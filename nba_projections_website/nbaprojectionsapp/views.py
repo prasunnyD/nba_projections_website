@@ -2,8 +2,9 @@ from django.shortcuts import render, HttpResponse
 
 # Create your views here.
 def home(request):
-    oefg= request.GET['OEFG']
-    ooreb= request.GET['OFTR']
-    oftr= request.GET['OREB']
-    pace=request.GET["PACE"]
+    if request.method == 'POST':
+        oefg= request.POST['OEFG']
+        ooreb= request.POST['OFTR']
+        oftr= request.POST['OREB']
+        pace=request.POST["PACE"]
     return render(request,"home.html")

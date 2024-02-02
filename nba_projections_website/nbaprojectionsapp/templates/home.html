@@ -1,12 +1,13 @@
 {% extends "base.html" %} {% block title %} Home Page {% endblock %}
 {% block content %}
 <p>Player projection Inputs</p>
-<form action="user">
-    Enter minutes projection <input type="number" name="minutes"><br>
-    Enter opponent effective field goal percentage <input type="number" name="OEFG"><br>
-    Enter opponent free throw rate <input type="number" name="OFTR"><br>
-    Enter opponent offensive rebounding percentage <input type="number" name="OREB"><br>
-    Enter opponent pace <input type="number" name="PACE"><br>
+<form method="POST">
+    {% csrf_token %}
+    Enter minutes projection <input type="number" name="minutes" required><br>
+    Enter opponent effective field goal percentage <input type="number" name="OEFG" required><br>
+    Enter opponent free throw rate <input type="number" name="OFTR" required><br>
+    Enter opponent offensive rebounding percentage <input type="number" name="OREB" required><br>
+    Enter opponent pace <input type="number" name="PACE" required><br>
     <input type="submit">
 </form>
 {% endblock %}
