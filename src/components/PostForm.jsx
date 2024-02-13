@@ -1,5 +1,7 @@
 import React, { Component } from 'react'
 import axios from 'axios'
+import PoissonDistResults from './PoissonDistResults'
+
 class PostForm extends Component {
     constructor(props) {
       super(props)
@@ -11,7 +13,9 @@ class PostForm extends Component {
          PACE:'',
          minutes:'',
          player_name: '',
+         bookLine:'',
          predictedPoints : null,
+         poissonDistResults: null,
          error: null
       }
     }
@@ -22,21 +26,31 @@ class PostForm extends Component {
     
     submitHandler = e => {
         e.preventDefault()
-        const { OEFG, OFTR, OREB, PACE, minutes, player_name } = this.state;
+        const { OEFG, OFTR, OREB, PACE, minutes, player_name, bookLine } = this.state;
         const data = {
             OEFG: parseFloat(OEFG),
             OFTR: parseFloat(OFTR),
             OREB: parseFloat(OREB),
             PACE: parseFloat(PACE),
-            minutes: parseFloat(minutes)
+            minutes: parseFloat(minutes),
         };
         console.log(this.state)
-        axios.post(`http://127.0.0.1:5000/points-prediction/${player_name}`, this.state).then(response =>{this.setState({ predictedPoints: response.data.projected_points, error: null });}).catch(error =>{this.setState({ error: 'An error occurred while fetching data', predictedPoints: null });
+        axios.post(`http://127.0.0.1:5000/points-prediction/${player_name}`, data).then(response =>{const predictedPoints = response.data.projected_points;this.setState({ predictedPoints})
+          axios.post('http://127.0.0.1:5000/poisson_dist', { predictedPoints, bookLine })
+            .then(response => {
+                const poissonDistResults = response.data;
+                this.setState({ poissonDistResults, error: null });
+            })
+            .catch(error => {
+                this.setState({ error: 'An error occurred while fetching data', poissonDistResults: null });
+                console.error('Error:', error);
+            });
+          }).catch(error =>{this.setState({ error: 'An error occurred while fetching data', predictedPoints: null });
         console.error('Error:', error);})
     }
     
   render() {
-    const {OEFG,OFTR,OREB,PACE,minutes,player_name, predictedPoints, error} = this.state
+    const {OEFG,OFTR,OREB,PACE,minutes,player_name, bookLine, predictedPoints, poissonDistResults, error} = this.state
     return (
       <div>
         <form onSubmit={this.submitHandler} className='model-inputs'>
@@ -64,6 +78,10 @@ class PostForm extends Component {
                 <label htmlFor='Projected Minutes'>Projected Minutes</label>
                 <input type='number' id="minutes" value={minutes} onChange={this.changeHandler}/>
             </div>
+            <div className='input-row'>
+                <label htmlFor='bookLine'>Book Line</label>
+                <input type='number' id='bookLine' value={bookLine} onChange={this.changeHandler} />
+            </div>
             <button type='submit' className='btn'>Predict</button>
         </form>
         {predictedPoints !== null && (
@@ -71,6 +89,13 @@ class PostForm extends Component {
               <h2>Predicted Points:</h2>
               <p>{predictedPoints}</p>
           </div>
+        )}
+        {poissonDistResults !== null && (
+          <PoissonDistResults
+            lessThan={poissonDistResults.less}
+            greaterThan={poissonDistResults.greater}
+            bookLine={bookLine}
+          />
         )}
         {error && <p className='error'>{error}</p>}
       </div>
