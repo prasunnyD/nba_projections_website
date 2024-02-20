@@ -7,10 +7,7 @@ class PostForm extends Component {
       super(props)
     
       this.state = {
-         OEFG:'',
-         OFTR:'',
-         OREB:'',
-         PACE:'',
+         city:'',
          minutes:'',
          player_name: '',
          bookLine:'',
@@ -26,12 +23,9 @@ class PostForm extends Component {
     
     submitHandler = e => {
         e.preventDefault()
-        const { OEFG, OFTR, OREB, PACE, minutes, player_name, bookLine } = this.state;
+        const { city, minutes, player_name, bookLine } = this.state;
         const data = {
-            OEFG: parseFloat(OEFG),
-            OFTR: parseFloat(OFTR),
-            OREB: parseFloat(OREB),
-            PACE: parseFloat(PACE),
+            city: city,
             minutes: parseFloat(minutes),
         };
         console.log(this.state)
@@ -50,7 +44,7 @@ class PostForm extends Component {
     }
     
   render() {
-    const {OEFG,OFTR,OREB,PACE,minutes,player_name, bookLine, predictedPoints, poissonDistResults, error} = this.state
+    const {city,minutes,player_name, bookLine, predictedPoints, poissonDistResults, error} = this.state
     return (
       <div>
         <form onSubmit={this.submitHandler} className='model-inputs'>
@@ -59,20 +53,8 @@ class PostForm extends Component {
                 <input type='text' id="player_name" value={player_name} onChange={this.changeHandler} />
             </div>
             <div className='input-row'>
-                <label htmlFor='Opponent effective field goal'>Opponent Effective Field Goal</label>
-                <input type='number' id="OEFG" value={OEFG} onChange={this.changeHandler}/>
-            </div>
-            <div className='input-row'>
-                <label htmlFor='Opponent free throw rate'>Opponent Free Throw Rate</label>
-                <input type='number' id="OFTR" value={OFTR} onChange={this.changeHandler}/>
-            </div>
-             <div className='input-row'>
-                <label htmlFor='Opponent Rebouding rate'>Opponent Rebounding Rate</label>
-                <input type='number' id="OREB" value={OREB} onChange={this.changeHandler}/>
-            </div>
-            <div className='input-row'>
-                 <label htmlFor='PACE'>PACE</label>
-                <input type='number' id="PACE" value={PACE} onChange={this.changeHandler}/>
+                <label htmlFor='Opponent City'>Opponent City</label>
+                <input type='text' id="city" value={city} onChange={this.changeHandler} />
             </div>
             <div className='input-row'>
                 <label htmlFor='Projected Minutes'>Projected Minutes</label>
