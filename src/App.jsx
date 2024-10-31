@@ -1,14 +1,16 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import PostForm from './components/PostForm'
+import TeamScoresChart from './components/TeamScoresChart';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <PostForm/>
+    <div className="container mx-auto px-4">
+      <div className="mt-8">
+        <TeamScoresChart/>
+      </div>
+      <PostForm />
+    </div>
   )
 }
 

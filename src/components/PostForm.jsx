@@ -14,7 +14,7 @@ class PostForm extends Component {
          predictedPoints : null,
          poissonDistResults: null,
          error: null
-      }
+      } 
     }
     
     changeHandler = (e) => {
