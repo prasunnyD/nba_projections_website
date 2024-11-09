@@ -8,6 +8,7 @@ class PostForm extends Component {
     
       this.state = {
          city:'',
+         opponent_city:'',
          minutes:'',
          player_name: '',
          bookLine:'',
@@ -23,9 +24,10 @@ class PostForm extends Component {
     
     submitHandler = e => {
         e.preventDefault()
-        const { city, minutes, player_name, bookLine } = this.state;
+        const { city, opponent_city, minutes, player_name, bookLine } = this.state;
         const data = {
             city: city,
+            opp_city : opponent_city,
             minutes: parseFloat(minutes),
         };
         console.log(this.state)
@@ -44,7 +46,7 @@ class PostForm extends Component {
     }
     
   render() {
-    const {city,minutes,player_name, bookLine, predictedPoints, poissonDistResults, error} = this.state
+    const {city, opponent_city,minutes,player_name, bookLine, predictedPoints, poissonDistResults, error} = this.state
     return (
       <div>
         <form onSubmit={this.submitHandler} className='model-inputs'>
@@ -53,8 +55,12 @@ class PostForm extends Component {
                 <input type='text' id="player_name" value={player_name} onChange={this.changeHandler} />
             </div>
             <div className='input-row'>
-                <label htmlFor='Opponent City'>Opponent City</label>
+                <label htmlFor='City'>Team City</label>
                 <input type='text' id="city" value={city} onChange={this.changeHandler} />
+            </div>
+            <div className='input-row'>
+                <label htmlFor='Opponent City'>Opponent City</label>
+                <input type='text' id="opponent_city" value={opponent_city} onChange={this.changeHandler} />
             </div>
             <div className='input-row'>
                 <label htmlFor='Projected Minutes'>Projected Minutes</label>
@@ -80,6 +86,10 @@ class PostForm extends Component {
           />
         )}
         {error && <p className='error'>{error}</p>}
+        {/* Render the PlayerScoresChart if the player name is submitted */}
+        {showChart && player_name && (
+          <PlayerScoresChart playerName={player_name} city={city} minutes={minutes} />
+        )}
       </div>
     )
   }

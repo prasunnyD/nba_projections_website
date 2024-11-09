@@ -4,15 +4,15 @@ import Plot from 'react-plotly.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-const PlayerScoresChart = () => {
+const PlayerScoresChart = ({ playerName, city, minutes }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [selectedPlayer, setSelectedPlayer] = useState('Anthony Edwards');
+    const [selectedPlayer, setSelectedPlayer] = useState(playerName);
 
     const query = {
-        city: 'Minnesota',
-        minutes: 28.5,
+        city: city,
+        minutes: minutes,
     };
 
     const client = axios.create({
@@ -59,7 +59,7 @@ const PlayerScoresChart = () => {
                         {
                             x: data.dates,
                             y: data.points,
-                            type: 'scatter',
+                            type: 'bar',
                             mode: 'lines+markers',
                             marker: { color: '#2563eb' },
                             line: { color: '#2563eb' },
