@@ -20,6 +20,9 @@ class PostForm extends Component {
     
     changeHandler = (e) => {
         this.setState({[e.target.id]: e.target.value})
+        if (e.target.id === 'player_name') {
+          this.props.onPlayerSelect(e.target.value);
+        }
     }
     
     submitHandler = e => {
@@ -86,13 +89,13 @@ class PostForm extends Component {
           />
         )}
         {error && <p className='error'>{error}</p>}
-        {/* Render the PlayerScoresChart if the player name is submitted */}
-        {showChart && player_name && (
-          <PlayerScoresChart playerName={player_name} city={city} minutes={minutes} />
-        )}
       </div>
     )
   }
 }
 
 export default PostForm
+
+
+
+

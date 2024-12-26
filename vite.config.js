@@ -11,11 +11,6 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
-      '/player-last-10-games': {
-        target: 'http://localhost:8000',  // Your FastAPI backend URL
-        changeOrigin: true,
-        secure: false,
-      },
     },
   }
 })
