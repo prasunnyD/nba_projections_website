@@ -40,3 +40,50 @@
 .read-the-docs {
   color: #888;
 }
+
+
+.scrollmenu {
+  background-color: #2d2d2d;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.game-card {
+  display: inline-block;
+  padding: 1rem 1.5rem;
+  margin-right: 1rem;
+  background-color: #383838;
+  border-radius: 6px;
+  min-width: 180px;
+  transition: background-color 0.2s;
+}
+
+.game-card:hover {
+  background-color: #383838;
+}
+
+.teams {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.scoreboard-container {
+  margin-bottom: 2rem;  /* 32px space after scoreboard */
+}
+
+.form-container {
+  background-color: #2d2d2d;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;  /* 32px space after form */
+}
+
+.chart-container {
+  background-color: #2d2d2d;
+  padding: 2rem;
+  border-radius: 8px;
+}

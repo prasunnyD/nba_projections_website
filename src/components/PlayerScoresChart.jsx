@@ -24,25 +24,14 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
             setLoading(true);
             try {
                 let response = await client.get(`/player-last-${numberOfGames}-games/${playerName}`);
-                // Add detailed debugging
-                console.log('Raw API Response:', response);
-                console.log('Response type:', typeof response);
-                
+    
                 const dates = Object.keys(response.data);
-                // console.log('Dates:', dates);
-                // console.log('Sample date data:', response.data[dates[0]]);
+
                 
                 const points = dates.map(date => response.data[date].points);
                 const assists = dates.map(date => response.data[date].assists);
                 const rebounds = dates.map(date => response.data[date].rebounds);
-                
-                // console.log('Processed data:', {
-                //     dates,
-                //     points,
-                //     assists,
-                //     rebounds
-                // });
-                
+
                 setData({ dates, points, assists, rebounds });
             } catch (error) {
                 console.error('API Error:', error);
