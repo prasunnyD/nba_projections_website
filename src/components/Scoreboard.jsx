@@ -1,16 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import TeamStatistics from './TeamStatistics';
 
-const Scoreboard = ({ }) => {
+const Scoreboard = ({ onTeamSelect}) => {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedTeam, setSelectedTeam] = useState(null);
 
     const client = axios.create({
         baseURL: "http://localhost:8000"
     });
+
+    const getCityName = (teamName) => {
+        const specialCases = {
+            'Los Angeles Lakers': 'Los Angeles Lakers',
+            'Los Angeles Clippers': 'Los Angeles Clippers',
+            'Golden State': 'Golden State',
+            'New York': 'New York',
+            'New Orleans': 'New Orleans',
+            'San Antonio': 'San Antonio',
+            'Oklahoma City': 'Oklahoma City'
+        };
+        // Check for special cases first
+        for (const [fullName, cityName] of Object.entries(specialCases)) {
+            if (teamName.includes(fullName)) {
+                return cityName;
+            }
+        }
+        // Default case: return first word (city name)
+        return teamName.split(' ')[0];
+    };
 
     useEffect(() => {
 
@@ -37,20 +59,45 @@ const Scoreboard = ({ }) => {
         fetchScoreboard();
     }, []);
 
+    // Handle team click
+    const handleTeamClick = (teamName) => {
+        const cityName = getCityName(teamName);
+        onTeamSelect(cityName);
+    };
+
     return (
-        <div className="scrollmenu">
-            {loading && <p className="text-white">Loading...</p>}
-            {error && <p className="text-red-500">Error: {error.message}</p>}
-            {data && (
-                <>
-                    {data.games.map((game, index) => (
-                        <div key={game} className="game-card">
-                            <div className="teams">
-                                {data.awayTeam[index]} @ {data.homeTeam[index]}
+        <div className="relative">
+            <div className="scrollmenu mb-4">
+                {loading && <p className="text-white">Loading...</p>}
+                {error && <p className="text-red-500">Error: {error.message}</p>}
+                {data && (
+                    <>
+                        {data.games.map((game, index) => (
+                            <div key={game} className="game-card">
+                                <div className="teams">
+                                    <span 
+                                        onClick={() => handleTeamClick(data.awayTeam[index])}
+                                        className="cursor-pointer hover:text-blue-500 transition-colors"
+                                    >
+                                        {data.awayTeam[index]}
+                                    </span>
+                                    {' @ '}
+                                    <span 
+                                        onClick={() => handleTeamClick(data.homeTeam[index])}
+                                        className="cursor-pointer hover:text-blue-500 transition-colors"
+                                    >
+                                        {data.homeTeam[index]}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </>
+                        ))}
+                    </>
+                )}
+            </div>
+
+            {/* Use TeamStatistics component */}
+            {selectedTeam && (
+                <TeamStatistics teamName={selectedTeam} />
             )}
         </div>
     );

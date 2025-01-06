@@ -120,30 +120,30 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
                 {/* Original stat buttons */}
                 <button
                     onClick={() => setSelectedStat('points')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'points' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Points
                 </button>
                 <button
                     onClick={() => setSelectedStat('rebounds')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'rebounds' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Rebounds
                 </button>
                 <button
                     onClick={() => setSelectedStat('assists')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'assists' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Assists
@@ -152,47 +152,47 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
                 {/* Combination stat buttons */}
                 <button
                     onClick={() => setSelectedStat('points+rebounds+assists')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'points+rebounds+assists' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Points + Rebounds + Assists
                 </button>
                 <button
                     onClick={() => setSelectedStat('points+rebounds')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'points+rebounds' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Points + Rebounds
                 </button>
                 <button
                     onClick={() => setSelectedStat('points+assists')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'points+assists' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Points + Assists
                 </button>
                 <button
                     onClick={() => setSelectedStat('rebounds+assists')}
-                    className={`px-4 py-2 rounded ${
+                    className={`stat-button ${
                         selectedStat === 'rebounds+assists' 
-                            ? 'bg-blue-600 text-white' 
-                            : 'bg-gray-200'
+                            ? 'active' 
+                            : 'inactive'
                     }`}
                 >
                     Rebounds + Assists
                 </button>
             </div>
-            <div className="flex items-center gap-4 mb-4"></div>
-                <div className="flex items-center gap-2">
+            <div className="prop-line-container">
+                <div className="prop-line-input">
                     <label htmlFor="propLine">Prop Line:</label>
                     <input
                         id="propLine"
@@ -203,21 +203,19 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
                         placeholder="0.5"
                     />
                 </div>
-                {/* Add prop line stats */}
                 {data && propLine && (
-                        <div className="flex gap-4 text-sm">
-                            <div className="flex gap-2">
-                                <span className="text-green-600 font-semibold">
-                                    Above: {getPropLineStats(data, propLine)?.above} 
-                                    ({getPropLineStats(data, propLine)?.abovePercentage}%)
-                                </span>
-                                <span className="text-red-600 font-semibold">
-                                    Below: {getPropLineStats(data, propLine)?.below}
-                                    ({getPropLineStats(data, propLine)?.belowPercentage}%)
-                                </span>
-                            </div>
-                        </div>
-                    )}
+                    <div className="prop-line-stats">
+                        <span className="stat-above">
+                            Above: {getPropLineStats(data, propLine)?.above} 
+                            ({getPropLineStats(data, propLine)?.abovePercentage}%)
+                        </span>
+                        <span className="stat-below">
+                            Below: {getPropLineStats(data, propLine)?.below}
+                            ({getPropLineStats(data, propLine)?.belowPercentage}%)
+                        </span>
+                    </div>
+                )}
+            </div>
 
             {data && (
                 <Plot
