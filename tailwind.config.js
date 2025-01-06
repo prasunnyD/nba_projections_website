@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ['./components/TeamScoresChart.js','./components/PlayerScoresChart.js'],
+  content: ['./src/components/*.jsx'],
   theme: {
     extend: {},
   },
