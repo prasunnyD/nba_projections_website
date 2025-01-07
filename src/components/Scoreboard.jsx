@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 import TeamStatistics from './TeamStatistics';
+import Roster from './Roster';
 
-const Scoreboard = ({ onTeamSelect}) => {
+
+const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -59,48 +61,65 @@ const Scoreboard = ({ onTeamSelect}) => {
         fetchScoreboard();
     }, []);
 
+    const handleGameClick = (homeTeam, awayTeam) => {
+      console.log("Game selected:", homeTeam, awayTeam);
+  
+      if (typeof onGameSelect === 'function') {
+          onGameSelect(homeTeam, awayTeam);
+      } else {
+          console.error("onGameSelect is not a function");
+      }
+  };
+
     // Handle team click
     const handleTeamClick = (teamName) => {
         const cityName = getCityName(teamName);
         onTeamSelect(cityName);
+       
     };
 
-    return (
-        <div className="relative">
-            <div className="scrollmenu mb-4">
-                {loading && <p className="text-white">Loading...</p>}
-                {error && <p className="text-red-500">Error: {error.message}</p>}
-                {data && (
-                    <>
-                        {data.games.map((game, index) => (
-                            <div key={game} className="game-card">
-                                <div className="teams">
-                                    <span 
-                                        onClick={() => handleTeamClick(data.awayTeam[index])}
-                                        className="cursor-pointer hover:text-blue-500 transition-colors"
-                                    >
-                                        {data.awayTeam[index]}
-                                    </span>
-                                    {' @ '}
-                                    <span 
-                                        onClick={() => handleTeamClick(data.homeTeam[index])}
-                                        className="cursor-pointer hover:text-blue-500 transition-colors"
-                                    >
-                                        {data.homeTeam[index]}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </>
-                )}
-            </div>
+    
 
-            {/* Use TeamStatistics component */}
-            {selectedTeam && (
-                <TeamStatistics teamName={selectedTeam} />
-            )}
-        </div>
-    );
+    return (
+      <div className="relative">
+          <div className="scrollmenu mb-4">
+              {loading && <p className="text-white">Loading...</p>}
+              {error && <p className="text-red-500">Error: {error.message}</p>}
+              {data &&
+                  data.games.map((game, index) => (
+                      <div
+                          key={game}
+                          className="game-card cursor-pointer"
+                          onClick={() =>
+                              handleGameClick(data.homeTeam[index], data.awayTeam[index])
+                          }
+                      >
+                          <div className="teams">
+                              <span
+                                  onClick={(e) => {
+                                      e.stopPropagation(); // Prevent triggering game-card click
+                                      handleTeamClick(data.awayTeam[index]);
+                                  }}
+                                  className="cursor-pointer hover:text-blue-500 transition-colors"
+                              >
+                                  {data.awayTeam[index]}
+                              </span>
+                              {' @ '}
+                              <span
+                                  onClick={(e) => {
+                                      e.stopPropagation(); // Prevent triggering game-card click
+                                      handleTeamClick(data.homeTeam[index]);
+                                  }}
+                                  className="cursor-pointer hover:text-blue-500 transition-colors"
+                              >
+                                  {data.homeTeam[index]}
+                              </span>
+                          </div>
+                      </div>
+                  ))}
+          </div>
+      </div>
+  );
 };
 
 export default Scoreboard;
