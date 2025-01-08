@@ -1,6 +1,5 @@
 const Roster = ({ homeRoster, awayRoster,homeTeamName, awayTeamName,onPlayerSelect  }) => {
     // Ensure the data is in array form
-    console.log("Raw Home Roster (before processing):", homeRoster);
     const homeRosterArray =
         homeRoster && typeof homeRoster === "object"
             ? Object.values(homeRoster)[0] // Extract the first value (the array of players)
@@ -9,13 +8,7 @@ const Roster = ({ homeRoster, awayRoster,homeTeamName, awayTeamName,onPlayerSele
     const awayRosterArray =
         awayRoster && typeof awayRoster === "object"
             ? Object.values(awayRoster)[0]
-            : [];
-
-    // const homeRosterArray = Array.isArray(homeRoster?.players) ? homeRoster.players : [];
-    // const awayRosterArray = Array.isArray(awayRoster?.players) ? awayRoster.players : [];        
-
-    console.log("Home Roster Array (processed):", homeRosterArray);
-    console.log("Away Roster Array (processed):", awayRosterArray);
+            : [];  
 
     return (
         <div>

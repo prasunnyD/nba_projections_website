@@ -10,19 +10,15 @@ import Scoreboard from './Scoreboard'; // Ensure the path is correct
 
 
 export default function MainContainer({teamName, homeRoster, awayRoster,homeTeamName, awayTeamName}) {
-    console.log("Home maincontainer Roster:", homeRoster);
-    console.log("Away maincontainer Roster:", awayRoster);
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
     const [selectedPlayerName, setSelectedPlayerName] = useState('');
-    
     const handleGameHistorySubmit = (playerName, gameCount) => {
       setSelectedPlayer(playerName);
       setNumberOfGames(gameCount);
     };
     const handlePlayerSelect = (playerName) => {
         setSelectedPlayerName(playerName); // Update the state with the selected player's name
-        console.log("Selected Player:", playerName); // Optional log for debugging
         handleGameHistorySubmit(playerName, 10);
     };
 

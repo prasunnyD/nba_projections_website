@@ -62,8 +62,6 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     }, []);
 
     const handleGameClick = (homeTeam, awayTeam) => {
-      console.log("Game selected:", homeTeam, awayTeam);
-  
       if (typeof onGameSelect === 'function') {
           onGameSelect(homeTeam, awayTeam);
       } else {
