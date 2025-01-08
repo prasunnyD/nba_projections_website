@@ -14,10 +14,16 @@ export default function MainContainer({teamName, homeRoster, awayRoster,homeTeam
     console.log("Away maincontainer Roster:", awayRoster);
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
+    const [selectedPlayerName, setSelectedPlayerName] = useState('');
     
     const handleGameHistorySubmit = (playerName, gameCount) => {
       setSelectedPlayer(playerName);
       setNumberOfGames(gameCount);
+    };
+    const handlePlayerSelect = (playerName) => {
+        setSelectedPlayerName(playerName); // Update the state with the selected player's name
+        console.log("Selected Player:", playerName); // Optional log for debugging
+        handleGameHistorySubmit(playerName, 10);
     };
 
     return (
@@ -33,6 +39,7 @@ export default function MainContainer({teamName, homeRoster, awayRoster,homeTeam
                     awayRoster={awayRoster}
                     homeTeamName={homeTeamName} // Pass the home team name
                     awayTeamName={awayTeamName} // Pass the away team name
+                    onPlayerSelect={handlePlayerSelect}
                 />
             </div>
     
@@ -40,6 +47,8 @@ export default function MainContainer({teamName, homeRoster, awayRoster,homeTeam
             <div className="w-2/4 rounded-lg bg-neutral-800 shadow">
                 <div className="form-container">
                     <GameHistoryForm onSubmit={handleGameHistorySubmit} />
+                    {selectedPlayerName} 
+                    {setSelectedPlayerName} 
                 </div>
                 <div className="chart-container">
                     <PlayerScoresChart playerName={selectedPlayer} numberOfGames={numberOfGames}/>

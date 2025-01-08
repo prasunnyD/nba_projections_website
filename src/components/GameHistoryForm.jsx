@@ -19,10 +19,10 @@ const GameHistoryForm = ({ onSubmit }) => {
                     <input
                         type="text"
                         id="playerName"
-                        value={playerName}
-                        onChange={(e) => setPlayerName(e.target.value)}
+                        value={playerName} // Controlled by state
+                        onChange={(e) => setPlayerName(e.target.value)} // Update state on change
                         className="w-full px-3 py-2 border rounded-md"
-                        required
+                        placeholder="Enter Player Name"
                     />
                 </div>
                 <div>
@@ -53,4 +53,4 @@ const GameHistoryForm = ({ onSubmit }) => {
     );
 };
 
-export default GameHistoryForm; 
+export default GameHistoryForm;
