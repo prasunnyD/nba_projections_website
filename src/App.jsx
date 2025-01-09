@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import './App.css';
-import axios from 'axios';
 import Scoreboard from './components/Scoreboard';
 import MainContainer from './components/MainContainer';
 

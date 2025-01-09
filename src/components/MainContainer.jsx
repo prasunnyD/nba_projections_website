@@ -1,20 +1,14 @@
 import { useState } from 'react'
 import '../App.css'
-
 import GameHistoryForm from './GameHistoryForm'
 import PlayerScoresChart from './PlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
 import Roster from './Roster';
-import Scoreboard from './Scoreboard'; // Ensure the path is correct
-
-
 
 export default function MainContainer({teamName, homeTeam, awayTeam,homeTeamName, awayTeamName}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
     const [selectedPlayerName, setSelectedPlayerName] = useState('');
-
-
     const handleGameHistorySubmit = (playerName, gameCount) => {
       setSelectedPlayer(playerName);
       setNumberOfGames(gameCount);
@@ -26,12 +20,10 @@ export default function MainContainer({teamName, homeTeam, awayTeam,homeTeamName
 
     return (
         <div className="m-4 flex gap-4 bg-neutral-800">
-            
-            {/* Left Column - 25% */}
 
+            {/* Left Column - 25% */}
             <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
                 <h2 className="text-xl font-bold text-white mb-4">Team Rosters</h2>
-               
                 <Roster
                     homeTeam={homeTeam}
                     awayTeam={awayTeam}
