@@ -229,3 +229,11 @@
   color: white;
   font-weight: bold;
 }
+
+.team-name {
+  font-size: 1.25rem; /* Slightly smaller than the roster title */
+  font-weight: 600; /* Semi-bold text */
+  color: #e5e7eb; /* Light gray text */
+  text-align: center; /* Center-align text */
+  margin-bottom: 1rem; /* Spacing below the team name */
+}
