@@ -1,20 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Plot from 'react-plotly.js';
-import TeamStatistics from './TeamStatistics';
-import Roster from './Roster';
-
 
 const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
 
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [selectedTeam, setSelectedTeam] = useState(null);
-
-    const client = axios.create({
-        baseURL: "http://localhost:8000"
-    });
+    const client = axios.create({baseURL: "http://localhost:8000"});
 
     const getCityName = (teamName) => {
         const specialCases = {
@@ -35,6 +27,24 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
         // Default case: return first word (city name)
         return teamName.split(' ')[0];
     };
+
+    const processTeamName = (teamName) => {
+        // Check if the teamName exists in specialCases
+          const specialCases = {
+          'LA Lakers': 'Los Angeles Lakers',
+          'Golden State': 'Golden State',
+          'New York': 'New York',
+          'New Orleans': 'New Orleans',
+          'San Antonio': 'San Antonio',
+          'Oklahoma City': 'Oklahoma City',
+          'LA Clippers': 'Los Angeles Clippers' 
+          };
+        if (specialCases[teamName]) {
+            return specialCases[teamName];
+        }
+        // Return the original teamName if no mapping is found
+        return teamName;
+      };
 
     useEffect(() => {
 
@@ -61,9 +71,10 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
         fetchScoreboard();
     }, []);
 
+     // Handle game click
     const handleGameClick = (homeTeam, awayTeam) => {
       if (typeof onGameSelect === 'function') {
-          onGameSelect(homeTeam, awayTeam);
+          onGameSelect(processTeamName(homeTeam), processTeamName(awayTeam));
       } else {
           console.error("onGameSelect is not a function");
       }
@@ -75,8 +86,6 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
         onTeamSelect(cityName);
        
     };
-
-    
 
     return (
       <div className="relative">

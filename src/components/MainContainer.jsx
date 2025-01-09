@@ -9,10 +9,12 @@ import Scoreboard from './Scoreboard'; // Ensure the path is correct
 
 
 
-export default function MainContainer({teamName, homeRoster, awayRoster,homeTeamName, awayTeamName}) {
+export default function MainContainer({teamName, homeTeam, awayTeam,homeTeamName, awayTeamName}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
     const [selectedPlayerName, setSelectedPlayerName] = useState('');
+
+
     const handleGameHistorySubmit = (playerName, gameCount) => {
       setSelectedPlayer(playerName);
       setNumberOfGames(gameCount);
@@ -29,10 +31,10 @@ export default function MainContainer({teamName, homeRoster, awayRoster,homeTeam
 
             <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
                 <h2 className="text-xl font-bold text-white mb-4">Team Rosters</h2>
+               
                 <Roster
-                    key={`${homeRoster.length}-${awayRoster.length}`}
-                    homeRoster={homeRoster}
-                    awayRoster={awayRoster}
+                    homeTeam={homeTeam}
+                    awayTeam={awayTeam}
                     homeTeamName={homeTeamName} // Pass the home team name
                     awayTeamName={awayTeamName} // Pass the away team name
                     onPlayerSelect={handlePlayerSelect}
