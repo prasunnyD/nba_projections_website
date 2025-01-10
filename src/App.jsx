@@ -8,8 +8,6 @@ function App() {
     const [homeTeam, setHomeTeam] = useState('');
     const [awayTeam, setAwayTeam] = useState('');
     const [selectedTeams, setSelectedTeams] = useState({ homeTeam: '', awayTeam: '' });
-    const [homeTeamName, setHomeTeamName] = useState("");
-    const [awayTeamName, setAwayTeamName] = useState("");
 
   // Handle team selection
   const handleTeamSelect = (teamName) => {setSelectedTeam(teamName)};
@@ -18,8 +16,6 @@ function App() {
   const handleGameSelect =  (homeTeam, awayTeam) => {
     setHomeTeam(homeTeam);
     setAwayTeam(awayTeam);
-    setHomeTeamName(homeTeam); // Set home team name
-    setAwayTeamName(awayTeam); // Set away team name
   };
 
   return (
@@ -33,8 +29,6 @@ function App() {
           teamName={selectedTeam}
           homeTeam={homeTeam}
           awayTeam={awayTeam}
-          homeTeamName={homeTeamName} // Pass the home team name
-          awayTeamName={awayTeamName} // Pass the away team name
           selectedTeams={selectedTeams}
         />
       </div>

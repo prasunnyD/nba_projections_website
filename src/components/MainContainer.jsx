@@ -5,7 +5,7 @@ import PlayerScoresChart from './PlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
 import Roster from './Roster';
 
-export default function MainContainer({teamName, homeTeam, awayTeam,homeTeamName, awayTeamName}) {
+export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
     const [selectedPlayerName, setSelectedPlayerName] = useState('');
@@ -20,15 +20,12 @@ export default function MainContainer({teamName, homeTeam, awayTeam,homeTeamName
 
     return (
         <div className="m-4 flex gap-4 bg-neutral-800">
-
             {/* Left Column - 25% */}
             <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
                 <h2 className="text-xl font-bold text-white mb-4">Team Rosters</h2>
                 <Roster
                     homeTeam={homeTeam}
                     awayTeam={awayTeam}
-                    homeTeamName={homeTeamName} // Pass the home team name
-                    awayTeamName={awayTeamName} // Pass the away team name
                     onPlayerSelect={handlePlayerSelect}
                 />
             </div>

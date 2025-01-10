@@ -8,26 +8,6 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     const [error, setError] = useState(null);
     const client = axios.create({baseURL: "http://localhost:8000"});
 
-    const getCityName = (teamName) => {
-        const specialCases = {
-            'Los Angeles Lakers': 'Los Angeles Lakers',
-            'Los Angeles Clippers': 'Los Angeles Clippers',
-            'Golden State': 'Golden State',
-            'New York': 'New York',
-            'New Orleans': 'New Orleans',
-            'San Antonio': 'San Antonio',
-            'Oklahoma City': 'Oklahoma City'
-        };
-        // Check for special cases first
-        for (const [fullName, cityName] of Object.entries(specialCases)) {
-            if (teamName.includes(fullName)) {
-                return cityName;
-            }
-        }
-        // Default case: return first word (city name)
-        return teamName.split(' ')[0];
-    };
-
     const processTeamName = (teamName) => {
         // Check if the teamName exists in specialCases
           const specialCases = {
@@ -52,13 +32,9 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
             setLoading(true);
             try {
                 let response = await client.get(`/scoreboard`);
-    
                 const games = Object.keys(response.data);
-
-                
                 const homeTeam = games.map(game => response.data[game].home_team);
                 const awayTeam = games.map(game => response.data[game].away_team);
-
                 setData({ games, homeTeam , awayTeam });
             } catch (error) {
                 console.error('API Error:', error);
@@ -67,7 +43,6 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                 setLoading(false);
             }
         };
-    
         fetchScoreboard();
     }, []);
 
@@ -82,7 +57,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
 
     // Handle team click
     const handleTeamClick = (teamName) => {
-        const cityName = getCityName(teamName);
+        const cityName = processTeamName(teamName);
         onTeamSelect(cityName);
        
     };
