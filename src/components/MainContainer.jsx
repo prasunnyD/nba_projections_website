@@ -1,28 +1,41 @@
 import { useState } from 'react'
 import '../App.css'
-
 import GameHistoryForm from './GameHistoryForm'
 import PlayerScoresChart from './PlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
-export default function MainContainer({teamName}) {
+import Roster from './Roster';
+
+export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
-    
+    const [selectedPlayerName, setSelectedPlayerName] = useState('');
     const handleGameHistorySubmit = (playerName, gameCount) => {
       setSelectedPlayer(playerName);
       setNumberOfGames(gameCount);
     };
+    const handlePlayerSelect = (playerName) => {
+        setSelectedPlayerName(playerName); // Update the state with the selected player's name
+        handleGameHistorySubmit(playerName, 10);
+    };
+
     return (
         <div className="m-4 flex gap-4 bg-neutral-800">
             {/* Left Column - 25% */}
-            <div className="w-1/4 rounded-lg bg-neutral-800 shadow">
-                ROSTER API RESPONSE
+            <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
+                <h2 className="text-xl font-bold text-white mb-4">Team Rosters</h2>
+                <Roster
+                    homeTeam={homeTeam}
+                    awayTeam={awayTeam}
+                    onPlayerSelect={handlePlayerSelect}
+                />
             </div>
     
             {/* Middle Column - 50% */}
             <div className="w-2/4 rounded-lg bg-neutral-800 shadow">
                 <div className="form-container">
                     <GameHistoryForm onSubmit={handleGameHistorySubmit} />
+                    {selectedPlayerName} 
+                    {setSelectedPlayerName} 
                 </div>
                 <div className="chart-container">
                     <PlayerScoresChart playerName={selectedPlayer} numberOfGames={numberOfGames}/>
