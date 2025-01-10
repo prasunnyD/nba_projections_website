@@ -7,7 +7,6 @@ function App() {
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [homeTeam, setHomeTeam] = useState('');
     const [awayTeam, setAwayTeam] = useState('');
-    const [selectedTeams, setSelectedTeams] = useState({ homeTeam: '', awayTeam: '' });
 
   // Handle team selection
   const handleTeamSelect = (teamName) => {setSelectedTeam(teamName)};
@@ -29,7 +28,6 @@ function App() {
           teamName={selectedTeam}
           homeTeam={homeTeam}
           awayTeam={awayTeam}
-          selectedTeams={selectedTeams}
         />
       </div>
     </div>
