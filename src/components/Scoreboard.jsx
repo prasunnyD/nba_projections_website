@@ -6,6 +6,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedGame, setSelectedGame] = useState(null); // Track selected game
     const client = axios.create({baseURL: "http://localhost:8000"});
 
     const processTeamName = (teamName) => {
@@ -49,6 +50,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
      // Handle game click
     const handleGameClick = (homeTeam, awayTeam) => {
       if (typeof onGameSelect === 'function') {
+          setSelectedGame(`${homeTeam} vs ${awayTeam}`); // Update selected game
           onGameSelect(processTeamName(homeTeam), processTeamName(awayTeam));
       } else {
           console.error("onGameSelect is not a function");
@@ -59,7 +61,6 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     const handleTeamClick = (teamName) => {
         const cityName = processTeamName(teamName);
         onTeamSelect(cityName);
-       
     };
 
     return (
@@ -71,7 +72,11 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                   data.games.map((game, index) => (
                       <div
                           key={game}
-                          className="game-card cursor-pointer"
+                          className={`game-card ${
+                            selectedGame === `${data.homeTeam[index]} vs ${data.awayTeam[index]}`
+                                ? 'selected'
+                                : ''
+                        }`}
                           onClick={() =>
                               handleGameClick(data.homeTeam[index], data.awayTeam[index])
                           }
