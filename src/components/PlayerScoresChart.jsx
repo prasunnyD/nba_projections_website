@@ -4,57 +4,47 @@ import Plot from 'react-plotly.js';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-const PlayerScoresChart = ({ playerName, numberOfGames }) => {
+const PlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames  }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedStat, setSelectedStat] = useState('points');
-    const [propLine, setPropLine] = useState(''); 
+    const [propLine, setPropLine] = useState('');
 
-    const client = axios.create({
-        baseURL: "http://localhost:8000"
-    });
+    const client = axios.create({baseURL: "http://localhost:8000"});
 
     useEffect(() => {
-
-        // Only fetch if playerName is not empty
         if (!playerName) return;
 
         const fetchPlayer = async () => {
             setLoading(true);
+            setError(null); // Reset error before making a new API call
+            setData(null); // Clear previous data
             try {
                 let response = await client.get(`/player-last-${numberOfGames}-games/${playerName}`);
-    
-                const dates = Object.keys(response.data);
 
-                
+                if (!response.data || Object.keys(response.data).length === 0) {
+                    throw new Error(`No data found for this player.`);
+                }
+                // Extract and sort data in descending order
+                const dates = Object.keys(response.data).sort((a, b) => new Date(b) - new Date(a))
+
                 const points = dates.map(date => response.data[date].points);
                 const assists = dates.map(date => response.data[date].assists);
                 const rebounds = dates.map(date => response.data[date].rebounds);
-
                 setData({ dates, points, assists, rebounds });
             } catch (error) {
-                console.error('API Error:', error);
-                setError(error);
+                setError(
+                    err.response?.status === 404
+                        ? `No game statistics available for ${playerName}.`
+                        : 'Failed to fetch player data. Please try again later.'
+                );
             } finally {
                 setLoading(false);
             }
         };
-    
         fetchPlayer();
     }, [playerName, numberOfGames]);
-
-    if (!playerName) {
-        return <div>Please submit a player name to see their statistics.</div>;
-    }
-    
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
-    if (error) {
-        return <div>Error: {error.message}</div>;
-    }
 
     const getCombinedStats = (stat1, stat2) => {
         if (!data) return [];
@@ -84,16 +74,13 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
 
     const getPropLineStats = (data, propLine) => {
         if (!data || !propLine) return null;
-        
         const values = getYValues();
         const above = values.filter(val => val >= propLine).length;
         const below = values.length - above;
         const abovePercentage = ((above / values.length) * 100).toFixed(1);
         const belowPercentage = ((below / values.length) * 100).toFixed(1);
-        
         return { above, below, abovePercentage, belowPercentage };
     };
-
 
     // Helper to get display name for combined stats
     const getStatDisplayName = (stat) => {
@@ -111,10 +98,14 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
         }
     };
 
+    // Error/Loading Handling
+    if (!playerName) return <div>Please select a player to see their statistics.</div>;
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div className="text-red-500">{error}</div>;
+
     return (
         <div>
-            <h2>Last {numberOfGames} Games {getStatDisplayName(selectedStat)} History</h2>
-
+            <h2 style={{ color: 'white' }}>Last {numberOfGames} Games {getStatDisplayName(selectedStat)} History</h2>
             {/* Add stat selector buttons */}
             <div className="mb-4 flex flex-wrap gap-2">
                 {/* Original stat buttons */}
@@ -191,32 +182,50 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
                     Rebounds + Assists
                 </button>
             </div>
-            <div className="prop-line-container">
-                <div className="prop-line-input">
-                    <label htmlFor="propLine">Prop Line:</label>
-                    <input
-                        id="propLine"
-                        type="number"
-                        value={propLine}
-                        onChange={(e) => setPropLine(e.target.value)}
-                        className="w-20 px-2 py-1 border rounded"
-                        placeholder="0.5"
-                    />
-                </div>
-                {data && propLine && (
-                    <div className="prop-line-stats">
-                        <span className="stat-above">
-                            Above: {getPropLineStats(data, propLine)?.above} 
-                            ({getPropLineStats(data, propLine)?.abovePercentage}%)
-                        </span>
-                        <span className="stat-below">
-                            Below: {getPropLineStats(data, propLine)?.below}
-                            ({getPropLineStats(data, propLine)?.belowPercentage}%)
-                        </span>
+
+            {/* Prop Line Box */}
+            <div className="prop-line-container flex flex-col items-center justify-center gap-4 p-4 rounded-lg shadow bg-neutral-800">
+                <div className="prop-line-and-games flex items-center gap-8">
+                    <div className="prop-line-input flex items-center gap-2">
+                        <label htmlFor="propLine" className="text-white font-medium">Prop Line:</label>
+                        <input
+                            id="propLine"
+                            type="number"
+                            value={propLine}
+                            onChange={(e) => setPropLine(e.target.value)}
+                            className="w-20 px-2 py-1 border rounded text-center"
+                            placeholder="0.5"
+                        />
                     </div>
-                )}
+                    <div className="number-of-games-container flex items-center gap-2">
+                        <label htmlFor="gameCount" className="text-white font-medium">
+                            Number of Games:
+                        </label>
+                        <select
+                            id="gameCount"
+                            value={numberOfGames}
+                            onChange={(e) => setNumberOfGames(Number(e.target.value))}
+                            className="px-3 py-2 border rounded-md"
+                        >
+                            <option value={5}>5 games</option>
+                            <option value={10}>10 games</option>
+                            <option value={15}>15 games</option>
+                            <option value={20}>20 games</option>
+                            <option value={30}>30 games</option>
+                        </select>
+                    </div>
+                </div>
+                <div className="prop-line-stats flex items-center gap-4 text-sm">
+                    <span className="stat-above font-bold text-green-500">
+                        Above: {getPropLineStats(data, propLine)?.above} ({getPropLineStats(data, propLine)?.abovePercentage}%)
+                    </span>
+                    <span className="stat-below font-bold text-red-500">
+                        Below: {getPropLineStats(data, propLine)?.below} ({getPropLineStats(data, propLine)?.belowPercentage}%)
+                    </span>
+                </div>
             </div>
 
+            {/* Chart Rendering */}
             {data && (
                 <Plot
                     data={[
@@ -270,5 +279,3 @@ const PlayerScoresChart = ({ playerName, numberOfGames }) => {
 };
 
 export default PlayerScoresChart;
-
-

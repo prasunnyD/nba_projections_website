@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import '../App.css'
-import GameHistoryForm from './GameHistoryForm'
 import PlayerScoresChart from './PlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
 import Roster from './Roster';
@@ -8,14 +7,10 @@ import Roster from './Roster';
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
-    const [selectedPlayerName, setSelectedPlayerName] = useState('');
-    const handleGameHistorySubmit = (playerName, gameCount) => {
-      setSelectedPlayer(playerName);
-      setNumberOfGames(gameCount);
-    };
+
     const handlePlayerSelect = (playerName) => {
-        setSelectedPlayerName(playerName); // Update the state with the selected player's name
-        handleGameHistorySubmit(playerName, 10);
+        setSelectedPlayer(playerName);
+        setNumberOfGames(10);
     };
 
     return (
@@ -30,27 +25,42 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
                 />
             </div>
     
-            {/* Middle Column - 50% */}
-            <div className="w-2/4 rounded-lg bg-neutral-800 shadow">
-                <div className="form-container">
-                    <GameHistoryForm onSubmit={handleGameHistorySubmit} />
-                    {selectedPlayerName} 
-                    {setSelectedPlayerName} 
+            {/* Middle Column - Player and Chart */}
+            <div className="w-1/2 rounded-lg bg-neutral-900 shadow p-4">
+                {/* Player Info and Game History Form */}
+                <div className="mb-4">
+                    <h2 className="text-lg font-bold text-white mb-2">
+                        Player Selected: {selectedPlayer || 'None'}
+                    </h2>
                 </div>
-                <div className="chart-container">
-                    <PlayerScoresChart playerName={selectedPlayer} numberOfGames={numberOfGames}/>
+
+                {/* Player Scores Chart */}
+                <div>
+                    {selectedPlayer ? (
+                        <>
+                            <PlayerScoresChart
+                                playerName={selectedPlayer}
+                                numberOfGames={numberOfGames}
+                                setNumberOfGames={setNumberOfGames}
+                            />
+                        </>
+                    ) : (
+                        <div className="p-4 text-gray-500 bg-gray-100 rounded-lg">
+                            Select a game card and then select a player to view their statistics.
+                        </div>
+                    )}
                 </div>
             </div>
-    
-            {/* Right Column - 25% */}
-            <div className="w-1/4 rounded-lg bg-neutral-800 shadow">
-                <h2 className="text-xl font-bold p-4">Team Statistics</h2>
+
+            {/* Right Column - Team Statistics */}
+            <div className="w-1/4 rounded-lg bg-neutral-800 shadow p-4">
+                <h2 className="text-xl font-bold text-white mb-4">Team Statistics</h2>
                 <div>
                     {teamName ? (
                         <TeamStatistics teamName={teamName} />
                     ) : (
                         <div className="p-4 text-gray-500 bg-gray-100 rounded-lg">
-                            Select a team from the scoreboard above to view statistics
+                            Select a team from the scoreboard above to view statistics.
                         </div>
                     )}
                 </div>

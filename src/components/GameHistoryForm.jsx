@@ -1,56 +1,49 @@
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
 
-const GameHistoryForm = ({ onSubmit }) => {
-    const [playerName, setPlayerName] = useState('');
-    const [gameCount, setGameCount] = useState(10);
+// const GameHistoryForm = ({ onSubmit }) => {
+//     const [gameCount, setGameCount] = useState(10);
+//     const handleSubmit = (e) => {
+//         e.preventDefault();
+//         if (!gameCount || isNaN(gameCount)) {
+//             console.error('Invalid gameCount value. Skipping submission.');
+//             return;
+//         }
+//         onSubmit(gameCount); // Pass only the game count
+//     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSubmit(playerName, gameCount);
-    };
+//     return (
+//         <form onSubmit={handleSubmit} className="flex flex-col items-center mb-4">
+//             <div className="flex items-center gap-4">
+//                 <div className="flex items-center gap-2">
+//                     <label htmlFor="gameCount" className="block text-sm font-medium text-white">
+//                         Number of Games:
+//                     </label>
+//                     <select
+//                         id="gameCount"
+//                         value={gameCount}
+//                         onChange={(e) => {
+//                             const value = Number(e.target.value) || 10;
+//                             console.log('Selected gameCount:', value);
+//                             setGameCount(value);
+//                         }}
+//                         className="px-3 py-2 border rounded-md"
+//                     >
+//                         <option value={5}>5 games</option>
+//                         <option value={10}>10 games</option>
+//                         <option value={15}>15 games</option>
+//                         <option value={20}>20 games</option>
+//                         <option value={30}>30 games</option>
+//                     </select>
+//                 </div>
+//                 <button
+//                     type="submit"
+//                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+//                 >
+//                     Show History
+//                 </button>
+//             </div>
+//         </form>
+//     );
+// };
 
-    return (
-        <form onSubmit={handleSubmit} className="mb-4">
-            <div className="flex gap-4 items-end">
-                <div className="flex-1">
-                    <label htmlFor="playerName" className="block text-sm font-medium mb-1">
-                        Player Name
-                    </label>
-                    <input
-                        type="text"
-                        id="playerName"
-                        value={playerName} // Controlled by state
-                        onChange={(e) => setPlayerName(e.target.value)} // Update state on change
-                        className="w-full px-3 py-2 border rounded-md"
-                        placeholder="Enter Player Name"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="gameCount" className="block text-sm font-medium mb-1">
-                        Number of Games
-                    </label>
-                    <select
-                        id="gameCount"
-                        value={gameCount}
-                        onChange={(e) => setGameCount(Number(e.target.value))}
-                        className="px-3 py-2 border rounded-md"
-                    >
-                        <option value={5}>5 games</option>
-                        <option value={10}>10 games</option>
-                        <option value={15}>15 games</option>
-                        <option value={20}>20 games</option>
-                        <option value={30}>30 games</option>
-                    </select>
-                </div>
-                <button
-                    type="submit"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-                >
-                    Show History
-                </button>
-            </div>
-        </form>
-    );
-};
-
-export default GameHistoryForm;
+// export default GameHistoryForm;

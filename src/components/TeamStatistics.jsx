@@ -98,7 +98,7 @@ const TeamStatistics = ({ teamName }) => {
         )}
         {data && (
             <div className="p-4">
-                <h1 className="text-2xl font-bold mb-4">{teamName} Defensive Statistics</h1>
+                <h1 style={{ color: 'white' }} className="text-2xl font-bold mb-4">{teamName} Defensive Statistics</h1>
                 
                 {/* Stats Table */}
                 <div className="overflow-x-auto">
@@ -152,7 +152,7 @@ const TeamStatistics = ({ teamName }) => {
     
                     {/* Keep the radar chart if desired */}
                     <div className="bg-neutral-700 shadow p-4 rounded-lg mt-6">
-                        <h2 className="text-xl font-semibold mb-4">Defensive Profile</h2>
+                        <h2 style={{ color: 'white' }} className="text-xl font-semibold mb-4">Defensive Profile</h2>
                         <Plot
                             data={[
                                 {
