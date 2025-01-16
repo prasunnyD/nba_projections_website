@@ -6,6 +6,7 @@ const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
     const [awayRoster, setAwayRoster] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [selectedPlayer, setSelectedPlayer] = useState(null);
 
     useEffect(() => {
         const fetchRosters = async () => {
@@ -34,6 +35,11 @@ const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
         fetchRosters();
     }, [homeTeam, awayTeam]);
 
+    const handlePlayerClick = (player) => {
+        setSelectedPlayer(player); // Update the selected player
+        onPlayerSelect(player); // Notify parent
+    };
+
     const renderRoster = (roster, teamName) => {
         if (loading) return <p>Loading roster for {teamName}...</p>;
         if (error) return <p className="text-red-500">{error}</p>;
@@ -43,8 +49,10 @@ const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
                     {roster.map((player, index) => (
                         <li
                             key={index}
-                            className="roster-item"
-                            onClick={() => onPlayerSelect(player.PLAYER)}
+                            className={`roster-item ${
+                                selectedPlayer === player.PLAYER ? 'selected' : ''
+                            }`}
+                            onClick={() => handlePlayerClick(player.PLAYER)}
                         >
                             <strong>{player.NUM || 'N/A'}</strong> - {player.PLAYER || 'Unknown'} ({player.POSITION || 'N/A'})
                         </li>
@@ -57,12 +65,10 @@ const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
 
     return (
         <div>
-             {/* Home Team Roster */}
             <div className="roster-container">
                 <h3 className="roster-title">{homeTeam} Team Roster</h3>
                 {renderRoster(homeRoster, homeTeam)}
             </div>
-            {/* Away Team Roster */}
             <div className="roster-container">
                 <h3 className="roster-title">{awayTeam} Team Roster</h3>
                 {renderRoster(awayRoster, awayTeam)}
