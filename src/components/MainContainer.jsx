@@ -2,6 +2,7 @@ import { useState } from 'react'
 import '../App.css'
 import PlayerScoresChart from './PlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
+import PlayerStatistics from './PlayerStatistics';
 import Roster from './Roster';
 
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
@@ -17,7 +18,7 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
         <div className="m-4 flex gap-4 bg-neutral-800">
             {/* Left Column - 25% */}
             <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
-                <h2 className="text-xl font-bold text-white mb-4">Team Rosters</h2>
+                <h2 className="text-2xl font-bold text-white mb-4">Team Rosters</h2>
                 <Roster
                     homeTeam={homeTeam}
                     awayTeam={awayTeam}
@@ -29,10 +30,11 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
             <div className="w-1/2 rounded-lg bg-neutral-900 shadow p-4">
                 {/* Player Info and Game History Form */}
                 <div className="mb-4">
-                    <h2 className="text-lg font-bold text-white mb-2">
+                    <h2 className="text-2xl font-bold text-white mb-4">
                         Player Selected: {selectedPlayer || 'None'}
                     </h2>
-                </div>
+                    <PlayerStatistics playerName={selectedPlayer} />
+                </div>  
 
                 {/* Player Scores Chart */}
                 <div>
