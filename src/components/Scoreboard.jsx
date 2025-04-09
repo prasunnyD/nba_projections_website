@@ -7,7 +7,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedGame, setSelectedGame] = useState(null); // Track selected game
-    const client = axios.create({baseURL: "http://localhost:8000"});
+    const client = axios.create({baseURL: "http://ec2-52-90-233-209.compute-1.amazonaws.com:8000/"});
 
     const processTeamName = (teamName) => {
         // Check if the teamName exists in specialCases

@@ -10,7 +10,7 @@ const PlayerStatistics = ({ playerName }) => {
     const [error, setError] = useState(null);
 
     const client = axios.create({
-        baseURL: "http://localhost:8000"
+        baseURL: "http://ec2-52-90-233-209.compute-1.amazonaws.com:8000/"
     });
 
     useEffect(() => {

@@ -14,7 +14,7 @@ const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
             setLoading(true);
             setError(null);
             try {
-                const client = axios.create({ baseURL: 'http://localhost:8000' });
+                const client = axios.create({ baseURL: 'http://ec2-52-90-233-209.compute-1.amazonaws.com:8000/' });
                 const [homeResponse, awayResponse] = await Promise.all([
                     client.get(`/team-roster/${homeTeam}`),
                     client.get(`/team-roster/${awayTeam}`),

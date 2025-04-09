@@ -11,7 +11,7 @@ const PlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames  }) => 
     const [selectedStat, setSelectedStat] = useState('points');
     const [propLine, setPropLine] = useState('');
 
-    const client = axios.create({baseURL: "http://localhost:8000"});
+    const client = axios.create({baseURL: "http://ec2-52-90-233-209.compute-1.amazonaws.com:8000/"});
 
     useEffect(() => {
         if (!playerName) return;
