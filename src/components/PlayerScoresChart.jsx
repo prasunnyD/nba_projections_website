@@ -229,7 +229,7 @@ const PlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames  }) => 
             {data && (
                 <Plot
                     data={[
-                        {
+                        {  
                             x: data.dates,
                             y: getYValues(),
                             type: 'bar',
@@ -260,6 +260,11 @@ const PlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames  }) => 
                             title: 'Game Date',
                             tickangle: -45,
                             automargin: true,
+                            type: 'category',
+                            tickmode: 'array',
+                            ticktext: data.dates,
+                            tickvals: Array.from({length: data.dates.length}, (_, i) => i)
+
                         },
                         yaxis: {
                             title: selectedStat.charAt(0).toUpperCase() + selectedStat.slice(1),

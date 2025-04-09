@@ -52,6 +52,10 @@ const TeamStatistics = ({ teamName }) => {
                         OPP_FG3A: {
                             value: teamData.OPP_FG3A,
                             rank: teamData.OPP_FG3A_RANK
+                        },
+                        OPP_FG3_PCT: {
+                            value: teamData.OPP_FG3_PCT,
+                            rank: teamData.OPP_FG3_PCT_RANK
                         }
                     },
                     FourFactor: {
