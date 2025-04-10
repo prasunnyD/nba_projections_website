@@ -10,7 +10,7 @@ const PlayerStatistics = ({ playerName }) => {
     const [error, setError] = useState(null);
 
     const client = axios.create({
-        baseURL: "'https://api.sharpr-analytics.com'"
+        baseURL: "https://api.sharpr-analytics.com"
     });
 
     useEffect(() => {
