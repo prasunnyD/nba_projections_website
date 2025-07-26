@@ -3,25 +3,35 @@ import '../App.css'
 import PlayerScoresChart from './PlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
 import PlayerStatistics from './PlayerStatistics';
-import Roster from './Roster';
+import TeamsDropdown from './TeamsDropdown';
 
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
     const [numberOfGames, setNumberOfGames] = useState(10);
+    const [selectedTeam, setSelectedTeam] = useState('');
+    const [rosterData, setRosterData] = useState([]);
 
     const handlePlayerSelect = (playerName) => {
         setSelectedPlayer(playerName);
         setNumberOfGames(10);
     };
 
+    const handleTeamSelect = (teamName) => {
+        setSelectedTeam(teamName);
+    };
+
+    const handleRosterData = (roster) => {
+        setRosterData(roster);
+    };
+
     return (
         <div className="m-4 flex gap-4 bg-neutral-800">
             {/* Left Column - 25% */}
             <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
-                <h2 className="text-2xl font-bold text-white mb-4">Team Rosters</h2>
-                <Roster
-                    homeTeam={homeTeam}
-                    awayTeam={awayTeam}
+                <h2 className="text-2xl font-bold text-white mb-4">NBA Teams</h2>
+                <TeamsDropdown
+                    onTeamSelect={handleTeamSelect}
+                    onRosterData={handleRosterData}
                     onPlayerSelect={handlePlayerSelect}
                 />
             </div>
@@ -31,7 +41,7 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
                 {/* Player Info and Game History Form */}
                 <div className="mb-4">
                     <h2 className="text-2xl font-bold text-white mb-4">
-                        Player Selected: {selectedPlayer || 'None'}
+                        {selectedTeam ? `${selectedTeam} - ` : ''}Player Selected: {selectedPlayer || 'None'}
                     </h2>
                     <PlayerStatistics playerName={selectedPlayer} />
                 </div>  
@@ -58,13 +68,7 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
             <div className="w-1/4 rounded-lg bg-neutral-800 shadow p-4">
                 <h2 className="text-xl font-bold text-white mb-4">Team Statistics</h2>
                 <div>
-                    {teamName ? (
-                        <TeamStatistics teamName={teamName} />
-                    ) : (
-                        <div className="p-4 text-gray-500 bg-gray-100 rounded-lg">
-                            Select a team from the scoreboard above to view statistics.
-                        </div>
-                    )}
+                    <TeamStatistics />
                 </div>
             </div>
         </div>

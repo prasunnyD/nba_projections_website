@@ -1,29 +1,72 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '';
-
-const TeamStatistics = ({ teamName }) => {
+const TeamStatistics = () => {
+    const [selectedTeam, setSelectedTeam] = useState('');
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // NBA Teams with their cities
+    const nbaTeams = [
+        { city: 'Atlanta', name: 'Hawks' },
+        { city: 'Boston', name: 'Celtics' },
+        { city: 'Brooklyn', name: 'Nets' },
+        { city: 'Charlotte', name: 'Hornets' },
+        { city: 'Chicago', name: 'Bulls' },
+        { city: 'Cleveland', name: 'Cavaliers' },
+        { city: 'Dallas', name: 'Mavericks' },
+        { city: 'Denver', name: 'Nuggets' },
+        { city: 'Detroit', name: 'Pistons' },
+        { city: 'Golden State', name: 'Warriors' },
+        { city: 'Houston', name: 'Rockets' },
+        { city: 'Indiana', name: 'Pacers' },
+        { city: 'Los Angeles Lakers', name: 'Lakers' },
+        { city: 'Los Angeles Clippers', name: 'Clippers' },
+        { city: 'Memphis', name: 'Grizzlies' },
+        { city: 'Miami', name: 'Heat' },
+        { city: 'Milwaukee', name: 'Bucks' },
+        { city: 'Minnesota', name: 'Timberwolves' },
+        { city: 'New Orleans', name: 'Pelicans' },
+        { city: 'New York', name: 'Knicks' },
+        { city: 'Oklahoma City', name: 'Thunder' },
+        { city: 'Orlando', name: 'Magic' },
+        { city: 'Philadelphia', name: '76ers' },
+        { city: 'Phoenix', name: 'Suns' },
+        { city: 'Portland', name: 'Trail Blazers' },
+        { city: 'Sacramento', name: 'Kings' },
+        { city: 'San Antonio', name: 'Spurs' },
+        { city: 'Toronto', name: 'Raptors' },
+        { city: 'Utah', name: 'Jazz' },
+        { city: 'Washington', name: 'Wizards' }
+    ];
+
     const client = axios.create({
-        baseURL: "https://api.sharpr-analytics.com"
+        baseURL: getApiBaseUrl()
     });
 
-    useEffect(() => {
+    const handleTeamChange = (event) => {
+        const teamCity = event.target.value;
+        setSelectedTeam(teamCity);
+        setData(null);
+        setError(null);
+    };
 
-        // Only fetch if playerName is not empty
-        if (!teamName) return;
+    useEffect(() => {
+        // Only fetch if selectedTeam is not empty
+        if (!selectedTeam) return;
 
         const fetchTeamStatistics = async () => {
             setLoading(true);
             try {
-                let response = await client.get(`/${teamName}-defense-stats`);
+                const apiUrl = `/${selectedTeam}-defense-stats`;
+                logApiCall('GET', apiUrl);
+                
+                let response = await client.get(apiUrl);
     
-                const teamData = response.data[teamName];
+                const teamData = response.data[selectedTeam];
 
                 setData({
                     Defense: {
@@ -86,23 +129,43 @@ const TeamStatistics = ({ teamName }) => {
         };
     
         fetchTeamStatistics();
-    }, [teamName]);
+    }, [selectedTeam]);
 
     return (
         <div className="bg-neutral-700 shadow-lg overflow-y-auto h-full">
-        {loading && (
-            <div className="flex items-center justify-center h-full">
-                <div>Loading...</div>
+            {/* Team Selection Dropdown */}
+            <div className="p-4 border-b border-gray-600">
+                <label htmlFor="team-stats-select" className="block text-sm font-medium text-white mb-2">
+                    Select Team for Statistics
+                </label>
+                <select
+                    id="team-stats-select"
+                    value={selectedTeam}
+                    onChange={handleTeamChange}
+                    className="w-full p-2 bg-neutral-600 text-white border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                    <option value="">Choose a team...</option>
+                    {nbaTeams.map((team, index) => (
+                        <option key={index} value={team.city}>
+                            {team.city} {team.name}
+                        </option>
+                    ))}
+                </select>
             </div>
-        )}
-        {error && (
-            <div className="flex items-center justify-center h-full">
-                <div className="text-red-500">Error loading team statistics</div>
-            </div>
-        )}
-        {data && (
-            <div className="p-4">
-                <h1 style={{ color: 'white' }} className="text-2xl font-bold mb-4">{teamName} Defensive Statistics</h1>
+
+            {loading && (
+                <div className="flex items-center justify-center h-full">
+                    <div className="text-white">Loading...</div>
+                </div>
+            )}
+            {error && (
+                <div className="flex items-center justify-center h-full">
+                    <div className="text-red-500">Error loading team statistics</div>
+                </div>
+            )}
+            {data && (
+                <div className="p-4">
+                    <h1 style={{ color: 'white' }} className="text-2xl font-bold mb-4">{selectedTeam} Defensive Statistics</h1>
                 
                 {/* Stats Table */}
                 <div className="overflow-x-auto">
@@ -176,7 +239,7 @@ const TeamStatistics = ({ teamName }) => {
                                         'Pace'
                                     ],
                                     fill: 'toself',
-                                    name: teamName
+                                    name: selectedTeam
                                 }
                             ]}
                             layout={{
