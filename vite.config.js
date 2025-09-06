@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
       // Proxy all API calls to localhost:8000 for development
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, ''),
