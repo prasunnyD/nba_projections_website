@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
-import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
+import { api, logApiCall } from '../utils/apiConfig';
 
 const TeamStatistics = () => {
     const [selectedTeam, setSelectedTeam] = useState('');
@@ -43,9 +43,7 @@ const TeamStatistics = () => {
         { city: 'Washington', name: 'Wizards' }
     ];
 
-    const client = axios.create({
-        baseURL: getApiBaseUrl()
-    });
+    const client = api;
 
     const handleTeamChange = (event) => {
         const teamCity = event.target.value;

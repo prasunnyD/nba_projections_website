@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
+import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
+
 const SportScoreboard = ({ sport, onGameSelect, onTeamSelect }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedGame, setSelectedGame] = useState(null);
     
-    const client = axios.create({baseURL: "https://api.sharpr-analytics.com"});
-
+    // const client = axios.create({baseURL: "https://api.sharpr-analytics.com"});
+    const client = axios.create({ baseURL: getApiBaseUrl() });
     const processTeamName = (teamName) => {
         // NBA special cases
         const nbaSpecialCases = {

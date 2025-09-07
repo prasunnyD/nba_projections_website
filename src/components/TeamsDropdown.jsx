@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
+import { api,logApiCall } from '../utils/apiConfig';
 
 const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect }) => {
     const [selectedTeam, setSelectedTeam] = useState('');
@@ -54,7 +54,7 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect }) => {
                 const apiUrl = `/team-roster/${selectedCity}`;
                 logApiCall('GET', apiUrl);
                 
-                const client = axios.create({ baseURL: getApiBaseUrl() });
+                const client = api;
                 const response = await client.get(apiUrl);
                 
                 // Extract the roster array
