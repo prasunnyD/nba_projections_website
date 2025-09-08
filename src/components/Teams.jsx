@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import { api , logApiCall} from '../utils/apiConfig';
 const Teams = () => {
     const [teams, setTeam] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -9,7 +9,9 @@ const Teams = () => {
     useEffect(() => {
         const fetchTeam = async () => {
             try {
-                const response = await axios.get(`https://api.sharpr-analytics.com/team-roster/${city}`);
+                const apiUrl = `/team-roster/${city}`;
+                logApiCall('GET', apiUrl);
+                const response = await client.get(apiUrl);
                 const teamRosterArray = Object.values(response.data || {})[0] || [];
                 setTeam(teamRosterArray);
             } catch (error) {

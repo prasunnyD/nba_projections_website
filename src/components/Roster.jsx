@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import { api } from '../utils/apiConfig';
 const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
     const [homeRoster, setHomeRoster] = useState([]);
     const [awayRoster, setAwayRoster] = useState([]);
@@ -14,7 +14,9 @@ const Roster = ({ homeTeam, awayTeam, onPlayerSelect }) => {
             setLoading(true);
             setError(null);
             try {
-                const client = axios.create({ baseURL: 'https://api.sharpr-analytics.com' });
+                // const client = axios.create({ baseURL: 'https://api.sharpr-analytics.com' });
+                const client = api;
+
                 const [homeResponse, awayResponse] = await Promise.all([
                     client.get(`/team-roster/${homeTeam}`),
                     client.get(`/team-roster/${awayTeam}`),

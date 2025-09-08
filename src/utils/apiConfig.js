@@ -1,5 +1,8 @@
 // API Configuration utility
-const isDevelopment = import.meta.env.DEV || __DEV__;
+import axios from "axios";
+
+// const isDevelopment = import.meta.env.DEV || __DEV__;
+const isDevelopment = import.meta.env.DEV === true;
 
 // Base URL configuration
 export const getApiBaseUrl = () => {
@@ -12,16 +15,11 @@ export const getApiBaseUrl = () => {
 };
 
 // Create axios instance with proper configuration
-export const createApiClient = () => {
-  const axios = require('axios');
-  return axios.create({
-    baseURL: getApiBaseUrl(),
-    timeout: 10000,
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-};
+export const api = axios.create({
+  baseURL: getApiBaseUrl(),
+  timeout: 10_000,
+  headers: { "Content-Type": "application/json" },
+});
 
 // Helper function to log API calls in development
 export const logApiCall = (method, url, data = null) => {
