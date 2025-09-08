@@ -4,7 +4,7 @@ import Plot from 'react-plotly.js';
 
 import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
 
-const NFLPlayerGameChart = ({ playerName, numberOfGames, setNumberOfGames }) => {
+const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGames }) => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -21,7 +21,12 @@ const NFLPlayerGameChart = ({ playerName, numberOfGames, setNumberOfGames }) => 
             setError(null); // Reset error before making a new API call
             setData(null); // Clear previous data
             try {
-                let response = await client.get(`api/v1/nfl/players/${playerName}/game-stats`);
+                let response = null;
+                if (position === 'RB' || position === 'WR' || position === 'TE') {
+                    response = await client.get(`api/v1/nfl/players/${playerName}/rushing-receiving-game-stats`);
+                } else if (position === 'QB') {
+                    response = await client.get(`api/v1/nfl/players/${playerName}/passing-game-stats`);
+                }
 
                 if (!response.data || Object.keys(response.data).length === 0) {
                     throw new Error(`No data found for this player.`);
@@ -54,27 +59,45 @@ const NFLPlayerGameChart = ({ playerName, numberOfGames, setNumberOfGames }) => 
                     const value = parseInt(game[statName]);
                     return isNaN(value) ? 0 : value;
                 };
-
+                if (position === 'RB' || position === 'WR' || position === 'TE') {
                 // Extract all stats using the mapping
-                const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
-                const rushingTouchdowns = dates.map(date => extractStat(date, 'rushingTouchdowns'));
-                const receptions = dates.map(date => extractStat(date, 'receptions'));
-                const receivingYards = dates.map(date => extractStat(date, 'receivingYards'));
-                const receivingTouchdowns = dates.map(date => extractStat(date, 'receivingTouchdowns'));
-                const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
-                const longestReception = dates.map(date => extractStat(date, 'longReception'));
+                    console.log("Position: ", position);
+                    const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
+                    const rushingTouchdowns = dates.map(date => extractStat(date, 'rushingTouchdowns'));
+                    const receptions = dates.map(date => extractStat(date, 'receptions'));
+                    const receivingYards = dates.map(date => extractStat(date, 'receivingYards'));
+                    const receivingTouchdowns = dates.map(date => extractStat(date, 'receivingTouchdowns'));
+                    const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
+                    const longestReception = dates.map(date => extractStat(date, 'longReception'));
 
-                setData({ 
-                    dates, 
-                    rushingYards, 
-                    rushingTouchdowns, 
-                    receptions,
-                    receivingYards,
-                    receivingTouchdowns,
-                    rushingAttempts,
-                    longestReception
-                });
-            } catch (error) {
+                    setData({ 
+                        dates, 
+                        rushingYards, 
+                        rushingTouchdowns, 
+                        receptions,
+                        receivingYards,
+                        receivingTouchdowns,
+                        rushingAttempts,
+                        longestReception
+                    });
+                } else if (position === 'QB') {
+                    console.log("Position: ", position);
+                    const completions = dates.map(date => extractStat(date, 'completions'));
+                    const passingYards = dates.map(date => extractStat(date, 'passingYards'));
+                    const passingTouchdowns = dates.map(date => extractStat(date, 'passingTouchdowns'));
+                    const passingAttempts = dates.map(date => extractStat(date, 'passingAttempts'));
+                    const passingInterceptions = dates.map(date => extractStat(date, 'passingInterceptions'));
+
+                    setData({ 
+                        dates,
+                        completions,
+                        passingYards, 
+                        passingTouchdowns, 
+                        passingAttempts, 
+                        passingInterceptions
+                    });
+                }
+            }catch (error) {
                 setError(
                     err.response?.status === 404
                         ? `No game statistics available for ${playerName}.`
@@ -133,38 +156,106 @@ const NFLPlayerGameChart = ({ playerName, numberOfGames, setNumberOfGames }) => 
                 >
                     Rushing Touchdowns
                 </button>
-                <button
-                    onClick={() => setSelectedStat('receptions')}
-                    className={`stat-button ${
-                        selectedStat === 'receptions' 
-                            ? 'active' 
-                            : 'inactive'
-                    }`}
-                >
-                    Receptions
-                </button>
-
+                {(position === 'RB' || position === 'WR' || position === 'TE') && (
+                    <>
+                        <button
+                            onClick={() => setSelectedStat('receptions')}
+                            className={`stat-button ${
+                                selectedStat === 'receptions' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Receptions
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('receivingYards')}
+                            className={`stat-button ${
+                                selectedStat === 'receivingYards' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Receiving Yards
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('receivingTouchdowns')}
+                            className={`stat-button ${
+                                selectedStat === 'receivingTouchdowns' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Receiving Touchdowns
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('longestReception')}
+                            className={`stat-button ${
+                                selectedStat === 'longestReception' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Longest Reception
+                        </button>
+                    </>
+                )}
+                {/* QB stat buttons */}
+                {position === 'QB' && (
+                    <>
+                        <button
+                            onClick={() => setSelectedStat('passingYards')}
+                            className={`stat-button ${
+                                selectedStat === 'passingYards' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Passing Yards
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('passingAttempts')}
+                            className={`stat-button ${
+                                selectedStat === 'passingAttempts' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Passing Attempts
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('completions')}
+                            className={`stat-button ${
+                                selectedStat === 'completions' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Completions
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('passingTouchdowns')}
+                            className={`stat-button ${
+                                selectedStat === 'passingTouchdowns' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Passing Touchdowns
+                        </button>
+                        <button
+                            onClick={() => setSelectedStat('passingInterceptions')}
+                            className={`stat-button ${
+                                selectedStat === 'passingInterceptions' 
+                                    ? 'active' 
+                                    : 'inactive'
+                            }`}
+                        >
+                            Interceptions
+                        </button>
+                    </>
+                )}
                 {/* Combination stat buttons */}
-                <button
-                    onClick={() => setSelectedStat('receivingYards')}
-                    className={`stat-button ${
-                        selectedStat === 'receivingYards' 
-                            ? 'active' 
-                            : 'inactive'
-                    }`}
-                >
-                    Receiving Yards
-                </button>
-                <button
-                    onClick={() => setSelectedStat('receivingTouchdowns')}
-                    className={`stat-button ${
-                        selectedStat === 'receivingTouchdowns' 
-                            ? 'active' 
-                            : 'inactive'
-                    }`}
-                >
-                    Receiving Touchdowns
-                </button>
                 <button
                     onClick={() => setSelectedStat('rushingAttempts')}
                     className={`stat-button ${
@@ -175,16 +266,7 @@ const NFLPlayerGameChart = ({ playerName, numberOfGames, setNumberOfGames }) => 
                 >
                     Rushing Attempts
                 </button>
-                <button
-                    onClick={() => setSelectedStat('longestReception')}
-                    className={`stat-button ${
-                        selectedStat === 'longestReception' 
-                            ? 'active' 
-                            : 'inactive'
-                    }`}
-                >
-                    Longest Reception
-                </button>
+                
             </div>
 
             {/* Prop Line Box */}
@@ -211,11 +293,8 @@ const NFLPlayerGameChart = ({ playerName, numberOfGames, setNumberOfGames }) => 
                             onChange={(e) => setNumberOfGames(Number(e.target.value))}
                             className="px-3 py-2 border rounded-md"
                         >
-                            <option value={5}>5 games</option>
-                            <option value={10}>10 games</option>
-                            <option value={15}>15 games</option>
-                            <option value={20}>20 games</option>
-                            <option value={30}>30 games</option>
+                            <option value={17}>17 games</option>
+                            <option value={30}>34 games</option>
                         </select>
                     </div>
                 </div>
