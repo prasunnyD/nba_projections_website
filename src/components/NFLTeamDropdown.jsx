@@ -53,7 +53,7 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
             setLoading(true);
             setError(null);
             try {
-                const apiUrl = `api/v1/nfl/team-roster/${selectedCity}`;
+                const apiUrl = `nfl/team-roster/${selectedCity}`;
                 logApiCall('GET', apiUrl);
                 
                 const client = axios.create({ baseURL: getApiBaseUrl() });

@@ -10,7 +10,12 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
     const [error, setError] = useState(null);
 
     const client = axios.create({
-        baseURL: getApiBaseUrl()
+        baseURL: getApiBaseUrl(),
+        headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
     });
 
     useEffect(() => {
@@ -23,8 +28,8 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
             try {
                 if (position === 'WR' || position === 'TE' || position === 'RB') {
                     console.log(`Fetching player statistics for ${playerName} with position ${position}`);
-                    let rec_response = await client.get(`api/v1/nfl/players/${playerName}/receiving-stats`);
-                    let rush_response = await client.get(`api/v1/nfl/players/${playerName}/rushing-stats`);
+                    let rec_response = await client.get(`nfl/players/${playerName}/receiving-stats`);
+                    let rush_response = await client.get(`nfl/players/${playerName}/rushing-stats`);
                     const rec_data = rec_response.data?.stats;
                     const rush_data = rush_response.data?.stats;
                     setData({
@@ -49,8 +54,37 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                         RushingFumbles:{ value: rush_data.rushingFumbles },
                     });
                 } else if (position === 'QB') {
-                    let pass_response = await client.get(`api/v1/nfl/players/${playerName}/passing-stats`);
-                    let rush_response = await client.get(`api/v1/nfl/players/${playerName}/rushing-stats`);
+                    let pass_response = await client.get(`nfl/players/${playerName}/passing-stats`);
+                    let rush_response = await client.get(`nfl/players/${playerName}/rushing-stats`);
+                    const pass_data = pass_response.data?.stats;
+                    const rush_data = rush_response.data?.stats;
+                    setData({
+                        // Rushing stats
+                        RushingFirstDowns: { value: rush_data.rushingFirstDowns },
+                        RushingAttempts: { value: rush_data.rushingAttempts },
+                        RushingYards: { value: rush_data.rushingYards },
+                        RushingYardsPerGame: { value: rush_data.rushingYardsPerGame },
+                        RushingYardsPerCarry: { value: rush_data.rushingYardsPerCarry },
+                        RushingTouchdowns: { value: rush_data.rushingTouchdowns },
+                        LongRushing: { value: rush_data.longRushing },
+                        RushingFumbles: { value: rush_data.rushingFumbles },
+
+                        // Additional fields from pass_data (using mapping as described)
+                        AvgGain: { value: pass_data.avgGain },
+                        CompletionPct: { value: pass_data.completionPct },
+                        Completions: { value: pass_data.completions },
+                        InterceptionPct: { value: pass_data.interceptionPct },
+                        Interceptions: { value: pass_data.interceptions },
+                        LongPassing: { value: pass_data.longPassing },
+                        PassingYards: { value: pass_data.passingYards },
+                        NetPassingYards: { value: pass_data.netPassingYards },
+                        NetPassingYardsPerGame: { value: pass_data.netPassingYardsPerGame },
+                        NetTotalYards: { value: pass_data.netTotalYards },
+                        NetYardsPerGame: { value: pass_data.netYardsPerGame },
+                        PassingAttempts: { value: pass_data.passingAttempts },
+                        TotalOffensivePlays:{ value: pass_data.totalOffensivePlays },
+                        Player_name: { value: pass_data.player_name },
+                    });
                 }
     
             } catch (error) {
@@ -84,55 +118,59 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                         <thead>
                             <tr className="border-b border-gray-700">
                                 <th className="px-4 py-2 text-md font-large text-gray-300">Total Offensive Plays : {data.TotalOffensivePlays.value}</th>
-                                <th className="px-4 py-2 text-md font-large text-gray-300">Net Yards Per Game : {data.NetYardsPerGame.value}</th>
-                                <th className="px-4 py-2 text-md font-large text-gray-300">Average Gain : {data.AvgGain.value}</th>
+                                <th className="px-4 py-2 text-md font-large text-gray-300">Net Yards Per Game : {(data.NetYardsPerGame.value).toFixed(2)}</th>
+                                <th className="px-4 py-2 text-md font-large text-gray-300">Average Gain : {(data.AvgGain.value).toFixed(2)}</th>
                             </tr>
                         </thead>
                     </table>
                 </div>
                 
                 {/* Receiving Stats Table */}
-                <h4 className="text-xl font-bold text-white mb-4">Receiving Stats</h4>
-                <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
-                    <table className="min-w-full">
-                        <thead>
-                    <tr className="border-b border-gray-700">
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving First Downs</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Targets</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Yards Per Reception</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Yards From Scrimmage Per Game</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards After Catch</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards At Catch</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards Per Game</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.ReceivingFirstDowns.value}
-                        </td>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.ReceivingTargets.value}
-                        </td>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.YardsPerReception.value}
-                        </td>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.YardsFromScrimmagePerGame.value}
-                        </td>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.ReceivingYardsAfterCatch.value}
-                        </td>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.ReceivingYardsAtCatch.value}
-                        </td>
-                        <td className="px-4 py-2 text-left text-white">
-                            {data.ReceivingYardsPerGame.value}
-                        </td>
+                {(position === 'WR' || position === 'TE' || position === 'RB') && (
+                    <>
+                    <h4 className="text-xl font-bold text-white mb-4">Receiving Stats</h4>
+                    <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
+                        <table className="min-w-full">
+                            <thead>
+                        <tr className="border-b border-gray-700">
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving First Downs</th>
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Targets</th>
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Yards Per Reception</th>
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Yards From Scrimmage Per Game</th>
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards After Catch</th>
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards At Catch</th>
+                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards Per Game</th>
                         </tr>
-                    </tbody>
-                    </table>
-                </div>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.ReceivingFirstDowns.value}
+                            </td>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.ReceivingTargets.value}
+                            </td>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.YardsPerReception.value}
+                            </td>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.YardsFromScrimmagePerGame.value}
+                            </td>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.ReceivingYardsAfterCatch.value}
+                            </td>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.ReceivingYardsAtCatch.value}
+                            </td>
+                            <td className="px-4 py-2 text-left text-white">
+                                {data.ReceivingYardsPerGame.value}
+                            </td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </>
+                )}
                 {/* Rushing Stats Table */}
                 <h4 className="text-xl font-bold text-white mb-4">Rushing Stats</h4>
                 <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
@@ -161,7 +199,7 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                             {data.RushingYards.value}
                         </td>
                         <td className="px-4 py-2 text-left text-white">
-                            {data.RushingYardsPerGame.value}
+                            {(data.RushingYardsPerGame.value).toFixed(2)}
                         </td>
                         <td className="px-4 py-2 text-left text-white">
                             {data.RushingYards.value}
@@ -177,8 +215,71 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                         </td>
                         </tr>
                     </tbody>
-                    </table>
+                </table>
                 </div>
+                
+                {/* Passing Stats Table - moved outside of rushing stats table */}
+                {position === 'QB' && (
+                    <>
+                        <h4 className="text-xl font-bold text-white mb-4">Passing Stats</h4>
+                        <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
+                            <table className="min-w-full">
+                                <thead>
+                                    <tr className="border-b border-gray-700">
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Passing Attempts</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Completions</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Completion %</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Passing Yards</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Passing Yards</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Passing Yards/Game</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Total Yards</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Yards/Game</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Interceptions</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Interception %</th>
+                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Long Passing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.PassingAttempts?.value}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.Completions?.value}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {(data.CompletionPct?.value).toFixed(2)}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.PassingYards?.value}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.NetPassingYards?.value}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {(data.NetPassingYardsPerGame?.value).toFixed(2)}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.NetTotalYards?.value}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {(data.NetYardsPerGame?.value).toFixed(2)}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.Interceptions?.value}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {(data.InterceptionPct?.value).toFixed(2)}
+                                        </td>
+                                        <td className="px-4 py-2 text-left text-white">
+                                            {data.LongPassing?.value}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                )}
             </div>
         )}
         </div>

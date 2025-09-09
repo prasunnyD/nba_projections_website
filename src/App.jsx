@@ -22,8 +22,21 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-neutral-800">
-        {/* Render Scoreboard at the top */}
-        <Scoreboard onTeamSelect={handleTeamSelect} onGameSelect={handleGameSelect} />
+        {/* Navigation Buttons */}
+        <div className="mb-4 flex gap-4 p-4 justify-center">
+            <button 
+              onClick={() => window.location.href = '/'}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+            >
+              Go to NBA Page
+            </button>
+            <button 
+              onClick={() => window.location.href = '/nfl'}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+            >
+              Go to NFL Page
+            </button>
+        </div>
 
         {/* Define routes for different pages */}
         <Routes>

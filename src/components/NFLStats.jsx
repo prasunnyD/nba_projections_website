@@ -60,6 +60,7 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
                                 playerName={selectedPlayer}
                                 numberOfGames={numberOfGames}
                                 setNumberOfGames={setNumberOfGames}
+                                position={playerPosition}
                             />
                         </>
                     ) : (
