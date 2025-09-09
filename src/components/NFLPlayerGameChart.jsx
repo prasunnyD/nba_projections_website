@@ -34,6 +34,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                 
                 // Extract and validate games
                 const games = response.data?.stats?.games || [];
+
                 if (games.length === 0) {
                     throw new Error('No game data available');
                 }
@@ -48,10 +49,9 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         }
                     }
                 });
-
                 // Get sorted dates (most recent first)
                 const dates = Array.from(gameByDate.keys()).sort((a, b) => new Date(b) - new Date(a));
-
+                console.log("Dates: ", dates);
                 // Helper function to safely extract stats
                 const extractStat = (date, statName) => {
                     const game = gameByDate.get(date);
@@ -61,7 +61,6 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                 };
                 if (position === 'RB' || position === 'WR' || position === 'TE') {
                 // Extract all stats using the mapping
-                    console.log("Position: ", position);
                     const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
                     const rushingTouchdowns = dates.map(date => extractStat(date, 'rushingTouchdowns'));
                     const receptions = dates.map(date => extractStat(date, 'receptions'));
@@ -81,12 +80,15 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         longestReception
                     });
                 } else if (position === 'QB') {
-                    console.log("Position: ", position);
-                    const completions = dates.map(date => extractStat(date, 'completions'));
+                    const completions = dates.map(date => extractStat(date, 'passingCompletions'));
                     const passingYards = dates.map(date => extractStat(date, 'passingYards'));
                     const passingTouchdowns = dates.map(date => extractStat(date, 'passingTouchdowns'));
                     const passingAttempts = dates.map(date => extractStat(date, 'passingAttempts'));
-                    const passingInterceptions = dates.map(date => extractStat(date, 'passingInterceptions'));
+                    const passingInterceptions = dates.map(date => extractStat(date, 'interceptions'));
+                    const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
+                    const rushingTouchdowns = dates.map(date => extractStat(date, 'rushingTouchdowns'));
+                    const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
+
 
                     setData({ 
                         dates,
@@ -94,7 +96,10 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         passingYards, 
                         passingTouchdowns, 
                         passingAttempts, 
-                        passingInterceptions
+                        passingInterceptions,
+                        rushingYards,
+                        rushingTouchdowns,
+                        rushingAttempts
                     });
                 }
             }catch (error) {

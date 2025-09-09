@@ -10,7 +10,12 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
     const [error, setError] = useState(null);
 
     const client = axios.create({
-        baseURL: getApiBaseUrl()
+        baseURL: getApiBaseUrl(),
+        headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
     });
 
     useEffect(() => {
@@ -71,6 +76,7 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                         InterceptionPct: { value: pass_data.interceptionPct },
                         Interceptions: { value: pass_data.interceptions },
                         LongPassing: { value: pass_data.longPassing },
+                        PassingYards: { value: pass_data.passingYards },
                         NetPassingYards: { value: pass_data.netPassingYards },
                         NetPassingYardsPerGame: { value: pass_data.netPassingYardsPerGame },
                         NetTotalYards: { value: pass_data.netTotalYards },
@@ -228,7 +234,6 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                                         <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Passing Yards/Game</th>
                                         <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Total Yards</th>
                                         <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Yards/Game</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Avg Gain</th>
                                         <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Interceptions</th>
                                         <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Interception %</th>
                                         <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Long Passing</th>
@@ -243,7 +248,7 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                                             {data.Completions?.value}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
-                                            {data.CompletionPct?.value}
+                                            {(data.CompletionPct?.value).toFixed(2)}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
                                             {data.PassingYards?.value}
@@ -252,22 +257,19 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                                             {data.NetPassingYards?.value}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
-                                            {data.NetPassingYardsPerGame?.value}
+                                            {(data.NetPassingYardsPerGame?.value).toFixed(2)}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
                                             {data.NetTotalYards?.value}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
-                                            {data.NetYardsPerGame?.value}
-                                        </td>
-                                        <td className="px-4 py-2 text-left text-white">
-                                            {data.AvgGain?.value}
+                                            {(data.NetYardsPerGame?.value).toFixed(2)}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
                                             {data.Interceptions?.value}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
-                                            {data.InterceptionPct?.value}
+                                            {(data.InterceptionPct?.value).toFixed(2)}
                                         </td>
                                         <td className="px-4 py-2 text-left text-white">
                                             {data.LongPassing?.value}
