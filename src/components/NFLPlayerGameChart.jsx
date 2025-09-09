@@ -23,9 +23,9 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             try {
                 let response = null;
                 if (position === 'RB' || position === 'WR' || position === 'TE') {
-                    response = await client.get(`api/v1/nfl/players/${playerName}/rushing-receiving-game-stats`);
+                    response = await client.get(`nfl/players/${playerName}/rushing-receiving-game-stats`);
                 } else if (position === 'QB') {
-                    response = await client.get(`api/v1/nfl/players/${playerName}/passing-game-stats`);
+                    response = await client.get(`nfl/players/${playerName}/passing-game-stats`);
                 }
 
                 if (!response.data || Object.keys(response.data).length === 0) {

@@ -62,7 +62,7 @@ const NFLTeamStatistics = () => {
         const fetchTeamStatistics = async () => {
             setLoading(true);
             try {
-                const apiUrl = `/api/v1/nfl/team-defense-stats/${selectedTeam}`;
+                const apiUrl = `nfl/team-defense-stats/${selectedTeam}`;
                 logApiCall('GET', apiUrl);
                 
                 let response = await client.get(apiUrl);

@@ -28,8 +28,8 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
             try {
                 if (position === 'WR' || position === 'TE' || position === 'RB') {
                     console.log(`Fetching player statistics for ${playerName} with position ${position}`);
-                    let rec_response = await client.get(`api/v1/nfl/players/${playerName}/receiving-stats`);
-                    let rush_response = await client.get(`api/v1/nfl/players/${playerName}/rushing-stats`);
+                    let rec_response = await client.get(`nfl/players/${playerName}/receiving-stats`);
+                    let rush_response = await client.get(`nfl/players/${playerName}/rushing-stats`);
                     const rec_data = rec_response.data?.stats;
                     const rush_data = rush_response.data?.stats;
                     setData({
@@ -54,8 +54,8 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                         RushingFumbles:{ value: rush_data.rushingFumbles },
                     });
                 } else if (position === 'QB') {
-                    let pass_response = await client.get(`api/v1/nfl/players/${playerName}/passing-stats`);
-                    let rush_response = await client.get(`api/v1/nfl/players/${playerName}/rushing-stats`);
+                    let pass_response = await client.get(`nfl/players/${playerName}/passing-stats`);
+                    let rush_response = await client.get(`nfl/players/${playerName}/rushing-stats`);
                     const pass_data = pass_response.data?.stats;
                     const rush_data = rush_response.data?.stats;
                     setData({
