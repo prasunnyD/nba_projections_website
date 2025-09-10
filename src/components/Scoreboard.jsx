@@ -32,7 +32,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
         const fetchScoreboard = async () => {
             setLoading(true);
             try {
-                let response = await client.get(`/scoreboard`);
+                let response = await client.get(`nba/scoreboard`);
                 const games = Object.keys(response.data);
                 const homeTeam = games.map(game => response.data[game].home_team);
                 const awayTeam = games.map(game => response.data[game].away_team);

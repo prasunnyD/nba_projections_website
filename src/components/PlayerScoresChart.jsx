@@ -36,7 +36,7 @@ const PlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames  }) => 
             setSeries(null); // Clear previous data
             setMinutesByDate({});
             try {
-                let res = await client.get(`/player-last-${numberOfGames}-games/${playerName}`);
+                let res = await client.get(`nba/player/${playerName}/last/${numberOfGames}/games`);
 
                 const payload = res.data || {};
             const datesAsc = Object.keys(payload)

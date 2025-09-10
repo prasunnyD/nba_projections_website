@@ -46,7 +46,13 @@ const TeamStatistics = () => {
     const client = api;
 
     const handleTeamChange = (event) => {
-        const teamCity = event.target.value;
+        let teamCity = event.target.value;
+        if (teamCity == 'Los Angeles Lakers Lakers') {
+            teamCity = 'Los Angeles Lakers';
+        } else if (teamCity == 'Los Angeles Clippers Clippers') {
+            teamCity = 'LA Clippers';
+        }
+        console.log("Team City: ", teamCity);
         setSelectedTeam(teamCity);
         setData(null);
         setError(null);
@@ -59,62 +65,63 @@ const TeamStatistics = () => {
         const fetchTeamStatistics = async () => {
             setLoading(true);
             try {
-                const apiUrl = `/${selectedTeam}-defense-stats`;
+                const apiUrl = `nba/defense-stats/${selectedTeam}`;
                 logApiCall('GET', apiUrl);
                 
                 let response = await client.get(apiUrl);
     
                 const teamData = response.data[selectedTeam];
+                console.log("Team Data: ", response.data);
 
                 setData({
                     Defense: {
                         DefensiveRating: {
-                            value: teamData.DEF_RATING,
-                            rank: teamData.DEF_RATING_RANK
+                            value: teamData.def_rating,
+                            rank: teamData.def_rating_rank
                         },
                         OPP_PTS_PAINT: {
-                            value: teamData.OPP_PTS_PAINT,
-                            rank: teamData.OPP_PTS_PAINT_RANK
+                            value: teamData.opp_pts_paint,
+                            rank: teamData.opp_pts_paint_rank
                         }
                     },
                     Opponent: {
                         OPP_FG_PCT: {
-                            value: teamData.OPP_FG_PCT,
-                            rank: teamData.OPP_FG_PCT_RANK
+                            value: teamData.opp_fg_pct,
+                            rank: teamData.opp_fg_pct_rank
                         },
                         OPP_REB: {
-                            value: teamData.OPP_REB,
-                            rank: teamData.OPP_REB_RANK
+                            value: teamData.opp_reb,
+                            rank: teamData.opp_reb_rank
                         },
                         OPP_AST: {
-                            value: teamData.OPP_AST,
-                            rank: teamData.OPP_AST_RANK
+                            value: teamData.opp_ast,
+                            rank: teamData.opp_ast_rank
                         },
                         OPP_FG3A: {
-                            value: teamData.OPP_FG3A,
-                            rank: teamData.OPP_FG3A_RANK
+                            value: teamData.opp_fg3a,
+                            rank: teamData.opp_fg3a_rank
                         },
                         OPP_FG3_PCT: {
-                            value: teamData.OPP_FG3_PCT,
-                            rank: teamData.OPP_FG3_PCT_RANK
+                            value: teamData.opp_fg3_pct,
+                            rank: teamData.opp_fg3_pct_rank
                         }
                     },
                     FourFactor: {
                         Pace: {
-                            value: teamData.PACE,
-                            rank: teamData.PACE_RANK
+                            value: teamData.pace,
+                            rank: teamData.pace_rank
                         },
                         OPP_EFG_PCT: {
-                            value: teamData.OPP_EFG_PCT,
-                            rank: teamData.OPP_EFG_PCT_RANK
+                            value: teamData.opp_efg_pct,
+                            rank: teamData.opp_efg_pct_rank
                         },
                         OPP_FTA_RATE: {
-                            value: teamData.OPP_FTA_RATE,
-                            rank: teamData.OPP_FTA_RATE_RANK
+                            value: teamData.opp_fta_rate,
+                            rank: teamData.opp_fta_rate_rank
                         },
                         OPP_OREB_PCT: {
-                            value: teamData.OPP_OREB_PCT,
-                            rank: teamData.OPP_OREB_PCT_RANK
+                            value: teamData.opp_oreb_pct,
+                            rank: teamData.opp_oreb_pct_rank
                         }
                     }
                 });
@@ -144,7 +151,7 @@ const TeamStatistics = () => {
                 >
                     <option value="">Choose a team...</option>
                     {nbaTeams.map((team, index) => (
-                        <option key={index} value={team.city}>
+                        <option key={index} value={team.city + ' ' + team.name}>
                             {team.city} {team.name}
                         </option>
                     ))}
