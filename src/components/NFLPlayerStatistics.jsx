@@ -151,10 +151,10 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                                 {data.ReceivingTargets.value}
                             </td>
                             <td className="px-4 py-2 text-left text-white">
-                                {data.YardsPerReception.value}
+                                {data.YardsPerReception.value.toFixed(2)}
                             </td>
                             <td className="px-4 py-2 text-left text-white">
-                                {data.YardsFromScrimmagePerGame.value}
+                                {data.YardsFromScrimmagePerGame.value.toFixed(2)}
                             </td>
                             <td className="px-4 py-2 text-left text-white">
                                 {data.ReceivingYardsAfterCatch.value}
@@ -163,7 +163,7 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                                 {data.ReceivingYardsAtCatch.value}
                             </td>
                             <td className="px-4 py-2 text-left text-white">
-                                {data.ReceivingYardsPerGame.value}
+                                {data.ReceivingYardsPerGame.value.toFixed(2)}
                             </td>
                             </tr>
                         </tbody>
