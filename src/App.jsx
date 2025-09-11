@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Scoreboard from './components/Scoreboard';
 import MainContainer from './components/MainContainer';
@@ -9,6 +9,7 @@ function App() {
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [homeTeam, setHomeTeam] = useState('');
     const [awayTeam, setAwayTeam] = useState('');
+    const navigate = useNavigate();
 
   // Handle team selection
   const handleTeamSelect = (teamName) => {setSelectedTeam(teamName)};
@@ -25,13 +26,13 @@ function App() {
         {/* Navigation Buttons */}
         <div className="mb-4 flex gap-4 p-4 justify-center">
             <button 
-              onClick={() => window.location.href = '/'}
+              onClick={() => navigate('/')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
             >
               Go to NBA Page
             </button>
             <button 
-              onClick={() => window.location.href = '/nfl'}
+              onClick={() => navigate('/nfl')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
             >
               Go to NFL Page
