@@ -8,6 +8,7 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [openPositions, setOpenPositions] = useState(new Set());
 
     // NFL Teams with their cities
     const nflTeams = [
@@ -89,28 +90,78 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
         }
     };
 
+    const togglePosition = (position) => {
+        const newOpenPositions = new Set(openPositions);
+        if (newOpenPositions.has(position)) {
+            newOpenPositions.delete(position);
+        } else {
+            newOpenPositions.add(position);
+        }
+        setOpenPositions(newOpenPositions);
+    };
+
+    const groupPlayersByPosition = (players) => {
+        return players.reduce((groups, player) => {
+            const position = player.position || 'Unknown';
+            if (!groups[position]) {
+                groups[position] = [];
+            }
+            groups[position].push(player);
+            return groups;
+        }, {});
+    };
+
     const renderRoster = () => {
         if (loading) return <p className="text-gray-400">Loading roster...</p>;
         if (error) return <p className="text-red-500">{error}</p>;
         if (roster.length > 0) {
+            const groupedPlayers = groupPlayersByPosition(roster);
+            const sortedPositions = Object.keys(groupedPlayers).sort();
+            
             return (
                 <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-white mb-2">
+                    <h3 className="text-lg font-semibold text-white mb-4">
                         {selectedTeam} Roster
                     </h3>
-                    <ul className="space-y-1">
-                        {roster.map((player, index) => (
-                            <li
-                                key={index}
-                                className={`roster-item text-gray-300 hover:text-white cursor-pointer p-1 rounded ${
-                                    selectedPlayer === player.PLAYER ? 'bg-blue-600 text-white' : ''
-                                }`}
-                                onClick={() => handlePlayerClick(player)}
-                            >
-                                {player.player_name || 'Unknown'} ({player.position || 'N/A'})
-                            </li>
-                        ))}
-                    </ul>
+                    <div className="space-y-2">
+                        {sortedPositions.map((position) => {
+                            const isOpen = openPositions.has(position);
+                            const players = groupedPlayers[position];
+                            
+                            return (
+                                <div key={position} className="border border-gray-600 rounded-lg overflow-hidden">
+                                    <button
+                                        onClick={() => togglePosition(position)}
+                                        className="w-full px-4 py-3 bg-neutral-700 hover:bg-neutral-600 text-left text-white font-medium flex justify-between items-center transition-colors"
+                                    >
+                                        <span>
+                                            {position} ({players.length})
+                                        </span>
+                                        <span className={`transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+                                            ▼
+                                        </span>
+                                    </button>
+                                    {isOpen && (
+                                        <div className="bg-neutral-800 border-t border-gray-600">
+                                            <ul className="divide-y divide-gray-600">
+                                                {players.map((player, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className={`px-4 py-2 text-gray-300 hover:text-white hover:bg-neutral-700 cursor-pointer transition-colors ${
+                                                            selectedPlayer === player ? 'bg-blue-600 text-white' : ''
+                                                        }`}
+                                                        onClick={() => handlePlayerClick(player)}
+                                                    >
+                                                        {player.player_name || 'Unknown'}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             );
         }
