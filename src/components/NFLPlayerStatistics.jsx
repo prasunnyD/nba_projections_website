@@ -11,11 +11,6 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
 
     const client = axios.create({
         baseURL: getApiBaseUrl(),
-        headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-        }
     });
 
     useEffect(() => {
