@@ -95,6 +95,7 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                 setIsTransitioning(false);
             } finally {
                 setLoading(false);
+                setIsTransitioning(false); // Add this line
             }
         };
     
