@@ -59,6 +59,15 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const value = parseInt(game[statName]);
                     return isNaN(value) ? 0 : value;
                 };
+                
+                // Helper function to safely extract decimal stats (like percentages)
+                const extractDecimalStat = (date, statName) => {
+                    const game = gameByDate.get(date);
+                    if (!game) return 0;
+                    const value = parseFloat(game[statName]);
+                    return isNaN(value) ? 0 : value;
+                };
+                
                 if (position === 'RB' || position === 'WR' || position === 'TE') {
                 // Extract all stats using the mapping
                     const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
@@ -68,6 +77,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const receivingTouchdowns = dates.map(date => extractStat(date, 'receivingTouchdowns'));
                     const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
                     const longestReception = dates.map(date => extractStat(date, 'longReception'));
+                    const offensiveSnapsPct = dates.map(date => extractDecimalStat(date, 'offenseSnapPct') * 100);
 
                     setData({ 
                         dates, 
@@ -77,7 +87,8 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         receivingYards,
                         receivingTouchdowns,
                         rushingAttempts,
-                        longestReception
+                        longestReception,
+                        offensiveSnapsPct
                     });
                 } else if (position === 'QB') {
                     const completions = dates.map(date => extractStat(date, 'passingCompletions'));
@@ -88,6 +99,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
                     const rushingTouchdowns = dates.map(date => extractStat(date, 'rushingTouchdowns'));
                     const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
+                    const offensiveSnapsPct = dates.map(date => extractDecimalStat(date, 'offenseSnapPct') * 100);
 
 
                     setData({ 
@@ -99,7 +111,8 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         passingInterceptions,
                         rushingYards,
                         rushingTouchdowns,
-                        rushingAttempts
+                        rushingAttempts,
+                        offensiveSnapsPct
                     });
                 }
             }catch (error) {
@@ -329,6 +342,18 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                             },
                             line: { color: '#2563eb' },
                         },
+                        // Add offensive snap percentage as a line graph
+                        {
+                            x: data.dates,
+                            y: data.offensiveSnapsPct,
+                            type: 'scatter',
+                            mode: 'lines+markers',
+                            name: 'Offensive Snaps %',
+                            yaxis: 'y2',
+                            line: { color: '#f59e0b', width: 3 },
+                            marker: { color: '#f59e0b', size: 6 },
+                            hovertemplate: '%{x}<br>%{y:.1f}%<extra>Offensive Snaps</extra>',
+                        },
                         ...(propLine ? [{
                             x: data.dates,
                             y: Array(data.dates.length).fill(propLine),
@@ -357,6 +382,16 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         yaxis: {
                             title: selectedStat.charAt(0).toUpperCase() + selectedStat.slice(1),
                             zeroline: false,
+                        },
+                        yaxis2: {
+                            title: 'Offensive Snaps %',
+                            overlaying: 'y',
+                            side: 'right',
+                            rangemode: 'tozero',
+                            zeroline: false,
+                            showgrid: false,
+                            showticklabels: false,  // Hide tick labels
+                            showline: false,        // Hide the axis line
                         },
                         height: 400,
                     }}
