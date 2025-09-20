@@ -116,14 +116,14 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
         )}
         {data && !isTransitioning && (
             <div className="p-4">
-                <h4 className="text-xl font-bold text-white mb-4">Season Averages</h4>
-                <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
+                <h4 className="text-l font-bold text-white mb-2">Season Averages</h4>
+                <div className="overflow-x-auto bg-neutral-800 rounded-lg p-1 mb-1">
                     <table className="min-w-full">
                         <thead>
                             <tr className="border-b border-gray-700">
-                                <th className="px-4 py-2 text-md font-large text-gray-300">Total Offensive Plays : {data?.TotalOffensivePlays?.value || 0}</th>
-                                <th className="px-4 py-2 text-md font-large text-gray-300">Net Yards Per Game : {(data?.NetYardsPerGame?.value || 0).toFixed(2)}</th>
-                                <th className="px-4 py-2 text-md font-large text-gray-300">Average Gain : {(data?.AvgGain?.value || 0).toFixed(2)}</th>
+                                <th className="px-4 py-2 text-sm font-medium text-gray-300">Total Offensive Plays : {data?.TotalOffensivePlays?.value || 0}</th>
+                                <th className="px-4 py-2 text-sm font-medium text-gray-300">Net Yards Per Game : {(data?.NetYardsPerGame?.value || 0).toFixed(2)}</th>
+                                <th className="px-4 py-2 text-sm font-medium text-gray-300">Average Gain : {(data?.AvgGain?.value || 0).toFixed(2)}</th>
                             </tr>
                         </thead>
                     </table>
@@ -132,18 +132,18 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                 {/* Receiving Stats Table */}
                 {(position === 'WR' || position === 'TE' || position === 'RB') && (
                     <>
-                    <h4 className="text-xl font-bold text-white mb-4">Receiving Stats</h4>
-                    <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
+                    <h4 className="text-l font-bold text-white mb-4">Receiving Stats</h4>
+                    <div className="overflow-x-auto bg-neutral-800 rounded-lg p-1 mb-1">
                         <table className="min-w-full">
                             <thead>
                         <tr className="border-b border-gray-700">
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving First Downs</th>
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Targets</th>
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Yards Per Reception</th>
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Yards From Scrimmage Per Game</th>
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards After Catch</th>
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards At Catch</th>
-                            <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Receiving Yards Per Game</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Receiving First Downs</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Receiving Targets</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Yards Per Reception</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Yards From Scrimmage Per Game</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Receiving Yards After Catch</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Receiving Yards At Catch</th>
+                            <th className="px-4 py-2 text-left text-sm font-medium text-gray-300">Receiving Yards Per Game</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,19 +176,19 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                 </>
                 )}
                 {/* Rushing Stats Table */}
-                <h4 className="text-xl font-bold text-white mb-4">Rushing Stats</h4>
-                <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
+                <h4 className="text-l font-bold text-white mb-2">Rushing Stats</h4>
+                <div className="overflow-x-auto bg-neutral-800 rounded-lg p-1 mb-1">
                     <table className="min-w-full">
                         <thead>
                     <tr className="border-b border-gray-700">
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing First Downs</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing Attempts</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing Yards</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing Yards Per Game</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing Yards Per Carry</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing Touchdowns</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Long Rushing</th>
-                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Rushing Fumbles</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing First Downs</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing Attempts</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing Yards</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing Yards Per Game</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing Yards Per Carry</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing Touchdowns</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Long Rushing</th>
+                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Rushing Fumbles</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -225,22 +225,22 @@ const NFLPlayerStatistics = ({ playerName, position }) => {
                 {/* Passing Stats Table - moved outside of rushing stats table */}
                 {position === 'QB' && (
                     <>
-                        <h4 className="text-xl font-bold text-white mb-4">Passing Stats</h4>
-                        <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
+                        <h4 className="text-l font-bold text-white mb-2">Passing Stats</h4>
+                        <div className="overflow-x-auto bg-neutral-800 rounded-lg p-1 mb-1">
                             <table className="min-w-full">
                                 <thead>
                                     <tr className="border-b border-gray-700">
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Passing Attempts</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Completions</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Completion %</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Passing Yards</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Passing Yards</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Passing Yards/Game</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Total Yards</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Net Yards/Game</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Interceptions</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Interception %</th>
-                                        <th className="px-4 py-2 text-left text-md font-medium text-gray-300">Long Passing</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Passing Attempts</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Completions</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Completion %</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Passing Yards</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Net Passing Yards</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Net Passing Yards/Game</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Net Total Yards</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Net Yards/Game</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Interceptions</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Interception %</th>
+                                        <th className="px-4 py-1 text-left text-sm font-medium text-gray-300">Long Passing</th>
                                     </tr>
                                 </thead>
                                 <tbody>

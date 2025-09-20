@@ -50,8 +50,13 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     }
                 });
                 // Get sorted dates (most recent first)
-                const dates = Array.from(gameByDate.keys()).sort((a, b) => new Date(b) - new Date(a));
+                const dates = Array.from(gameByDate.keys()).sort((a, b) => new Date(a) - new Date(b));
                 console.log("Dates: ", dates);
+                // Format dates to year-month-date format
+                const formattedDates = dates.map(dateStr => {
+                    const date = new Date(dateStr);
+                    return date.toISOString().split('T')[0]; // Gets YYYY-MM-DD format
+                });
                 // Helper function to safely extract stats
                 const extractStat = (date, statName) => {
                     const game = gameByDate.get(date);
@@ -80,7 +85,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const offensiveSnapsPct = dates.map(date => extractDecimalStat(date, 'offenseSnapPct') * 100);
 
                     setData({ 
-                        dates, 
+                        dates: formattedDates, 
                         rushingYards, 
                         rushingTouchdowns, 
                         receptions,
@@ -103,7 +108,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
 
 
                     setData({ 
-                        dates,
+                        dates: formattedDates,
                         completions,
                         passingYards, 
                         passingTouchdowns, 
@@ -130,7 +135,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
 
 
     const getPropLineStats = (data, propLine) => {
-        if (!data || !propLine) return null;
+        if (!data || !propLine || !data[selectedStat]) return null;
         const values = data[selectedStat];
         const above = values.filter(val => val >= propLine).length;
         const below = values.length - above;
@@ -327,7 +332,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             </div>
 
             {/* Chart Rendering */}
-            {data && (
+            {data && data[selectedStat] && (
                 <Plot
                     data={[
                         {  
