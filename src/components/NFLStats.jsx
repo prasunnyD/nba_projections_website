@@ -72,8 +72,8 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
             </div>
 
             {/* Right Column - Team Statistics */}
-            <div className="w-1/4 rounded-lg bg-neutral-800 shadow p-4">
-                <h2 className="text-xl font-bold text-white mb-4">Team Statistics</h2>
+            <div className="w-1/4 rounded-lg bg-neutral-900 shadow p-4">
+                <h2 className="text-xl font-bold text-white mb-4">Opponent Team Statistics</h2>
                 <div>
                     <NFLTeamStatistics />
                 </div>
