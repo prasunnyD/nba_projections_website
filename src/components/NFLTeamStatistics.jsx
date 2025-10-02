@@ -234,25 +234,25 @@ const NFLTeamStatistics = () => {
                                     {data.success_rate_allowed}
                                 </td>
                             </tr>
-                            <tr style={{ backgroundColor: getRankColor(data.success_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                            <tr style={{ backgroundColor: getRankColor(data.rush_success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
                                     Rush Success Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
                                     {data.rush_success_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
                                     {data.rush_success_rate_allowed}
                                 </td>
                             </tr>
-                            <tr style={{ backgroundColor: getRankColor(data.success_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                            <tr style={{ backgroundColor: getRankColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     Dropback Success Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     {data.dropback_success_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     {data.dropback_success_rate_allowed}
                                 </td>
                             </tr>
