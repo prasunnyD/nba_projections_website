@@ -4,6 +4,7 @@ import NFLPlayerGameChart from './NFLPlayerGameChart';
 import NFLPlayerStatistics from './NFLPlayerStatistics';
 import NFLTeamDropdown from './NFLTeamDropdown';
 import NFLTeamStatistics from './NFLTeamStatistics';
+import NFLTeamOffensiveStatistics from './NFLTeamOffensiveStatistics';
 
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -40,7 +41,15 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
                     onPlayerSelect={handlePlayerSelect}
                     onPlayerPosition={handlePlayerPosition}
                 />
+                <div className="space-y-4">
+                    {/* Offensive Statistics */}
+                    <div>
+                        <h3 className="text-lg font-semibold text-white mb-2">Team Offensive Statistics</h3>
+                        <NFLTeamOffensiveStatistics selectedTeam={selectedTeam} />
+                    </div>
+                </div>
             </div>
+            
     
             {/* Middle Column - Player and Chart */}
             <div className="w-1/2 rounded-lg bg-neutral-900 shadow p-4">
