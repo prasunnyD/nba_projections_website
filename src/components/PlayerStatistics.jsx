@@ -24,19 +24,19 @@ const PlayerStatistics = ({ playerName }) => {
         const headlineStats = headlineRes.data[playerName];
 
         setData({
-          FG2A: { value: playerData.FG2A },
-          FG2M: { value: playerData.FG2M },
-          FG2_PCT: { value: playerData.FG2_PCT },
-          FG2A_FREQUENCY: { value: playerData.FG2A_FREQUENCY },
-          FG3A: { value: playerData.FG3A },
-          FG3M: { value: playerData.FG3M },
-          FG3_PCT: { value: playerData.FG3_PCT },
-          FG3A_FREQUENCY: { value: playerData.FG3A_FREQUENCY },
-          FG_PCT: { value: playerData.FG_PCT },
-          EFG_PCT: { value: playerData.EFG_PCT },
-          PTS: { value: headlineStats.PTS },
-          REB: { value: headlineStats.REB },
-          AST: { value: headlineStats.AST },
+          FG2A: { value: playerData.fg2a },
+          FG2M: { value: playerData.fg2m },
+          FG2_PCT: { value: playerData.fg2_pct },
+          FG2A_FREQUENCY: { value: playerData.fg2a_frequency },
+          FG3A: { value: playerData.fg3a },
+          FG3M: { value: playerData.fg3m },
+          FG3_PCT: { value: playerData.fg3_pct },
+          FG3A_FREQUENCY: { value: playerData.fg3a_frequency },
+          FG_PCT: { value: playerData.fg_pct },
+          EFG_PCT: { value: playerData.efg_pct },
+          PTS: { value: headlineStats.points },
+          REB: { value: headlineStats.rebounds },
+          AST: { value: headlineStats.assists },
         });
       } catch (err) {
         console.error('API Error:', err);

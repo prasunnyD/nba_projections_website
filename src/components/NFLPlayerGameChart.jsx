@@ -50,8 +50,13 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     }
                 });
                 // Get sorted dates (most recent first)
-                const dates = Array.from(gameByDate.keys()).sort((a, b) => new Date(b) - new Date(a));
+                const dates = Array.from(gameByDate.keys()).sort((a, b) => new Date(a) - new Date(b));
                 console.log("Dates: ", dates);
+                // Format dates to year-month-date format
+                const formattedDates = dates.map(dateStr => {
+                    const date = new Date(dateStr);
+                    return date.toISOString().split('T')[0]; // Gets YYYY-MM-DD format
+                });
                 // Helper function to safely extract stats
                 const extractStat = (date, statName) => {
                     const game = gameByDate.get(date);
@@ -59,6 +64,15 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const value = parseInt(game[statName]);
                     return isNaN(value) ? 0 : value;
                 };
+                
+                // Helper function to safely extract decimal stats (like percentages)
+                const extractDecimalStat = (date, statName) => {
+                    const game = gameByDate.get(date);
+                    if (!game) return 0;
+                    const value = parseFloat(game[statName]);
+                    return isNaN(value) ? 0 : value;
+                };
+                
                 if (position === 'RB' || position === 'WR' || position === 'TE') {
                 // Extract all stats using the mapping
                     const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
@@ -68,16 +82,20 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const receivingTouchdowns = dates.map(date => extractStat(date, 'receivingTouchdowns'));
                     const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
                     const longestReception = dates.map(date => extractStat(date, 'longReception'));
+                    const offensiveSnapsPct = dates.map(date => extractDecimalStat(date, 'offenseSnapPct') * 100);
+                    const offensiveSnaps = dates.map(date => extractStat(date, 'offenseSnaps'));
 
                     setData({ 
-                        dates, 
+                        dates: formattedDates, 
                         rushingYards, 
                         rushingTouchdowns, 
                         receptions,
                         receivingYards,
                         receivingTouchdowns,
                         rushingAttempts,
-                        longestReception
+                        longestReception,
+                        offensiveSnapsPct,
+                        offensiveSnaps,
                     });
                 } else if (position === 'QB') {
                     const completions = dates.map(date => extractStat(date, 'passingCompletions'));
@@ -88,10 +106,12 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                     const rushingYards = dates.map(date => extractStat(date, 'rushingYards'));
                     const rushingTouchdowns = dates.map(date => extractStat(date, 'rushingTouchdowns'));
                     const rushingAttempts = dates.map(date => extractStat(date, 'rushingAttempts'));
+                    const offensiveSnapsPct = dates.map(date => extractDecimalStat(date, 'offenseSnapPct') * 100);
+                    const offensiveSnaps = dates.map(date => extractStat(date, 'offenseSnaps'));
 
 
                     setData({ 
-                        dates,
+                        dates: formattedDates,
                         completions,
                         passingYards, 
                         passingTouchdowns, 
@@ -99,7 +119,9 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         passingInterceptions,
                         rushingYards,
                         rushingTouchdowns,
-                        rushingAttempts
+                        rushingAttempts,
+                        offensiveSnapsPct,
+                        offensiveSnaps,
                     });
                 }
             }catch (error) {
@@ -117,7 +139,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
 
 
     const getPropLineStats = (data, propLine) => {
-        if (!data || !propLine) return null;
+        if (!data || !propLine || !data[selectedStat]) return null;
         const values = data[selectedStat];
         const above = values.filter(val => val >= propLine).length;
         const below = values.length - above;
@@ -314,7 +336,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             </div>
 
             {/* Chart Rendering */}
-            {data && (
+            {data && data[selectedStat] && (
                 <Plot
                     data={[
                         {  
@@ -322,12 +344,26 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                             y: data[selectedStat],
                             type: 'bar',
                             mode: 'lines+markers',
+                            name: selectedStat.charAt(0).toUpperCase() + selectedStat.slice(1),
                             marker: {
                                 color: propLine ? data[selectedStat].map(val => 
                                     val >= propLine ? '#22c55e' : '#ef4444'
                                 ) : '#2563eb'
                             },
                             line: { color: '#2563eb' },
+                        },
+                        // Add offensive snap percentage as a line graph
+                        {
+                            x: data.dates,
+                            y: data.offensiveSnapsPct,
+                            type: 'scatter',
+                            mode: 'lines+markers',
+                            name: 'Offensive Snaps %',
+                            yaxis: 'y2',
+                            line: { color: '#f59e0b', width: 3 },
+                            marker: { color: '#f59e0b', size: 6 },
+                            hovertemplate: '%{x}<br>%{y:.1f}%<br>Snaps: %{customdata}<extra>Offensive Snaps</extra>',
+                            customdata: data.offensiveSnaps,
                         },
                         ...(propLine ? [{
                             x: data.dates,
@@ -357,6 +393,16 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
                         yaxis: {
                             title: selectedStat.charAt(0).toUpperCase() + selectedStat.slice(1),
                             zeroline: false,
+                        },
+                        yaxis2: {
+                            title: 'Offensive Snaps %',
+                            overlaying: 'y',
+                            side: 'right',
+                            rangemode: 'tozero',
+                            zeroline: false,
+                            showgrid: false,
+                            showticklabels: false,  // Hide tick labels
+                            showline: false,        // Hide the axis line
                         },
                         height: 400,
                     }}

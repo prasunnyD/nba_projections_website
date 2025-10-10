@@ -3,6 +3,41 @@ import axios from 'axios';
 import Plot from 'react-plotly.js';
 import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
 
+// Colorblind-friendly gradient function
+const getRankColor = (rank, totalTeams = 32) => {
+    if (!rank || rank === 0) return '#6B7280'; // gray for no rank
+    
+    // Normalize rank to 0-1 scale (1 is best, 32 is worst)
+    const normalizedRank = (rank - 1) / (totalTeams - 1);
+    
+    // Colorblind-friendly blue to light gray to red gradient
+    // Blue (good rank) -> Light Gray -> Red (bad rank)
+    if (normalizedRank <= 0.5) {
+        // Blue to Light Gray
+        const t = normalizedRank * 2;
+        const r = Math.round(59 + (200 - 59) * t);
+        const g = Math.round(130 + (200 - 130) * t);
+        const b = Math.round(246 + (200 - 246) * t);
+        return `rgb(${r}, ${g}, ${b})`;
+    } else {
+        // Light Gray to Red
+        const t = (normalizedRank - 0.5) * 2;
+        const r = Math.round(200 + (220 - 200) * t);
+        const g = Math.round(200 + (20 - 200) * t);
+        const b = Math.round(200 + (20 - 200) * t);
+        return `rgb(${r}, ${g}, ${b})`;
+    }
+};
+
+// Helper function to determine text color based on background brightness
+const getTextColor = (rank) => {
+    if (!rank || rank === 0) return 'white';
+    
+    // Use white text for ranks 1-12 (darker backgrounds)
+    // Use black text for ranks 13-32 (lighter backgrounds)
+    return rank <= 12 ? 'white' : 'black';
+};
+
 const NFLTeamStatistics = () => {
     const [selectedTeam, setSelectedTeam] = useState('');
     const [data, setData] = useState(null);
@@ -133,59 +168,92 @@ const NFLTeamStatistics = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200">
-                            <tr>
-                                <td className="px-4 py-2 text-left text-white">
-                                    Yards Allowed
+                            <tr style={{ backgroundColor: getRankColor(data.epa_per_play_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
+                                    EPA per Play Allowed
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500 text-center">
-                                    #1
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
+                                    {data.epa_per_play_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left text-white">
-                                    {data.yardsAllowed.value}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="px-4 py-2 text-left text-white">
-                                    Average Sack Yards
-                                </td>
-                                <td className="px-6 py-4 text-sm text-gray-500 text-center">
-                                    #1
-                                </td>
-                                <td className="px-4 py-2 text-left text-white">
-                                    {data.avgSackYards}
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
+                                    {data.epa_per_play_allowed}
                                 </td>
                             </tr>
-                            <tr>
-                                <td className="px-4 py-2 text-left text-white">
-                                    Average Stuff Yards
+                            <tr style={{ backgroundColor: getRankColor(data.sacks_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.sacks_rank) }}>
+                                    Sacks Allowed
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500 text-center">
-                                    #1
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.sacks_rank) }}>
+                                    {data.sacks_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left text-white">
-                                    {data.avgStuffYards}
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.sacks_rank) }}>
+                                    {data.sacks}
                                 </td>
                             </tr>
-                            <tr>
-                                <td className="px-4 py-2 text-left text-white">
+                            <tr style={{ backgroundColor: getRankColor(data.stuffs_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.stuffs_rank) }}>
+                                    Stuff Rate
+                                </td>
+                                <td className="px-6 py-4 text-center font-bold" style={{ color: getTextColor(data.stuffs_rank) }}>
+                                    {data.stuffs_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.stuffs_rank) }}>
+                                    {data.stuffs}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.tacklesForLoss_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: 'white' }}>
                                     Tackles For Loss
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500 text-center">
-                                    #1
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: 'white' }}>
+                                    {data.tacklesForLoss_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left text-white">
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: 'white' }}>
                                     {data.tacklesForLoss}
                                 </td>
                             </tr>
-                            <tr>
-                                <td className="px-4 py-2 text-left text-white">
+                            <tr style={{ backgroundColor: getRankColor(data.passesDefended_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.passesDefended_rank) }}>
                                     Passes Defended
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500 text-center">
-                                    #1
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.passesDefended_rank) }}>
+                                    {data.passesDefended_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left text-white">
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.passesDefended_rank) }}>
                                     {data.passesDefended}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                    Success Rate Allowed
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                    {data.success_rate_allowed_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                    {data.success_rate_allowed}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.rush_success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
+                                    Rush Success Rate Allowed
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
+                                    {data.rush_success_rate_allowed_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
+                                    {data.rush_success_rate_allowed}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                    Dropback Success Rate Allowed
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                    {data.dropback_success_rate_allowed_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                    {data.dropback_success_rate_allowed}
                                 </td>
                             </tr>
                         </tbody>

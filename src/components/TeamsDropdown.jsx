@@ -45,13 +45,15 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect }) => {
 
     const handleTeamChange = async (event) => {
         const selectedCity = event.target.value;
+        console.log("Selected City: ", selectedCity);
         setSelectedTeam(selectedCity);
+        console.log("Selected Team: ", selectedTeam);
         
         if (selectedCity) {
             setLoading(true);
             setError(null);
             try {
-                const apiUrl = `/team-roster/${selectedCity}`;
+                const apiUrl = `nba/team-roster/${selectedCity}`;
                 logApiCall('GET', apiUrl);
                 
                 const client = api;

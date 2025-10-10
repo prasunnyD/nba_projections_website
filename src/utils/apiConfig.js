@@ -11,7 +11,7 @@ export const getApiBaseUrl = () => {
     return '/api';
   }
   // In production, use the actual API URL
-  return 'https://api.sharpr-analytics.com';
+  return 'https://api.sharpr-analytics.com/api/v1';
 };
 
 // Create axios instance with proper configuration
