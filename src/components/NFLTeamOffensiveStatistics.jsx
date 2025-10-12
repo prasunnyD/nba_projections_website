@@ -237,13 +237,24 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.sacks_rank) }}>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.sacks_rank) }}>
-                                    Sacks
+                                    Sacks Rate Allowed
                                 </td>
                                 <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.sacks_rank) }}>
                                     {data.sacks_rank}
                                 </td>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.sacks_rank) }}>
                                     {data.sacks}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.scramble_rate_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
+                                    Scramble Rate
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
+                                    {data.scramble_rate_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
+                                    {data.scramble_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.rushingAttempts_rank) }}>
@@ -277,6 +288,28 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                 </td>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.passingAttempts_rank) }}>
                                     {data.passingAttempts}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.adot_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
+                                    ADOT
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.adot_rank) }}>
+                                    {data.adot_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
+                                    {data.adot}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.int_rate_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.int_rate_rank) }}>
+                                    Interception Rate
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.int_rate_rank) }}>
+                                    {data.int_rate_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.int_rate_rank) }}>
+                                    {data.int_rate}
                                 </td>
                             </tr>
                         </tbody>
