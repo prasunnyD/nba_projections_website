@@ -3,13 +3,11 @@ import { api } from '../utils/apiConfig';
 
 const PlayerStatistics = ({ playerName }) => {
   const [data, setData] = useState(null);
- 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const client = api; // uses your configured axios instance
 
-  // --------------------------------------------------------------------------
   useEffect(() => {
     if (!playerName) return;
 
@@ -18,8 +16,8 @@ const PlayerStatistics = ({ playerName }) => {
       setError(null);
       try {
         const [splitsRes, headlineRes] = await Promise.all([
-          client.get(`nba/shooting-splits/${playerName}`),
-          client.get(`nba/headline-stats/${playerName}`),
+          client.get(`nba/shooting-splits/${encodeURIComponent(playerName)}`),
+          client.get(`nba/headline-stats/${encodeURIComponent(playerName)}`),
         ]);
 
         const playerData = splitsRes.data[playerName];
@@ -40,7 +38,6 @@ const PlayerStatistics = ({ playerName }) => {
           REB: { value: headlineStats.rebounds },
           AST: { value: headlineStats.assists },
         });
-
       } catch (err) {
         console.error('API Error:', err);
         setError('Error loading player statistics');
@@ -50,9 +47,9 @@ const PlayerStatistics = ({ playerName }) => {
     };
 
     fetchPlayerStatistics();
-  }, [playerName]);
+  }, [playerName, client]);
 
-   return (
+  return (
     <div className="bg-neutral-700 shadow-lg overflow-y-auto h-full">
       {loading && (
         <div className="flex items-center justify-center h-full">
@@ -81,7 +78,6 @@ const PlayerStatistics = ({ playerName }) => {
             </table>
           </div>
 
-          {/* Shooting Splits Table */}
           <h4 className="text-xl font-bold text-white mb-4">Shooting Splits</h4>
           <div className="overflow-x-auto bg-neutral-800 rounded-lg p-4 mb-6">
             <table className="min-w-full">

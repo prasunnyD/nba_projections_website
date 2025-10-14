@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      // Proxy all API calls to localhost:8000 for development
+      // Proxy all API calls to localhost:8080 for development
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
