@@ -16,8 +16,8 @@ const PlayerStatistics = ({ playerName }) => {
       setError(null);
       try {
         const [splitsRes, headlineRes] = await Promise.all([
-          client.get(`/${encodeURIComponent(playerName)}-shooting-splits`),
-          client.get(`/${encodeURIComponent(playerName)}-headline-stats`),
+          client.get(`nba/shooting-splits/${encodeURIComponent(playerName)}`),
+          client.get(`nba/headline-stats/${encodeURIComponent(playerName)}`),
         ]);
 
         const playerData = splitsRes.data[playerName];

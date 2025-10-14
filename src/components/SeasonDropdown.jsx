@@ -1,45 +1,39 @@
 import { useEffect, useState } from "react";
-import { api } from "../utils/apiConfig";
 
 export default function SeasonDropdown({ playerName, value, onChange }) {
   const [seasons, setSeasons] = useState([]);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!playerName) { setSeasons([]); return; }
-    setLoading(true);
-    api.get(`/players/${encodeURIComponent(playerName)}/seasons`, {
-      params: { max_seasons: 5 },
-    })
-      .then(res => {
-        const list = (res.data?.seasons ?? []).slice(0, 5);
-        setSeasons(list);
-        // If current value isn’t in the new list, pick the newest
-        if (!list.includes(value)) {
-          onChange(list[0] ?? "");
-        }
-      })
-      .catch(() => {
-        setSeasons([]);
-        onChange("");
-      })
-      .finally(() => setLoading(false));
-  }, [playerName]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (!playerName) { 
+      setSeasons([]); 
+      return; 
+    }
+    // Predefined list of seasons from 2024-25 to 2020-21
+    const predefinedSeasons = ["2024-25", "2023-24", "2022-23", "2021-22", "2020-21"];
+    setSeasons(predefinedSeasons);
+    // If current value isn't in the new list, pick the newest
+    if (!predefinedSeasons.includes(value)) {
+      onChange(predefinedSeasons[0] ?? "");
+    }
+  }, [playerName, value, onChange]);
 
-  const disabled = loading || !playerName || seasons.length === 0;
+  const disabled = !playerName || seasons.length === 0;
 
   return (
+    <div className="flex items-center">
+      <label className="text-slate-200 text-sm mr-2">Season:</label>
     <select
-      className="border rounded px-2 py-1 bg-white/90 text-sm"
+      className="bg-neutral-700 text-white border border-neutral-600 rounded px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
       value={value || ""}
       onChange={(e) => onChange(e.target.value)}
       disabled={disabled}
     >
       {disabled ? (
-        <option value="">{loading ? "Loading…" : "No seasons"}</option>
+        <option value="">No seasons</option>
       ) : (
         seasons.map((s) => <option key={s} value={s}>{s}</option>)
       )}
     </select>
+    </div>
   );
 }
