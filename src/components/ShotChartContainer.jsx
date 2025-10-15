@@ -7,7 +7,7 @@ import PlayerShotHexChart from "./PlayerShotHexChart";
 
 export default function ShotChartContainer({ playerName }) {
   const [seasons, setSeasons] = useState([]);
-  const [season, setSeason] = useState("2024-25");
+  const [season, setSeason] = useState("");
   const [opponent, setOpponent] = useState("");
   const [allShots, setAllShots] = useState(null); // Store all shots from API
   const [shots, setShots] = useState(null); // Filtered shots for display
@@ -96,11 +96,12 @@ export default function ShotChartContainer({ playerName }) {
       {/* Season and Opponent selectors sit directly above the shot map */}
       <div className="mt-6 mb-2 flex items-center justify-between">
         <OpponentDropdown
-          shots={allShots}
+          data={allShots}
           value={opponent}
           onChange={setOpponent}
         />
         <SeasonDropdown
+          predefinedSeasons={seasons}
           playerName={playerName}
           value={season}
           onChange={setSeason}

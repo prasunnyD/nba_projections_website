@@ -5,6 +5,7 @@ import NFLPlayerStatistics from './NFLPlayerStatistics';
 import NFLTeamDropdown from './NFLTeamDropdown';
 import NFLTeamStatistics from './NFLTeamStatistics';
 import NFLTeamOffensiveStatistics from './NFLTeamOffensiveStatistics';
+import QBPassChart from './QBPassChart';
 
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -71,6 +72,10 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
                                 setNumberOfGames={setNumberOfGames}
                                 position={playerPosition}
                             />
+                        
+                        <div className="mt-6">
+                            <QBPassChart playerName={selectedPlayer} />
+                        </div>
                         </>
                     ) : (
                         <div className="p-4 text-gray-500 bg-gray-100 rounded-lg">
