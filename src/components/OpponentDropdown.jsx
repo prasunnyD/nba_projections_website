@@ -1,17 +1,26 @@
 import React, { useState, useEffect } from "react";
 
-export default function OpponentDropdown({ shots, value, onChange }) {
+export default function OpponentDropdown({ data, value, onChange }) {
   const [opponents, setOpponents] = useState([]);
 
   useEffect(() => {
-    if (shots && shots.length > 0) {
-      // Extract unique opponents from shots data
-      const uniqueOpponents = [...new Set(shots.map(shot => shot.opponent))].sort();
-      setOpponents(uniqueOpponents);
+    if (data && data.length > 0) {
+      // Extract unique opponents from data (could be shots or passes)
+      // Check for different possible field names
+      const opponentField = data[0].opponent || data[0].defteam || data[0].opponent_team || data[0].defense;
+      
+      if (opponentField) {
+        const uniqueOpponents = [...new Set(data.map(item => 
+          item.opponent || item.defteam || item.opponent_team || item.defense
+        ))].filter(Boolean).sort();
+        setOpponents(uniqueOpponents);
+      } else {
+        setOpponents([]);
+      }
     } else {
       setOpponents([]);
     }
-  }, [shots]);
+  }, [data]);
 
   if (opponents.length === 0) {
     return null;
