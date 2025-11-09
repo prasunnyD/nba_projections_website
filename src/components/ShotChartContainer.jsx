@@ -64,11 +64,11 @@ export default function ShotChartContainer({ playerName }) {
   const [err, setErr] = useState(null);
 
   // Debug: verify Vite env
-  console.log("[ShotChart] ENV", {
-    VITE_ENABLE_OPPONENT_API: import.meta.env?.VITE_ENABLE_OPPONENT_API,
-    mode: import.meta.env?.MODE,
-    base: import.meta.env?.BASE_URL,
-  });
+  // console.log("[ShotChart] ENV", {
+  //   VITE_ENABLE_OPPONENT_API: import.meta.env?.VITE_ENABLE_OPPONENT_API,
+  //   mode: import.meta.env?.MODE,
+  //   base: import.meta.env?.BASE_URL,
+  // });
 
   // ----------------------------------------------------
   // Initialize seasons when player changes
