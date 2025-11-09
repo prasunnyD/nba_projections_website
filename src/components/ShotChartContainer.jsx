@@ -1,8 +1,3 @@
-// Enable remote opponent zone API calls only if you really have those endpoints.
-// Create .env (or .env.local) and set VITE_ENABLE_OPPONENT_API=true to turn on.
-const ENABLE_REMOTE_OPPONENT =
-  import.meta?.env?.VITE_ENABLE_OPPONENT_API === "true";
-
 import { useEffect, useState } from "react";
 import { api } from "../utils/apiConfig";
 import SeasonDropdown from "./SeasonDropdown";
@@ -69,11 +64,11 @@ export default function ShotChartContainer({ playerName }) {
   const [err, setErr] = useState(null);
 
   // Debug: verify Vite env
-  console.log("[ShotChart] ENV", {
-    VITE_ENABLE_OPPONENT_API: import.meta.env?.VITE_ENABLE_OPPONENT_API,
-    mode: import.meta.env?.MODE,
-    base: import.meta.env?.BASE_URL,
-  });
+  // console.log("[ShotChart] ENV", {
+  //   VITE_ENABLE_OPPONENT_API: import.meta.env?.VITE_ENABLE_OPPONENT_API,
+  //   mode: import.meta.env?.MODE,
+  //   base: import.meta.env?.BASE_URL,
+  // });
 
   // ----------------------------------------------------
   // Initialize seasons when player changes
@@ -209,84 +204,83 @@ export default function ShotChartContainer({ playerName }) {
   };
 
   useEffect(() => {
-    if (!season || !opponent) {
-      setOpponentZones(null);
-      return;
-    }
+  if (!season || !opponent) {
+    setOpponentZones(null);
+    return;
+  }
 
-    let cancelled = false;
+  let cancelled = false;
 
-    const fetchOpponentZones = async () => {
-      if (!ENABLE_REMOTE_OPPONENT) {
-        console.info("[ShotChart] Remote opponent zone API disabled; skipping.");
-        setOpponentZones(null);
-        return;
+  (async () => {
+    // helper to parse either new or legacy API shapes
+    const parseZones = (apiData) => {
+      const out = {};
+      const zonesObj = apiData?.data?.zones || null;                  // NEW
+      const legacyRows = Array.isArray(apiData?.rows) ? apiData.rows : null; // LEGACY
+
+      if (zonesObj && typeof zonesObj === "object") {
+        Object.entries(zonesObj).forEach(([regionName, zval]) => {
+          const id = regionNameToId(regionName);
+          const val = pctNormalize(zval && zval.fg_pct);
+          if (id && val != null) out[id] = { fg_pct: val };
+        });
+      } else if (legacyRows) {
+        legacyRows.forEach((r) => {
+          const basic = r.SHOT_ZONE_BASIC ?? r.shot_zone_basic ?? null;
+          const area  = r.SHOT_ZONE_AREA  ?? r.shot_zone_area  ?? null;
+          const fgRaw = r.FG_PCT          ?? r.fg_pct          ?? null;
+          if (!basic) return;
+          const id  = mapZoneTextToRegionId(basic, area);
+          const val = pctNormalize(fgRaw);
+          if (id && val != null) out[id] = { fg_pct: val };
+        });
       }
 
-      try {
-        const res = await api.get(
-          `/nba/opponent-shooting/by-zone/${encodeURIComponent(
-            opponent
-          )}/${encodeURIComponent(season)}`
+      // Fan-out ATB3 → left/right if only center provided
+      const atb = out.center_above_3?.fg_pct ?? out.center_above_3 ?? null;
+      if (atb != null) {
+        if (!out.left_above_3)  out.left_above_3  = { fg_pct: atb.fg_pct ?? atb };
+        if (!out.right_above_3) out.right_above_3 = { fg_pct: atb.fg_pct ?? atb };
+      }
+
+      return Object.keys(out).length ? out : null;
+    };
+
+    try {
+      // Try path-param form first
+      const r1 = await api.get(
+        `/nba/opponent-shooting/by-zone/${encodeURIComponent(opponent)}/${encodeURIComponent(season)}`
+      );
+      if (cancelled) return;
+      let zones = parseZones(r1?.data);
+
+      // Fallback to querystring form if needed
+      if (!zones || !Object.keys(zones).length) {
+        const r2 = await api.get(
+          `/nba/opponent-shooting/by-zone?opponent=${encodeURIComponent(opponent)}&season=${encodeURIComponent(season)}`
         );
         if (cancelled) return;
+        zones = parseZones(r2?.data);
+      }
 
-        const apiData = res?.data ?? null;
-
-        // NEW SHAPE: { status, data: { team, season, zones: { [region]: { fg_pct, fgm, fga }}}}
-        const zonesObj = apiData && apiData.data ? apiData.data.zones : null;
-
-        // LEGACY SHAPE: { rows: [{SHOT_ZONE_BASIC, SHOT_ZONE_AREA, FG_PCT}, ...] }
-        const legacyRows = apiData && Array.isArray(apiData.rows) ? apiData.rows : null;
-
-        const out = {};
-
-        if (zonesObj && typeof zonesObj === "object") {
-          Object.entries(zonesObj).forEach(([regionName, zval]) => {
-            const id = regionNameToId(regionName);
-            const val = pctNormalize(zval && zval.fg_pct);
-            if (id && val != null) out[id] = { fg_pct: val };
-          });
-        } else if (legacyRows) {
-          legacyRows.forEach((r) => {
-            const basic = r.SHOT_ZONE_BASIC ?? r.shot_zone_basic ?? null;
-            const area = r.SHOT_ZONE_AREA ?? r.shot_zone_area ?? null;
-            const fgRaw = r.FG_PCT ?? r.fg_pct ?? null;
-            if (!basic) return;
-            const id = mapZoneTextToRegionId(basic, area);
-            const val = pctNormalize(fgRaw);
-            if (id && val != null) out[id] = { fg_pct: val };
-          });
-        }
-
-        // FAN-OUT: if API only gives a single ATB3 value, mirror it to left/right
-        const atb =
-          out.center_above_3?.fg_pct ??
-          out.center_above_3 ??
-          null;
-        if (atb != null) {
-          if (!out.left_above_3) out.left_above_3 = { fg_pct: atb.fg_pct ?? atb };
-          if (!out.right_above_3) out.right_above_3 = { fg_pct: atb.fg_pct ?? atb };
-        }
-
-        if (Object.keys(out).length) {
-          setOpponentZones(out);
-          console.log("[ShotChart] opponent zones loaded", out);
-        } else {
-          console.warn("[ShotChart] API returned no usable zone data for", opponent, season);
-          setOpponentZones(null);
-        }
-      } catch (err) {
+      if (zones && Object.keys(zones).length) {
+        setOpponentZones(zones);
+        console.log("[ShotChart] opponent zones loaded", zones);
+      } else {
+        console.warn("[ShotChart] No usable opponent zone data for", opponent, season);
+        setOpponentZones(null);
+      }
+    } catch (err) {
+      if (!cancelled) {
         console.warn("[ShotChart] Opponent by-zone API unavailable for", opponent, season, err);
         setOpponentZones(null);
       }
-    };
+    }
+  })();
 
-    fetchOpponentZones();
-    return () => {
-      cancelled = true;
-    };
-  }, [season, opponent, ENABLE_REMOTE_OPPONENT]);
+  return () => { cancelled = true; };
+}, [season, opponent]);
+
 
   // ----------------------------------------------------
   // Render
