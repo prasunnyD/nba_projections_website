@@ -4,13 +4,13 @@ import * as d3 from "d3";
 import { makeRegionPredicates, REGION_LABELS } from "../helpers/zoneUtils";
 import { getAccuracyScale, getVolumeScale } from "../helpers/colorUtils";
 import { normalizePct } from "../helpers/shotUtils";
-import {DEFAULT_PADDING,FG_THRESHOLDS,REGION_LABEL_FEET,} from "../helpers/chartConfig";
-import { RA_R, PAINT_W, PAINT_H, CORNER_X, BREAK_Y, buildThreePtArcPath, WoodPattern,} from "../helpers/courtUtils";
-import { makeHexbin, aggregateHexes, nearestHex, hexagonPathString,} from "../helpers/hexUtils";
+import { DEFAULT_PADDING, FG_THRESHOLDS, REGION_LABEL_FEET } from "../helpers/chartConfig";
+import { RA_R, PAINT_W, PAINT_H, CORNER_X, BREAK_Y, buildThreePtArcPath, WoodPattern } from "../helpers/courtUtils";
+import { makeHexbin, aggregateHexes, nearestHex, hexagonPathString } from "../helpers/hexUtils";
 
 /**
  * PlayerShotHexChart.jsx
- * Visualizes player shots + opponent defense overlay.
+ * Visualizes player shots + opponent defense overlay (FG% + league rank).
  */
 export default function PlayerShotHexChart({
   shots = [],
@@ -22,7 +22,7 @@ export default function PlayerShotHexChart({
   seasonLabel,
   baselineZones = null,
   playerSeasonZones = null, // fallback so tooltip never blanks
-  opponentZones = null, // opponent FG% overlay by zone
+  opponentZones = null, // {region: { fg_pct, fg_rank?, out_of? }}
   loading,
   error,
   teamColor = "#2563eb",
@@ -41,14 +41,8 @@ export default function PlayerShotHexChart({
   const innerH = Math.round(innerW / targetAspect);
   const svgH = innerH + padding * 2;
 
-  const x = useMemo(
-    () => d3.scaleLinear().domain(xDomain).range([0, innerW]),
-    [xDomain, innerW]
-  );
-  const y = useMemo(
-    () => d3.scaleLinear().domain(yDomain).range([innerH, 0]),
-    [yDomain, innerH]
-  );
+  const x = useMemo(() => d3.scaleLinear().domain(xDomain).range([0, innerW]), [xDomain, innerW]);
+  const y = useMemo(() => d3.scaleLinear().domain(yDomain).range([innerH, 0]), [yDomain, innerH]);
   const dxPx = (feet) => Math.abs(x(0) - x(feet));
 
   // ---------------- Region & per-zone logic ----------------
@@ -75,9 +69,7 @@ export default function PlayerShotHexChart({
         }
       }
     });
-    Object.values(stats).forEach(
-      (o) => (o.fg = o.atts ? o.made / o.atts : null)
-    );
+    Object.values(stats).forEach((o) => (o.fg = o.atts ? o.made / o.atts : null));
     return stats;
   }, [data, pred, regionList]);
 
@@ -107,10 +99,7 @@ export default function PlayerShotHexChart({
   // ---------------- Color scales ----------------
   const [mode, setMode] = useState("accuracy");
   const [showMisses, setShowMisses] = useState(false);
-  const accuracyScale = useMemo(
-    () => getAccuracyScale(teamColor, FG_THRESHOLDS),
-    [teamColor]
-  );
+  const accuracyScale = useMemo(() => getAccuracyScale(teamColor, FG_THRESHOLDS), [teamColor]);
   const volumeColor = useMemo(() => getVolumeScale(hexes), [hexes]);
 
   // ---------------- Hover logic ----------------
@@ -148,10 +137,8 @@ export default function PlayerShotHexChart({
     const cy = y.invert(h.py);
     return pred[regionId](cx, cy);
   };
-  const hexOpacity = (h) =>
-    !hover ? 0.9 : hexMatchesHover(h, hover.regionId) ? 1.0 : 0.18;
-  const hexStroke = (h) =>
-    hover && hexMatchesHover(h, hover.regionId) ? 1.25 : 0.6;
+  const hexOpacity = (h) => (!hover ? 0.9 : hexMatchesHover(h, hover.regionId) ? 1.0 : 0.18);
+  const hexStroke = (h) => (hover && hexMatchesHover(h, hover.regionId) ? 1.25 : 0.6);
 
   // ---------------- Tooltip Data ----------------
   const tip = useMemo(() => {
@@ -162,44 +149,38 @@ export default function PlayerShotHexChart({
     const playerPct = z.fg ?? null;
     // Prefer baseline → fallback to player season → fallback to current
     let seasonPct = baselineZones?.[hover.regionId]?.fg_pct ?? null;
-    if (seasonPct == null)
-      seasonPct = playerSeasonZones?.[hover.regionId]?.fg_pct ?? playerPct;
+    if (seasonPct == null) seasonPct = playerSeasonZones?.[hover.regionId]?.fg_pct ?? playerPct;
 
-    const opponentPct = normalizePct(opponentZones?.[hover.regionId]?.fg_pct);
+    const opp = opponentZones?.[hover.regionId] || null;
+    const opponentPct = normalizePct(opp?.fg_pct);
+    const opponentRank = Number.isFinite(+opp?.fg_rank) ? +opp.fg_rank : null;
+    const outOf = Number.isFinite(+opp?.out_of) ? +opp.out_of : null;
+
     const fmt = d3.format(".1%");
+    const pctText = playerPct == null ? "—" : fmt(playerPct);
+    const seasonText = seasonPct == null ? "—" : fmt(normalizePct(seasonPct) ?? seasonPct);
+    const oppText = opponentPct == null ? "—" : fmt(opponentPct);
 
     return {
       regionLabel: REGION_LABELS[hover.regionId],
-      pct: playerPct == null ? "—" : fmt(playerPct),
+      pctText,
       made: z.made,
       atts: z.atts,
-      seasonPct:
-        seasonPct == null ? "—" : fmt(normalizePct(seasonPct) ?? seasonPct),
-      opponentPct: opponentPct == null ? "—" : fmt(opponentPct),
+      seasonText,
+      oppText,
+      oppRankText: opponentRank && outOf ? `Rk ${opponentRank}/${outOf}` : null,
     };
   }, [hover, zoneStats, baselineZones, playerSeasonZones, opponentZones]);
 
   // ---------------- Court helpers ----------------
-  const woodPatternId = useMemo(
-    () => `wood-${Math.random().toString(36).slice(2)}`,
-    []
-  );
+  const woodPatternId = useMemo(() => `wood-${Math.random().toString(36).slice(2)}`, []);
   const threePtArcPath = useMemo(() => buildThreePtArcPath(x, y), [x, y]);
 
-  // ---------------- Loading / Error ----------------
   if (loading) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-slate-200">
-        Loading shot chart…
-      </div>
-    );
+    return <div className="w-full h-full flex items-center justify-center text-slate-200">Loading shot chart…</div>;
   }
   if (error) {
-    return (
-      <div className="w-full h-full flex items-center justify-center text-red-400">
-        {error}
-      </div>
-    );
+    return <div className="w-full h-full flex items-center justify-center text-red-400">{error}</div>;
   }
 
   // ---------------- Render ----------------
@@ -224,9 +205,7 @@ export default function PlayerShotHexChart({
           <SummaryTile label="At Rim FG%" value={quickTiles.rimFG} />
           <div className="bg-neutral-800 rounded-lg p-3 text-center">
             <div className="text-gray-400 text-xs">Attempts</div>
-            <div className="text-white text-xl font-bold">
-              {quickTiles.attempts ?? 0}
-            </div>
+            <div className="text-white text-xl font-bold">{quickTiles.attempts ?? 0}</div>
           </div>
         </div>
 
@@ -246,20 +225,15 @@ export default function PlayerShotHexChart({
         >
           <defs>
             <WoodPattern id={woodPatternId} height={innerH} />
+            {/* soft drop shadow for badges */}
+            <filter id="oppBadgeShadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="1.25" stdDeviation="1.5" floodColor="#000" floodOpacity="0.45" />
+            </filter>
           </defs>
 
           <g transform={`translate(${padding},${padding})`}>
             {/* Background */}
-            <rect
-              x={0}
-              y={0}
-              width={innerW}
-              height={innerH}
-              rx={12}
-              fill={`url(#${woodPatternId})`}
-              stroke="#0f172a"
-              opacity={0.98}
-            />
+            <rect x={0} y={0} width={innerW} height={innerH} rx={12} fill={`url(#${woodPatternId})`} stroke="#0f172a" opacity={0.98} />
 
             {courtImgSrc && (
               <image
@@ -277,10 +251,10 @@ export default function PlayerShotHexChart({
             {/* Court lines */}
             <g
               pointerEvents="none"
-              stroke="#0b1220"
-              strokeOpacity="0.8"
+              stroke="#e2e8f0"      // light cool gray (near Tailwind slate-200)
+              strokeOpacity="0.25"  // subtle
               fill="none"
-              strokeWidth={1.6}
+              strokeWidth={1.1}
             >
               <circle cx={x(0)} cy={y(0)} r={dxPx(RA_R)} />
               <rect
@@ -298,8 +272,7 @@ export default function PlayerShotHexChart({
             {/* Hexes */}
             <g>
               {hexes.map((h, i) => {
-                const fill =
-                  mode === "accuracy" ? accuracyScale(h.fg) : volumeColor(h.atts);
+                const fill = mode === "accuracy" ? accuracyScale(h.fg) : volumeColor(h.atts);
                 return (
                   <path
                     key={i}
@@ -325,12 +298,7 @@ export default function PlayerShotHexChart({
                     const cyVal = y(s.y);
                     const r = 4;
                     return (
-                      <g
-                        key={i}
-                        transform={`translate(${cxVal},${cyVal})`}
-                        stroke="#ef4444"
-                        strokeWidth={1.5}
-                      >
+                      <g key={i} transform={`translate(${cxVal},${cyVal})`} stroke="#ef4444" strokeWidth={1.5}>
                         <line x1={-r} y1={-r} x2={r} y2={r} />
                         <line x1={-r} y1={r} x2={r} y2={-r} />
                       </g>
@@ -339,43 +307,77 @@ export default function PlayerShotHexChart({
               </g>
             )}
 
-            {/* Opponent overlay badges - BIGGER & CLEARER */}
+            {/* Opponent overlay badges — simplified rank text */}
             {opponentZones && (
-              <g>
-                {Object.entries(REGION_LABEL_FEET).map(([rid, [fx, fy]]) => {
-                  const val = normalizePct(opponentZones[rid]?.fg_pct ?? null);
-                  if (val == null) return null;
-                  const px = x(fx);
-                  const py = y(fy);
-                  return (
-                    <g key={rid} transform={`translate(${px},${py})`}>
-                      <rect
-                        x={-37}
-                        y={-18}
-                        width={74}
-                        height={28}
-                        rx={9}
-                        fill="#0b1220"
-                        opacity="0.97"
-                        stroke="#3b4758"
-                        strokeWidth="1.1"
-                        filter="url(#)"
-                      />
+            <g>
+              {Object.entries(REGION_LABEL_FEET).map(([rid, [fx, fy]]) => {
+                const z = opponentZones[rid];
+                const pct = normalizePct(z?.fg_pct);
+                if (pct == null) return null;
+
+                const px = x(fx);
+                const py = y(fy);
+                const rank = Number.isFinite(+z?.fg_rank) ? +z.fg_rank : null;
+
+                return (
+                  <g key={rid} transform={`translate(${px},${py})`} filter="url(#oppBadgeShadow)">
+                    {/* Badge background */}
+                    <rect
+                      x={-48}
+                      y={-28}
+                      width={96}
+                      height={48}
+                      rx={10}
+                      fill="#0b1220"
+                      opacity="0.97"
+                      stroke="#3b4758"
+                      strokeWidth="1.2"
+                    />
+
+                    {/* Label "OPP" */}
+                    <text
+                      x={0}
+                      y={-10}
+                      textAnchor="middle"
+                      fontSize="11"
+                      fontWeight="800"
+                      fill="#a9c0e3"
+                      letterSpacing="0.04em"
+                    >
+                      OPP
+                    </text>
+
+                    {/* FG% value */}
+                    <text
+                      x={0}
+                      y={9}
+                      textAnchor="middle"
+                      fontSize="18"
+                      fontWeight="900"
+                      fill="#e7eef9"
+                    >
+                      {d3.format(".1%")(pct)}
+                    </text>
+
+                    {/* Rank line */}
+                    {rank ? (
                       <text
                         x={0}
-                        y={3}
+                        y={25}
                         textAnchor="middle"
-                        fontSize="14"
+                        fontSize="11"
                         fontWeight="800"
-                        fill="#e5edf8"
+                        fill="#b3c8e6"
                       >
-                        {d3.format(".1%")(val)}
+                        Rank: {rank}
                       </text>
-                    </g>
-                  );
-                })}
-              </g>
-            )}
+                    ) : null}
+                  </g>
+                );
+              })}
+            </g>
+          )}
+
           </g>
         </svg>
 
@@ -402,9 +404,7 @@ function SummaryTile({ label, value }) {
   return (
     <div className="bg-neutral-800 rounded-lg p-3 text-center">
       <div className="text-gray-400 text-xs">{label}</div>
-      <div className="text-white text-xl font-bold">
-        {value == null ? "—" : (value * 100).toFixed(1) + "%"}
-      </div>
+      <div className="text-white text-xl font-bold">{value == null ? "—" : (value * 100).toFixed(1) + "%"}</div>
     </div>
   );
 }
@@ -414,27 +414,34 @@ function Tooltip({ containerRef, hover, tip }) {
     <div
       className="pointer-events-none absolute rounded-lg bg-white/95 shadow-lg ring-1 ring-black/10"
       style={{
-        left: Math.min(
-          Math.max(hover.pxCss + 12, 8),
-          (containerRef.current?.clientWidth || 900) - 260
-        ),
-        top: Math.min(
-          Math.max(hover.pyCss + 12, 8),
-          (containerRef.current?.clientHeight || 500) - 170
-        ),
+        left: Math.min(Math.max(hover.pxCss + 12, 8), (containerRef.current?.clientWidth || 900) - 280),
+        top: Math.min(Math.max(hover.pyCss + 12, 8), (containerRef.current?.clientHeight || 500) - 190),
         padding: "12px 14px",
-        minWidth: 220,
+        minWidth: 240,
       }}
     >
       <div className="text-slate-800 text-sm font-semibold">{tip.regionLabel}</div>
-      <div className="text-sky-700 text-2xl font-extrabold mt-1">{tip.pct}</div>
-      <div className="text-slate-600 text-xs">{`${tip.made} of ${tip.atts}`}</div>
 
-      <div className="text-slate-600 text-xs mt-2">
-        Season avg: <span className="font-medium">{tip.seasonPct}</span>
+      {/* Player section */}
+      <div className="mt-1">
+        <div className="text-[11px] font-semibold tracking-wide text-slate-600">PLAYER SHOT VOLUME %</div>
+        <div className="text-sky-700 text-2xl font-extrabold leading-6">{tip.pctText}</div>
+        <div className="text-slate-600 text-xs">{`${tip.made} of ${tip.atts}`}</div>
       </div>
-      <div className="text-slate-600 text-xs">
-        Opponent avg: <span className="font-medium">{tip.opponentPct}</span>
+
+      {/* Baseline + Opponent section */}
+      <div className="grid grid-cols-2 gap-8 mt-10">
+        <div>
+          <div className="text-[11px] font-semibold tracking-wide text-slate-600">PLAYER SEASON AVG</div>
+          <div className="text-slate-800 text-base font-bold">{tip.seasonText}</div>
+        </div>
+        <div>
+          <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT OVERALL FG%</div>
+          <div className="flex items-baseline gap-2">
+            <div className="text-slate-900 text-base font-extrabold">{tip.oppText}</div>
+            {tip.oppRankText ? <div className="text-slate-500 text-xs font-semibold">{tip.oppRankText}</div> : null}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -474,21 +481,13 @@ function Legend({
             {[-Infinity, ...fgThresholds, Infinity].map((lo, i, arr) => {
               const hi = arr[i + 1];
               if (hi == null) return null;
-              const mid =
-                lo === -Infinity ? fgThresholds[0] - 0.001 : lo + 0.0001;
+              const mid = lo === -Infinity ? fgThresholds[0] - 0.001 : lo + 0.0001;
               const color = accuracyScale(mid);
               const label =
-                lo === -Infinity
-                  ? "<35%"
-                  : hi === Infinity
-                  ? "≥55%"
-                  : `${Math.round(lo * 100)}–${Math.round(hi * 100)}%`;
+                lo === -Infinity ? "<35%" : hi === Infinity ? "≥55%" : `${Math.round(lo * 100)}–${Math.round(hi * 100)}%`;
               return (
                 <div key={i} className="flex items-center gap-2">
-                  <div
-                    className="w-7 h-3 rounded-sm"
-                    style={{ backgroundColor: color, border: "1px solid #0f172a" }}
-                  />
+                  <div className="w-7 h-3 rounded-sm" style={{ backgroundColor: color, border: "1px solid #0f172a" }} />
                   <span className="text-xs text-gray-200">{label}</span>
                 </div>
               );
@@ -503,10 +502,7 @@ function Legend({
               const label = r.end ? `${r.start}–${r.end}` : `${r.start}+`;
               return (
                 <div key={i} className="flex items-center gap-2">
-                  <div
-                    className="w-7 h-3 rounded-sm"
-                    style={{ backgroundColor: color, border: "1px solid #0f172a" }}
-                  />
+                  <div className="w-7 h-3 rounded-sm" style={{ backgroundColor: color, border: "1px solid #0f172a" }} />
                   <span className="text-xs text-gray-200">{label}</span>
                 </div>
               );
@@ -522,36 +518,14 @@ function Legend({
           {opponentOverlayOn && (
             <div className="flex items-center gap-1">
               <span className="inline-block w-3 h-3 rounded-sm bg-[#0b1220] border border-[#334155]" />
-              <span>Badges show overall opponent team FG% by zone.</span>
+              <span>Badges show opponent FG% and league rank by zone.</span>
             </div>
           )}
           <div className="flex items-center gap-1">
             <svg width="12" height="12" viewBox="0 0 12 12">
-              <rect
-                x="1"
-                y="1"
-                width="10"
-                height="10"
-                fill="#ffffff"
-                stroke="#ef4444"
-                strokeWidth="1.2"
-              />
-              <line
-                x1="3.2"
-                y1="3.2"
-                x2="8.8"
-                y2="8.8"
-                stroke="#ef4444"
-                strokeWidth="1.2"
-              />
-              <line
-                x1="3.2"
-                y1="8.8"
-                x2="8.8"
-                y2="3.2"
-                stroke="#ef4444"
-                strokeWidth="1.2"
-              />
+              <rect x="1" y="1" width="10" height="10" fill="#ffffff" stroke="#ef4444" strokeWidth="1.2" />
+              <line x1="3.2" y1="3.2" x2="8.8" y2="8.8" stroke="#ef4444" strokeWidth="1.2" />
+              <line x1="3.2" y1="8.8" x2="8.8" y2="3.2" stroke="#ef4444" strokeWidth="1.2" />
             </svg>
             <span>Miss markers toggle.</span>
           </div>
@@ -559,22 +533,13 @@ function Legend({
       </div>
 
       <div className="flex justify-center gap-2 mt-4">
-        <button
-          className={`stat-button ${mode === "accuracy" ? "active" : "inactive"}`}
-          onClick={() => onModeChange("accuracy")}
-        >
+        <button className={`stat-button ${mode === "accuracy" ? "active" : "inactive"}`} onClick={() => onModeChange("accuracy")}>
           FG% View
         </button>
-        <button
-          className={`stat-button ${mode === "volume" ? "active" : "inactive"}`}
-          onClick={() => onModeChange("volume")}
-        >
+        <button className={`stat-button ${mode === "volume" ? "active" : "inactive"}`} onClick={() => onModeChange("volume")}>
           Shot Volume
         </button>
-        <button
-          className={`stat-button ${showMisses ? "active" : "inactive"}`}
-          onClick={() => setShowMisses((v) => !v)}
-        >
+        <button className={`stat-button ${showMisses ? "active" : "inactive"}`} onClick={() => setShowMisses((v) => !v)}>
           Show Misses
         </button>
       </div>

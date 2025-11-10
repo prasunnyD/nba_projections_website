@@ -4,12 +4,11 @@ import SeasonDropdown from "./SeasonDropdown";
 import OpponentDropdown from "./OpponentDropdown";
 import PlayerShotHexChart from "./PlayerShotHexChart";
 
-import {getTeamAbbrFromShot, getOpponentFromShot, filterShots,} from "../helpers/shotUtils";
-
-import { mapZoneTextToRegionId, makeRegionPredicates,} from "../helpers/zoneUtils";
+import { getTeamAbbrFromShot, getOpponentFromShot, filterShots } from "../helpers/shotUtils";
+import { mapZoneTextToRegionId, makeRegionPredicates } from "../helpers/zoneUtils";
 
 // ----------------------------------------------------
-// Helpers to compute fallback per-zone FG%
+// Helpers to compute fallback per-zone FG% (player-only)
 // ----------------------------------------------------
 function computeZonesFromShots(shots) {
   const pred = makeRegionPredicates();
@@ -63,13 +62,6 @@ export default function ShotChartContainer({ playerName }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
 
-  // Debug: verify Vite env
-  // console.log("[ShotChart] ENV", {
-  //   VITE_ENABLE_OPPONENT_API: import.meta.env?.VITE_ENABLE_OPPONENT_API,
-  //   mode: import.meta.env?.MODE,
-  //   base: import.meta.env?.BASE_URL,
-  // });
-
   // ----------------------------------------------------
   // Initialize seasons when player changes
   // ----------------------------------------------------
@@ -102,11 +94,7 @@ export default function ShotChartContainer({ playerName }) {
 
     // Player shot chart data
     api
-      .get(
-        `/nba/players-shotchart/${encodeURIComponent(
-          playerName
-        )}/${encodeURIComponent(season)}`
-      )
+      .get(`/nba/players-shotchart/${encodeURIComponent(playerName)}/${encodeURIComponent(season)}`)
       .then((res) => {
         if (cancelled) return;
         const raw = res.data?.shots ?? [];
@@ -128,7 +116,7 @@ export default function ShotChartContainer({ playerName }) {
         });
 
         setAllShots(mapped);
-        // Compute fallback for tooltip baseline if league avg is missing
+        // Fallback for tooltip baseline if league avg missing
         setPlayerSeasonZones(computeZonesFromShots(mapped));
       })
       .catch(() => {
@@ -143,22 +131,15 @@ export default function ShotChartContainer({ playerName }) {
         if (!cancelled) setLoading(false);
       });
 
-    // Baseline league average zones
+    // Baseline league average zones (from your API)
     api
-      .get(
-        `/nba/players-shotchart/averages/${encodeURIComponent(
-          playerName
-        )}/${encodeURIComponent(season)}`
-      )
+      .get(`/nba/players-shotchart/averages/${encodeURIComponent(playerName)}/${encodeURIComponent(season)}`)
       .then((res) => {
         if (cancelled) return;
         const rows = res.data?.stats ?? [];
         const keyed = {};
         for (const r of rows) {
-          const id = mapZoneTextToRegionId(
-            r.shot_zone_basic || r.SHOT_ZONE_BASIC,
-            r.shot_zone_area || r.SHOT_ZONE_AREA
-          );
+          const id = mapZoneTextToRegionId(r.shot_zone_basic || r.SHOT_ZONE_BASIC, r.shot_zone_area || r.SHOT_ZONE_AREA);
           const fg = r.fg_pct ?? r.FG_PCT ?? null;
           if (id && typeof fg === "number") keyed[id] = { fg_pct: fg };
         }
@@ -182,7 +163,7 @@ export default function ShotChartContainer({ playerName }) {
   }, [allShots, opponent, numGames]);
 
   // ----------------------------------------------------
-  // Fetch opponent allowed FG% (if endpoint enabled)
+  // Fetch opponent allowed FG% + rank (new backend)
   // ----------------------------------------------------
   const pctNormalize = (x) => {
     if (x == null) return null;
@@ -200,87 +181,89 @@ export default function ShotChartContainer({ playerName }) {
     if (n.includes("left corner 3")) return "left_corner_3";
     if (n.includes("right corner 3")) return "right_corner_3";
     if (n.includes("above the break 3")) return "center_above_3"; // will fan-out below
+    if (n.includes("backcourt")) return "backcourt";
     return null;
   };
 
   useEffect(() => {
-  if (!season || !opponent) {
-    setOpponentZones(null);
-    return;
-  }
+    if (!season || !opponent) {
+      setOpponentZones(null);
+      return;
+    }
 
-  let cancelled = false;
+    let cancelled = false;
 
-  (async () => {
-    // helper to parse either new or legacy API shapes
-    const parseZones = (apiData) => {
-      const out = {};
-      const zonesObj = apiData?.data?.zones || null;                  // NEW
-      const legacyRows = Array.isArray(apiData?.rows) ? apiData.rows : null; // LEGACY
+    (async () => {
+      // helper to parse either new or legacy API shapes
+      const parseZones = (apiData) => {
+        const out = {};
+        const zonesObj = apiData?.data?.zones || null; // NEW shape from your Go endpoint
+        const legacyRows = Array.isArray(apiData?.rows) ? apiData.rows : null; // LEGACY (no ranks)
 
-      if (zonesObj && typeof zonesObj === "object") {
-        Object.entries(zonesObj).forEach(([regionName, zval]) => {
-          const id = regionNameToId(regionName);
-          const val = pctNormalize(zval && zval.fg_pct);
-          if (id && val != null) out[id] = { fg_pct: val };
-        });
-      } else if (legacyRows) {
-        legacyRows.forEach((r) => {
-          const basic = r.SHOT_ZONE_BASIC ?? r.shot_zone_basic ?? null;
-          const area  = r.SHOT_ZONE_AREA  ?? r.shot_zone_area  ?? null;
-          const fgRaw = r.FG_PCT          ?? r.fg_pct          ?? null;
-          if (!basic) return;
-          const id  = mapZoneTextToRegionId(basic, area);
-          const val = pctNormalize(fgRaw);
-          if (id && val != null) out[id] = { fg_pct: val };
-        });
-      }
+        if (zonesObj && typeof zonesObj === "object") {
+          Object.entries(zonesObj).forEach(([regionName, zval]) => {
+            const id = regionNameToId(regionName);
+            if (!id || !zval) return;
+            const val = pctNormalize(zval.fg_pct);
+            const rank = Number.isFinite(+zval.fg_rank) ? +zval.fg_rank : null;
+            const outOf = Number.isFinite(+zval.out_of) ? +zval.out_of : null;
+            if (val != null) out[id] = { fg_pct: val, fg_rank: rank, out_of: outOf };
+          });
+        } else if (legacyRows) {
+          // no rank in legacy rows; still show opponent pct
+          legacyRows.forEach((r) => {
+            const basic = r.SHOT_ZONE_BASIC ?? r.shot_zone_basic ?? null;
+            const area = r.SHOT_ZONE_AREA ?? r.shot_zone_area ?? null;
+            const fgRaw = r.FG_PCT ?? r.fg_pct ?? null;
+            if (!basic) return;
+            const id = mapZoneTextToRegionId(basic, area);
+            const val = pctNormalize(fgRaw);
+            if (id && val != null) out[id] = { fg_pct: val };
+          });
+        }
 
-      // Fan-out ATB3 → left/right if only center provided
-      const atb = out.center_above_3?.fg_pct ?? out.center_above_3 ?? null;
-      if (atb != null) {
-        if (!out.left_above_3)  out.left_above_3  = { fg_pct: atb.fg_pct ?? atb };
-        if (!out.right_above_3) out.right_above_3 = { fg_pct: atb.fg_pct ?? atb };
-      }
+        // Fan-out ATB3 → left/right (carry rank if present)
+        const atb = out.center_above_3;
+        if (atb && atb.fg_pct != null) {
+          if (!out.left_above_3) out.left_above_3 = { ...atb };
+          if (!out.right_above_3) out.right_above_3 = { ...atb };
+        }
 
-      return Object.keys(out).length ? out : null;
-    };
+        return Object.keys(out).length ? out : null;
+      };
 
-    try {
-      // Try path-param form first
-      const r1 = await api.get(
-        `/nba/opponent-shooting/by-zone/${encodeURIComponent(opponent)}/${encodeURIComponent(season)}`
-      );
-      if (cancelled) return;
-      let zones = parseZones(r1?.data);
-
-      // Fallback to querystring form if needed
-      if (!zones || !Object.keys(zones).length) {
-        const r2 = await api.get(
-          `/nba/opponent-shooting/by-zone?opponent=${encodeURIComponent(opponent)}&season=${encodeURIComponent(season)}`
+      try {
+        // Path-param form
+        const r1 = await api.get(
+          `/nba/opponent-shooting/by-zone/${encodeURIComponent(opponent)}/${encodeURIComponent(season)}`
         );
         if (cancelled) return;
-        zones = parseZones(r2?.data);
-      }
+        let zones = parseZones(r1?.data);
 
-      if (zones && Object.keys(zones).length) {
-        setOpponentZones(zones);
-        console.log("[ShotChart] opponent zones loaded", zones);
-      } else {
-        console.warn("[ShotChart] No usable opponent zone data for", opponent, season);
-        setOpponentZones(null);
-      }
-    } catch (err) {
-      if (!cancelled) {
-        console.warn("[ShotChart] Opponent by-zone API unavailable for", opponent, season, err);
-        setOpponentZones(null);
-      }
-    }
-  })();
+        // Fallback to querystring
+        if (!zones || !Object.keys(zones).length) {
+          const r2 = await api.get(
+            `/nba/opponent-shooting/by-zone?opponent=${encodeURIComponent(opponent)}&season=${encodeURIComponent(season)}`
+          );
+          if (cancelled) return;
+          zones = parseZones(r2?.data);
+        }
 
-  return () => { cancelled = true; };
-}, [season, opponent]);
+        if (zones && Object.keys(zones).length) {
+          setOpponentZones(zones);
+          // console.log("[ShotChart] opponent zones loaded", zones);
+        } else {
+          setOpponentZones(null);
+        }
+      } catch {
+        if (!cancelled) setOpponentZones(null);
+      }
+    })();
 
+    return () => {
+      cancelled = true;
+    };
+  }, [season, opponent]);
 
   // ----------------------------------------------------
   // Render
@@ -300,22 +283,13 @@ export default function ShotChartContainer({ playerName }) {
           {playerName} Shot Chart {season ? `(${season})` : ""}
         </h2>
         <p className="text-gray-400 text-sm mt-1 text-center">
-          Visualizing shot accuracy and volume across the court. Select the Opponent team from the dropdown to see their overall FG% stats across zones
+          Visualizing shot accuracy and volume across the court. Select the Opponent team to overlay their allowed FG% and league rank by zone.
         </p>
       </div>
 
       <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
-        <OpponentDropdown
-          data={allShots}
-          value={opponent}
-          onChange={setOpponent}
-        />
-        <SeasonDropdown
-          predefinedSeasons={seasons}
-          playerName={playerName}
-          value={season}
-          onChange={setSeason}
-        />
+        <OpponentDropdown data={allShots} value={opponent} onChange={setOpponent} />
+        <SeasonDropdown predefinedSeasons={seasons} playerName={playerName} value={season} onChange={setSeason} />
         <div className="flex items-center gap-2">
           <label htmlFor="numGames" className="text-gray-300 text-sm">
             Recent Games:
@@ -344,7 +318,7 @@ export default function ShotChartContainer({ playerName }) {
           playerName={playerName}
           seasonLabel={season}
           baselineZones={baselineZones}
-          playerSeasonZones={playerSeasonZones} // fallback ensures tooltips never blank
+          playerSeasonZones={playerSeasonZones}
           opponentZones={opponentZones}
           loading={loading}
           error={err}
