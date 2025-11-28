@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import '../App.css'
-import PlayerScoresChart from './PlayerScoresChart';
+import NBAPlayerScoresChart from './NBAPlayerScoresChart';
 import TeamStatistics from './TeamStatistics';
 import PlayerStatistics from './PlayerStatistics';
 import TeamsDropdown from './TeamsDropdown';
@@ -51,7 +51,7 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
         <div>
           {selectedPlayer ? (
             <>
-              <PlayerScoresChart
+              <NBAPlayerScoresChart
                 playerName={selectedPlayer}
                 numberOfGames={numberOfGames}
                 setNumberOfGames={setNumberOfGames}
