@@ -8,6 +8,7 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const [isRosterExpanded, setIsRosterExpanded] = useState(true);
     const isManualSelection = useRef(false);
     const lastAutoSelectedHomeTeam = useRef(null);
 
@@ -108,6 +109,7 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
             // Extract the roster array
             const rosterArray = Object.values(response.data || {})[0] || [];
             setRoster(rosterArray);
+            setIsRosterExpanded(true); // Expand roster when new team is loaded
             
             // Notify parent components (use original teamCity for display)
             onTeamSelect(teamCity);
@@ -170,32 +172,55 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
         }
     };
 
+    const toggleRoster = () => {
+        setIsRosterExpanded(!isRosterExpanded);
+    };
+
     const renderRoster = () => {
+        if (!selectedTeam) return null;
+        
         if (loading) return <p className="text-gray-400">Loading roster...</p>;
         if (error) return <p className="text-red-500">{error}</p>;
         if (roster.length > 0) {
             return (
                 <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-white mb-2">
-                        {selectedTeam} Roster
-                    </h3>
-                    <ul className="space-y-1">
-                        {roster.map((player, index) => (
-                            <li
-                                key={index}
-                                className={`roster-item text-gray-300 hover:text-white cursor-pointer p-1 rounded ${
-                                    selectedPlayer === player.PLAYER ? 'bg-blue-600 text-white' : ''
-                                }`}
-                                onClick={() => handlePlayerClick(player.PLAYER)}
-                            >
-                                <strong>{player.NUM || 'N/A'}</strong> - {player.PLAYER || 'Unknown'} ({player.POSITION || 'N/A'})
-                            </li>
-                        ))}
-                    </ul>
+                    <button
+                        onClick={toggleRoster}
+                        className="w-full flex items-center justify-between text-left p-2 bg-neutral-800 hover:bg-neutral-750 rounded-md transition-colors"
+                    >
+                        <h3 className="text-lg font-semibold text-white">
+                            {selectedTeam} Roster
+                        </h3>
+                        <svg
+                            className={`w-5 h-5 text-white transition-transform duration-200 ${
+                                isRosterExpanded ? 'rotate-180' : ''
+                            }`}
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    {isRosterExpanded && (
+                        <ul className="space-y-1 mt-2 max-h-96 overflow-y-auto">
+                            {roster.map((player, index) => (
+                                <li
+                                    key={index}
+                                    className={`roster-item text-gray-300 hover:text-white cursor-pointer p-1 rounded ${
+                                        selectedPlayer === player.PLAYER ? 'bg-blue-600 text-white' : ''
+                                    }`}
+                                    onClick={() => handlePlayerClick(player.PLAYER)}
+                                >
+                                    <strong>{player.NUM || 'N/A'}</strong> - {player.PLAYER || 'Unknown'} ({player.POSITION || 'N/A'})
+                                </li>
+                            ))}
+                        </ul>
+                    )}
                 </div>
             );
         }
-        return selectedTeam ? <p className="text-gray-400">No roster data available.</p> : null;
+        return <p className="text-gray-400">No roster data available.</p>;
     };
 
     return (
