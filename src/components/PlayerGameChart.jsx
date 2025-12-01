@@ -232,8 +232,10 @@ const PlayerGameChart = ({
         },
         showlegend: true,
         legend: {
-            x: 1.02,
-            y: 1,
+            x: 0.5,
+            y: -0.45,
+            xanchor: 'center',
+            orientation: 'h',
             bgcolor: chartConfig.lightTheme 
                 ? 'rgba(255,255,255,0.8)' 
                 : 'rgba(0,0,0,0)',
