@@ -140,25 +140,50 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
         return baseOptions;
     }, [position]);
 
+    // Filter data to show only the most recent N games
+    const filteredData = useMemo(() => {
+        if (!data || !data.dates) return null;
+        
+        const allDates = data.dates;
+        const numGames = numberOfGames || allDates.length;
+        
+        // Take the last N games (most recent)
+        const startIndex = Math.max(0, allDates.length - numGames);
+        const filteredDates = allDates.slice(startIndex);
+        
+        // Filter all stat arrays to match the filtered dates
+        const filteredStats = {};
+        Object.keys(data).forEach(key => {
+            if (key !== 'dates' && Array.isArray(data[key])) {
+                filteredStats[key] = data[key].slice(startIndex);
+            }
+        });
+        
+        return {
+            dates: filteredDates,
+            ...filteredStats
+        };
+    }, [data, numberOfGames]);
+
     // Secondary metric (offensive snaps percentage)
     const secondaryMetric = useMemo(() => {
-        if (!data || !data.offensiveSnapsPct) return null;
+        if (!filteredData || !filteredData.offensiveSnapsPct) return null;
         return {
-            values: data.offensiveSnapsPct,
+            values: filteredData.offensiveSnapsPct,
             name: 'Offensive Snaps %',
             yaxisTitle: 'Offensive Snaps %',
             color: '#f59e0b',
             unit: '%',
-            customdata: data.offensiveSnaps
+            customdata: filteredData.offensiveSnaps
         };
-    }, [data]);
+    }, [filteredData]);
 
     if (!playerName) return <div>Please select a player to see their statistics.</div>;
     if (loading) return <div>Loading...</div>;
     if (error) return <div className="text-red-500">{error}</div>;
 
     // Remove dates from stats object
-    const { dates, ...stats } = data || {};
+    const { dates, ...stats } = filteredData || {};
 
     return (
         <PlayerGameChart
