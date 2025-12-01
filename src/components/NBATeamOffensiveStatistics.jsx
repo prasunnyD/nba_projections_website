@@ -74,6 +74,16 @@ const nbaTeams = [
 const convertToAPIFormat = (teamName) => {
     if (!teamName) return '';
     
+    // Handle LA Clippers - API expects "LA Clippers"
+    if (teamName === 'Los Angeles Clippers' || teamName.includes('Clippers')) {
+        return 'LA Clippers';
+    }
+    
+    // Handle Lakers - API expects "Los Angeles Lakers"
+    if (teamName === 'Los Angeles Lakers' || (teamName.includes('Lakers') && teamName.includes('Los Angeles'))) {
+        return 'Los Angeles Lakers';
+    }
+    
     // Find matching team in nbaTeams array
     const team = nbaTeams.find(t => t.city === teamName);
     if (team) {
