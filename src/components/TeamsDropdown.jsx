@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { api,logApiCall } from '../utils/apiConfig';
 
-const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect }) => {
+const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam }) => {
     const [selectedTeam, setSelectedTeam] = useState('');
     const [roster, setRoster] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
+    const isManualSelection = useRef(false);
+    const lastAutoSelectedHomeTeam = useRef(null);
 
     // NBA Teams with their cities
     const nbaTeams = [
@@ -43,43 +45,123 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect }) => {
         { city: 'Washington', name: 'Wizards' }
     ];
 
-    const handleTeamChange = async (event) => {
-        const selectedCity = event.target.value;
-        console.log("Selected City: ", selectedCity);
-        setSelectedTeam(selectedCity);
-        console.log("Selected Team: ", selectedTeam);
+    // Extract team name for API calls (roster API needs full team name format)
+    const extractCityForAPI = (teamValue) => {
+        if (!teamValue) return '';
         
-        if (selectedCity) {
-            setLoading(true);
-            setError(null);
-            try {
-                const apiUrl = `nba/team-roster/${selectedCity}`;
-                logApiCall('GET', apiUrl);
-                
-                const client = api;
-                const response = await client.get(apiUrl);
-                
-                // Extract the roster array
-                const rosterArray = Object.values(response.data || {})[0] || [];
-                setRoster(rosterArray);
-                
-                // Notify parent components
-                onTeamSelect(selectedCity);
-                onRosterData(rosterArray);
-            } catch (err) {
-                console.error('Error fetching roster:', err);
-                setError('Failed to load roster. Please try again.');
-                setRoster([]);
-            } finally {
-                setLoading(false);
-            }
-        } else {
+        // Handle LA teams - API needs specific format
+        if (teamValue === 'Los Angeles Lakers' || 
+            (teamValue.includes('Lakers') && teamValue.includes('Los Angeles'))) {
+            return 'Los Angeles Lakers';
+        }
+        if (teamValue === 'Los Angeles Clippers' || 
+            teamValue === 'LA Clippers' ||
+            (teamValue.includes('Clippers'))) {
+            return 'Los Angeles Clippers';
+        }
+        
+        // Find matching team in nbaTeams array
+        const team = nbaTeams.find(t => t.city === teamValue);
+        if (team) {
+            // For most teams, return the city name (which is what the API expects)
+            return team.city;
+        }
+        
+        // Fallback: if it's in "City Team" format, try to match or return city
+        const parts = teamValue.split(' ');
+        if (parts.length > 1) {
+            // For multi-word cities, check if it matches known patterns
+            if (parts[0] === 'New' && parts[1] === 'York') return 'New York';
+            if (parts[0] === 'New' && parts[1] === 'Orleans') return 'New Orleans';
+            if (parts[0] === 'Oklahoma' && parts[1] === 'City') return 'Oklahoma City';
+            if (parts[0] === 'San' && parts[1] === 'Antonio') return 'San Antonio';
+            if (parts[0] === 'Golden' && parts[1] === 'State') return 'Golden State';
+            // For others, assume first word(s) before team name is the city
+            // Most team names are single words, so take everything except last word
+            return parts.slice(0, -1).join(' ');
+        }
+        // Single word - return as is
+        return teamValue;
+    };
+
+    const fetchRosterForTeam = useCallback(async (teamCity, isHomeTeam = false) => {
+        if (!teamCity) {
             setRoster([]);
             setSelectedPlayer(null);
             onTeamSelect('');
             onRosterData([]);
+            return;
         }
+
+        // Extract just the city for API call
+        const cityForAPI = extractCityForAPI(teamCity);
+
+        setLoading(true);
+        setError(null);
+        try {
+            const apiUrl = `nba/team-roster/${cityForAPI}`;
+            logApiCall('GET', apiUrl);
+            
+            const client = api;
+            const response = await client.get(apiUrl);
+            
+            // Extract the roster array
+            const rosterArray = Object.values(response.data || {})[0] || [];
+            setRoster(rosterArray);
+            
+            // Notify parent components (use original teamCity for display)
+            onTeamSelect(teamCity);
+            onRosterData(rosterArray);
+
+            // Randomly select a player if this is the home team and roster has players
+            if (isHomeTeam && rosterArray.length > 0 && onPlayerSelect) {
+                const randomIndex = Math.floor(Math.random() * rosterArray.length);
+                const randomPlayer = rosterArray[randomIndex];
+                if (randomPlayer && randomPlayer.PLAYER) {
+                    setSelectedPlayer(randomPlayer.PLAYER);
+                    onPlayerSelect(randomPlayer.PLAYER);
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching roster:', err);
+            setError('Failed to load roster. Please try again.');
+            setRoster([]);
+        } finally {
+            setLoading(false);
+        }
+    }, [onTeamSelect, onRosterData, onPlayerSelect]);
+
+    const handleTeamChange = async (event) => {
+        const selectedCity = event.target.value;
+        console.log("Selected City: ", selectedCity);
+        isManualSelection.current = true; // Mark as manual selection
+        setSelectedTeam(selectedCity);
+        await fetchRosterForTeam(selectedCity, false); // Not home team for manual selection
     };
+
+    // Auto-select homeTeam when it changes (only when homeTeam prop changes, not when selectedTeam changes)
+    useEffect(() => {
+        if (!homeTeam) return;
+        
+        // If homeTeam changed to a new value, reset manual selection flag to allow auto-select
+        if (homeTeam !== lastAutoSelectedHomeTeam.current) {
+            isManualSelection.current = false;
+        }
+        
+        // Use functional update to get current selectedTeam value
+        setSelectedTeam(currentSelected => {
+            // Only auto-select if:
+            // 1. homeTeam is different from currently selected team
+            // 2. It's not a manual selection (user hasn't manually changed the team)
+            if (homeTeam !== currentSelected && !isManualSelection.current) {
+                lastAutoSelectedHomeTeam.current = homeTeam; // Track what we auto-selected
+                fetchRosterForTeam(homeTeam, true); // true indicates this is the home team
+                return homeTeam;
+            }
+            return currentSelected; // Keep current selection
+        });
+        // Only depend on homeTeam, not selectedTeam, so manual selections aren't overridden
+    }, [homeTeam, fetchRosterForTeam]);
 
     const handlePlayerClick = (player) => {
         setSelectedPlayer(player);

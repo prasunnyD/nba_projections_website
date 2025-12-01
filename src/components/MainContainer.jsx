@@ -34,6 +34,7 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
           onTeamSelect={handleTeamSelect}
           onRosterData={handleRosterData}
           onPlayerSelect={handlePlayerSelect}
+          homeTeam={homeTeam}
         />
       </div>
 
@@ -59,7 +60,7 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
 
               {/* Shot chart block (data & seasons handled inside the container) */}
               <div className="mt-6">
-                <ShotChartContainer playerName={selectedPlayer} />
+                <ShotChartContainer playerName={selectedPlayer} opponentTeam={awayTeam} />
               </div>
             </>
           ) : (
@@ -74,7 +75,7 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
       <div className="w-1/4 rounded-lg bg-neutral-800 shadow p-4">
         <h2 className="text-xl font-bold text-white mb-4">Team Statistics</h2>
         <div>
-          <TeamStatistics />
+          <TeamStatistics awayTeam={awayTeam} />
         </div>
       </div>
     </div>

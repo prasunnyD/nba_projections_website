@@ -41,7 +41,7 @@ const normalizeRank = (x) => {
   return Number.isFinite(n) ? n : null;
 };
 
-const TeamStatistics = () => {
+const TeamStatistics = ({ awayTeam }) => {
   const [selectedTeam, setSelectedTeam] = useState('');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -95,17 +95,70 @@ const TeamStatistics = () => {
     setError(null);
   };
 
+  // Convert awayTeam format to match dropdown format
+  const convertAwayTeamToDropdownFormat = (teamName) => {
+    if (!teamName) return '';
+    // Find matching team in nbaTeams array
+    const team = nbaTeams.find(t => {
+      const fullName = `${t.city} ${t.name}`;
+      return fullName === teamName || t.city === teamName;
+    });
+    if (team) {
+      // Return format that matches dropdown: "City Team"
+      return `${team.city} ${team.name}`;
+    }
+    // Fallback: return as is
+    return teamName;
+  };
+
+  // Auto-select awayTeam when it changes
+  useEffect(() => {
+    if (awayTeam && awayTeam !== selectedTeam) {
+      const dropdownFormat = convertAwayTeamToDropdownFormat(awayTeam);
+      if (dropdownFormat) {
+        setSelectedTeam(dropdownFormat);
+        setData(null);
+        setError(null);
+      }
+    }
+  }, [awayTeam]);
+
+  // Convert team name to API format
+  const convertToAPIFormat = (teamName) => {
+    if (!teamName) return '';
+    
+    // Handle Clippers - API expects "LA Clippers"
+    if (teamName === 'Los Angeles Clippers Clippers' || 
+        teamName === 'Los Angeles Clippers' ||
+        teamName.includes('Clippers')) {
+      return 'LA Clippers';
+    }
+    
+    // Handle Lakers - API expects "Los Angeles Lakers"
+    if (teamName === 'Los Angeles Lakers Lakers' || 
+        teamName === 'Los Angeles Lakers' ||
+        (teamName.includes('Lakers') && teamName.includes('Los Angeles'))) {
+      return 'Los Angeles Lakers';
+    }
+    
+    // For other teams, return as is
+    return teamName;
+  };
+
   useEffect(() => {
     if (!selectedTeam) return;
 
     const fetchTeamStatistics = async () => {
       setLoading(true);
       try {
-        const apiUrl = `nba/defense-stats/${selectedTeam}`; // your existing route usage
+        // Convert to API format before making the call
+        const apiTeamName = convertToAPIFormat(selectedTeam);
+        const apiUrl = `nba/defense-stats/${apiTeamName}`;
         logApiCall('GET', apiUrl);
 
         const response = await client.get(apiUrl);
-        const teamData = response.data[selectedTeam];
+        // Use the API team name to get data from response
+        const teamData = response.data[apiTeamName];
 
         setData({
           Defense: {

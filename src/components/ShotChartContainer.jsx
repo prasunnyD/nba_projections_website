@@ -46,7 +46,7 @@ function computeZonesFromShots(shots) {
 // ----------------------------------------------------
 // Component: ShotChartContainer
 // ----------------------------------------------------
-export default function ShotChartContainer({ playerName }) {
+export default function ShotChartContainer({ playerName, opponentTeam }) {
   const [seasons, setSeasons] = useState([]);
   const [season, setSeason] = useState("");
   const [opponent, setOpponent] = useState("");
@@ -61,6 +61,15 @@ export default function ShotChartContainer({ playerName }) {
   const [domains] = useState({ x: [-25, 25], y: [-5, 47] });
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState(null);
+
+  // ----------------------------------------------------
+  // Auto-select opponent when opponentTeam prop changes
+  // ----------------------------------------------------
+  useEffect(() => {
+    if (opponentTeam) {
+      setOpponent(opponentTeam);
+    }
+  }, [opponentTeam]);
 
   // ----------------------------------------------------
   // Initialize seasons when player changes
@@ -80,6 +89,10 @@ export default function ShotChartContainer({ playerName }) {
     const predefined = ["2024-25", "2023-24", "2022-23", "2021-22", "2020-21"];
     setSeasons(predefined);
     setSeason(predefined[0]);
+    // If opponentTeam is provided, set it as opponent
+    if (opponentTeam) {
+      setOpponent(opponentTeam);
+    }
   }, [playerName]);
 
   // ----------------------------------------------------
