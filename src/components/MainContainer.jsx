@@ -5,6 +5,7 @@ import TeamStatistics from './TeamStatistics';
 import PlayerStatistics from './PlayerStatistics';
 import TeamsDropdown from './TeamsDropdown';
 import ShotChartContainer from './ShotChartContainer'; // Shotchart
+import NBATeamOffensiveStatistics from './NBATeamOffensiveStatistics';
 
 export default function MainContainer({ teamName, homeTeam, awayTeam }) {
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -36,6 +37,13 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
           onPlayerSelect={handlePlayerSelect}
           homeTeam={homeTeam}
         />
+        <div className="space-y-4 mt-4">
+          {/* Offensive Statistics */}
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-2">Team Offensive Statistics</h3>
+            <NBATeamOffensiveStatistics selectedTeam={selectedTeam} />
+          </div>
+        </div>
       </div>
 
       {/* Middle Column - Player and Chart */}
