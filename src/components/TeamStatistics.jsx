@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 import { api, logApiCall } from '../utils/apiConfig';
+import { getTeamLogoUrl } from '../helpers/teamLogoUtils';
 
 // Color helpers 
 const TOTAL_NBA_TEAMS = 30;
@@ -145,6 +146,33 @@ const TeamStatistics = ({ awayTeam }) => {
     return teamName;
   };
 
+  // Convert team name to format needed for logo utility
+  const getCityForLogo = (teamName) => {
+    if (!teamName) return '';
+    
+    // Handle LA teams
+    if (teamName.includes('Los Angeles Lakers') || teamName.includes('Lakers')) {
+      return 'Los Angeles Lakers';
+    }
+    if (teamName.includes('Los Angeles Clippers') || teamName.includes('Clippers')) {
+      return 'Los Angeles Clippers';
+    }
+    
+    // Extract city name (first part before space)
+    const parts = teamName.split(' ');
+    if (parts.length > 1) {
+      // Handle multi-word cities
+      if (parts[0] === 'New' && parts[1] === 'York') return 'New York';
+      if (parts[0] === 'New' && parts[1] === 'Orleans') return 'New Orleans';
+      if (parts[0] === 'Oklahoma' && parts[1] === 'City') return 'Oklahoma City';
+      if (parts[0] === 'San' && parts[1] === 'Antonio') return 'San Antonio';
+      if (parts[0] === 'Golden' && parts[1] === 'State') return 'Golden State';
+      // For most teams, city is the first word
+      return parts[0];
+    }
+    return teamName;
+  };
+
   useEffect(() => {
     if (!selectedTeam) return;
 
@@ -265,9 +293,21 @@ const TeamStatistics = ({ awayTeam }) => {
 
       {data && (
         <div className="p-4">
-          <h1 className="text-2xl font-bold mb-4 text-white">
-            {selectedTeam} Defensive Statistics
-          </h1>
+          <div className="flex items-center gap-3 mb-4">
+            {getTeamLogoUrl(getCityForLogo(selectedTeam)) && (
+              <img 
+                src={getTeamLogoUrl(getCityForLogo(selectedTeam))} 
+                alt={`${selectedTeam} logo`}
+                className="w-14 h-14 object-contain"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            )}
+            <h1 className="text-2xl font-bold text-white">
+              {selectedTeam} Defensive Statistics
+            </h1>
+          </div>
 
           {/* Stats Table with Rank-based Row Colors */}
           <div className="overflow-x-auto">
