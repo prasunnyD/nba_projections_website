@@ -217,17 +217,34 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
                     </button>
                     {isRosterExpanded && (
                         <ul className="space-y-1 mt-2 max-h-96 overflow-y-auto">
-                            {roster.map((player, index) => (
-                                <li
-                                    key={index}
-                                    className={`roster-item text-gray-300 hover:text-white cursor-pointer p-1 rounded ${
-                                        selectedPlayer === player.PLAYER ? 'bg-blue-600 text-white' : ''
-                                    }`}
-                                    onClick={() => handlePlayerClick(player.PLAYER)}
-                                >
-                                    <strong>{player.NUM || 'N/A'}</strong> - {player.PLAYER || 'Unknown'} ({player.POSITION || 'N/A'})
-                                </li>
-                            ))}
+                            {roster.map((player, index) => {
+                                const getStatusColor = (status) => {
+                                    if (status === 'Out') return 'text-red-500';
+                                    if (status === 'Questionable') return 'text-orange-500';
+                                    if (status === 'Probable') return 'text-yellow-500';
+                                    if (status === 'Available') return 'text-blue-500';
+                                    return '';
+                                };
+                                
+                                const status = player.STATUS && player.STATUS.trim() !== '' ? player.STATUS : null;
+                                
+                                return (
+                                    <li
+                                        key={index}
+                                        className={`roster-item text-gray-300 hover:text-white cursor-pointer p-1 rounded ${
+                                            selectedPlayer === player.PLAYER ? 'bg-blue-600 text-white' : ''
+                                        }`}
+                                        onClick={() => handlePlayerClick(player.PLAYER)}
+                                    >
+                                        <strong>{player.NUM || 'N/A'}</strong> - {player.PLAYER || 'Unknown'} ({player.POSITION || 'N/A'})
+                                        {status && (
+                                            <span className={`ml-2 font-semibold ${getStatusColor(status)}`}>
+                                                {status}
+                                            </span>
+                                        )}
+                                    </li>
+                                );
+                            })}
                         </ul>
                     )}
                 </div>
