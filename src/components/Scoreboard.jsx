@@ -141,16 +141,19 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                       }}
                                       className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
                                   >
-                                      {getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'S') && (
-                                          <img 
-                                              src={getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'S')} 
-                                              alt={`${data.awayCity[index]} ${data.awayTeam[index]} logo`}
-                                              className="w-6 h-6 object-contain flex-shrink-0"
-                                              onError={(e) => {
-                                                  e.target.style.display = 'none';
-                                              }}
-                                          />
-                                      )}
+                                      {(() => {
+                                          const logoUrl = getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'L');
+                                          return logoUrl ? (
+                                              <img 
+                                                  src={logoUrl} 
+                                                  alt={`${data.awayCity[index]} ${data.awayTeam[index]} logo`}
+                                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                                  onError={(e) => {
+                                                      e.target.style.display = 'none';
+                                                  }}
+                                              />
+                                          ) : null;
+                                      })()}
                                       <span className="font-semibold text-blue-300">{data.awayCity[index]}</span> <span className="text-gray-300">{data.awayTeam[index]}</span>
                                   </span>
                                   {' @ '}
@@ -161,16 +164,19 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                       }}
                                       className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
                                   >
-                                      {getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'S') && (
-                                          <img 
-                                              src={getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'S')} 
-                                              alt={`${data.homeCity[index]} ${data.homeTeam[index]} logo`}
-                                              className="w-6 h-6 object-contain flex-shrink-0"
-                                              onError={(e) => {
-                                                  e.target.style.display = 'none';
-                                              }}
-                                          />
-                                      )}
+                                      {(() => {
+                                          const logoUrl = getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'L');
+                                          return logoUrl ? (
+                                              <img 
+                                                  src={logoUrl} 
+                                                  alt={`${data.homeCity[index]} ${data.homeTeam[index]} logo`}
+                                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                                  onError={(e) => {
+                                                      e.target.style.display = 'none';
+                                                  }}
+                                              />
+                                          ) : null;
+                                      })()}
                                       <span className="font-semibold text-blue-300">{data.homeCity[index]}</span> <span className="text-gray-300">{data.homeTeam[index]}</span>
                                   </span>
                               </div>

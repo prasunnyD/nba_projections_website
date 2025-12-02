@@ -90,3 +90,35 @@ export const getAllTeamIds = () => {
     return { ...nbaTeamIds };
 };
 
+/**
+ * Extract city name from team name for logo lookup
+ * Handles various team name formats like "City Team", "Los Angeles Lakers", etc.
+ * @param {string} teamName - The team name (e.g., "Boston Celtics", "Los Angeles Lakers")
+ * @returns {string} - The city name for logo lookup
+ */
+export const getCityForLogo = (teamName) => {
+    if (!teamName) return '';
+    
+    // Handle LA teams
+    if (teamName.includes('Los Angeles Lakers') || teamName.includes('Lakers')) {
+        return 'Los Angeles Lakers';
+    }
+    if (teamName.includes('Los Angeles Clippers') || teamName.includes('Clippers')) {
+        return 'Los Angeles Clippers';
+    }
+    
+    // Extract city name (first part before space)
+    const parts = teamName.split(' ');
+    if (parts.length > 1) {
+        // Handle multi-word cities
+        if (parts[0] === 'New' && parts[1] === 'York') return 'New York';
+        if (parts[0] === 'New' && parts[1] === 'Orleans') return 'New Orleans';
+        if (parts[0] === 'Oklahoma' && parts[1] === 'City') return 'Oklahoma City';
+        if (parts[0] === 'San' && parts[1] === 'Antonio') return 'San Antonio';
+        if (parts[0] === 'Golden' && parts[1] === 'State') return 'Golden State';
+        // For most teams, city is the first word
+        return parts[0];
+    }
+    return teamName;
+};
+
