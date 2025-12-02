@@ -7,6 +7,7 @@ import TeamsDropdown from './TeamsDropdown';
 import ShotChartContainer from './ShotChartContainer'; // Shotchart
 import NBATeamOffensiveStatistics from './NBATeamOffensiveStatistics';
 import { getTeamLogoUrl, getCityForLogo } from '../helpers/teamLogoUtils';
+import { getPlayerImageUrlByName } from '../helpers/playerImageUtils';
 
 export default function MainContainer({ teamName, homeTeam, awayTeam }) {
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -58,7 +59,7 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
                   <img 
                     src={getTeamLogoUrl(getCityForLogo(selectedTeam), 'L')} 
                     alt={`${selectedTeam} logo`}
-                    className="w-16 h-16 object-contain flex-shrink-0"
+                    className="w-24 h-24 object-contain flex-shrink-0"
                     onError={(e) => {
                       e.target.style.display = 'none';
                     }}
@@ -68,6 +69,16 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
               </>
             )}
             <span>Player Selected: {selectedPlayer || 'None'}</span>
+            {selectedPlayer && getPlayerImageUrlByName(selectedPlayer, rosterData) && (
+              <img 
+                src={getPlayerImageUrlByName(selectedPlayer, rosterData)} 
+                alt={`${selectedPlayer} headshot`}
+                className="w-24 h-[120px] object-contain flex-shrink-0"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            )}
           </h2>
           <PlayerStatistics playerName={selectedPlayer} />
         </div>
