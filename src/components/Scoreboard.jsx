@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { api } from '../utils/apiConfig';
+import { getTeamLogoUrl } from '../helpers/teamLogoUtils';
 const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
 
     const [data, setData] = useState(null);
@@ -38,6 +39,20 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
         // TeamsDropdown uses city names like "Brooklyn", "Boston", etc. in its nbaTeams array
         return city;
     };
+
+    const getCityForLogo = (city, team) => {
+        // Convert API city+team to format needed for logo utility
+        // Handle special cases
+        if (city === 'LA' && team === 'Lakers') {
+            return 'Los Angeles Lakers';
+        }
+        if (city === 'LA' && team === 'Clippers') {
+            return 'Los Angeles Clippers';
+        }
+        // For most teams, return just the city name
+        return city;
+    };
+
 
     useEffect(() => {
 
@@ -118,14 +133,27 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                   handleGameClick(data.homeCity[index], data.homeTeam[index], data.awayCity[index], data.awayTeam[index])
                               }
                           >
-                              <div className="teams">
+                              <div className="teams flex items-center gap-2">
                                   <span
                                       onClick={(e) => {
                                           e.stopPropagation(); // Prevent triggering game-card click
                                           handleTeamClick(data.awayCity[index], data.awayTeam[index]);
                                       }}
-                                      className="cursor-pointer hover:text-blue-500 transition-colors"
+                                      className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
                                   >
+                                      {(() => {
+                                          const logoUrl = getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'L');
+                                          return logoUrl ? (
+                                              <img 
+                                                  src={logoUrl} 
+                                                  alt={`${data.awayCity[index]} ${data.awayTeam[index]} logo`}
+                                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                                  onError={(e) => {
+                                                      e.target.style.display = 'none';
+                                                  }}
+                                              />
+                                          ) : null;
+                                      })()}
                                       <span className="font-semibold text-blue-300">{data.awayCity[index]}</span> <span className="text-gray-300">{data.awayTeam[index]}</span>
                                   </span>
                                   {' @ '}
@@ -134,8 +162,21 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                           e.stopPropagation(); // Prevent triggering game-card click
                                           handleTeamClick(data.homeCity[index], data.homeTeam[index]);
                                       }}
-                                      className="cursor-pointer hover:text-blue-500 transition-colors"
+                                      className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
                                   >
+                                      {(() => {
+                                          const logoUrl = getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'L');
+                                          return logoUrl ? (
+                                              <img 
+                                                  src={logoUrl} 
+                                                  alt={`${data.homeCity[index]} ${data.homeTeam[index]} logo`}
+                                                  className="w-6 h-6 object-contain flex-shrink-0"
+                                                  onError={(e) => {
+                                                      e.target.style.display = 'none';
+                                                  }}
+                                              />
+                                          ) : null;
+                                      })()}
                                       <span className="font-semibold text-blue-300">{data.homeCity[index]}</span> <span className="text-gray-300">{data.homeTeam[index]}</span>
                                   </span>
                               </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { api,logApiCall } from '../utils/apiConfig';
+import { getTeamLogoUrl } from '../helpers/teamLogoUtils';
 
 const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam }) => {
     const [selectedTeam, setSelectedTeam] = useState('');
@@ -188,9 +189,21 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
                         onClick={toggleRoster}
                         className="w-full flex items-center justify-between text-left p-2 bg-neutral-800 hover:bg-neutral-750 rounded-md transition-colors"
                     >
-                        <h3 className="text-lg font-semibold text-white">
-                            {selectedTeam} Roster
-                        </h3>
+                        <div className="flex items-center gap-2">
+                            {selectedTeam && (
+                                <img 
+                                    src={getTeamLogoUrl(selectedTeam)} 
+                                    alt={`${selectedTeam} logo`}
+                                    className="w-8 h-8 object-contain"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            )}
+                            <h3 className="text-lg font-semibold text-white">
+                                {selectedTeam} Roster
+                            </h3>
+                        </div>
                         <svg
                             className={`w-5 h-5 text-white transition-transform duration-200 ${
                                 isRosterExpanded ? 'rotate-180' : ''

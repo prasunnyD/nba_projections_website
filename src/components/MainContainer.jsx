@@ -6,6 +6,8 @@ import PlayerStatistics from './PlayerStatistics';
 import TeamsDropdown from './TeamsDropdown';
 import ShotChartContainer from './ShotChartContainer'; // Shotchart
 import NBATeamOffensiveStatistics from './NBATeamOffensiveStatistics';
+import { getTeamLogoUrl, getCityForLogo } from '../helpers/teamLogoUtils';
+import { getPlayerImageUrlByName } from '../helpers/playerImageUtils';
 
 export default function MainContainer({ teamName, homeTeam, awayTeam }) {
   const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -50,8 +52,33 @@ export default function MainContainer({ teamName, homeTeam, awayTeam }) {
       <div className="w-1/2 rounded-lg bg-neutral-900 shadow p-4">
         {/* Player Info */}
         <div className="mb-4">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            {selectedTeam ? `${selectedTeam} - ` : ''}Player Selected: {selectedPlayer || 'None'}
+          <h2 className="text-2xl font-bold text-white mb-4 flex items-center justify-center gap-2">
+            {selectedTeam && (
+              <>
+                {getTeamLogoUrl(getCityForLogo(selectedTeam), 'L') && (
+                  <img 
+                    src={getTeamLogoUrl(getCityForLogo(selectedTeam), 'L')} 
+                    alt={`${selectedTeam} logo`}
+                    className="w-24 h-24 object-contain flex-shrink-0"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
+                )}
+                <span>{selectedTeam} - </span>
+              </>
+            )}
+            <span>Player Selected: {selectedPlayer || 'None'}</span>
+            {selectedPlayer && getPlayerImageUrlByName(selectedPlayer, rosterData) && (
+              <img 
+                src={getPlayerImageUrlByName(selectedPlayer, rosterData)} 
+                alt={`${selectedPlayer} headshot`}
+                className="w-24 h-[120px] object-contain flex-shrink-0"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                }}
+              />
+            )}
           </h2>
           <PlayerStatistics playerName={selectedPlayer} />
         </div>
