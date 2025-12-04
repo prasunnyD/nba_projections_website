@@ -107,13 +107,23 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
             'points': 'player_points',
             'rebounds': 'player_rebounds',
             'assists': 'player_assists',
+            'points+rebounds': 'player_points_rebounds',
+            'points+assists': 'player_points_assists',
+            'rebounds+assists': 'player_rebounds_assists',
+            'points+rebounds+assists': 'player_points_rebounds_assists',
         };
         return marketMap[stat] || null;
     };
 
-    // Fetch odds data when player changes
+    // Fetch odds data when player or selected stat changes
     useEffect(() => {
         if (!playerName) {
+            setOdds([]);
+            return;
+        }
+
+        const market = getMarketForStat(selectedStat);
+        if (!market) {
             setOdds([]);
             return;
         }
@@ -121,7 +131,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         const fetchOdds = async () => {
             setOddsLoading(true);
             try {
-                const res = await client.get(`nba/odds/${playerName}`);
+                const res = await client.get(`nba/odds/${market}/${playerName}`);
                 const oddsData = res.data || [];
                 setOdds(oddsData);
             } catch (e) {
@@ -133,7 +143,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         };
 
         fetchOdds();
-    }, [playerName]);
+    }, [playerName, selectedStat]);
 
     // Update propLine from FanDuel when selectedStat or odds change
     useEffect(() => {
