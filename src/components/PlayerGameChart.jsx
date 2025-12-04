@@ -22,6 +22,8 @@ import Plot from 'react-plotly.js';
  * @param {string} props.secondaryMetric.name - Secondary metric name
  * @param {string} props.secondaryMetric.yaxisTitle - Secondary metric y-axis title
  * @param {string} props.secondaryMetric.color - Secondary metric line color
+ * @param {Array} props.odds - Optional array of odds data
+ * @param {boolean} props.oddsLoading - Whether odds are loading
  * @param {Object} props.chartConfig - Chart styling configuration
  * @param {boolean} props.chartConfig.lightTheme - Use light theme for chart
  * @param {number} props.chartConfig.height - Chart height
@@ -39,6 +41,8 @@ const PlayerGameChart = ({
     onNumberOfGamesChange,
     numberOfGamesOptions = [5, 10, 15, 20, 30],
     secondaryMetric,
+    odds = [],
+    oddsLoading = false,
     chartConfig = {
         lightTheme: true,
         height: 450
@@ -269,6 +273,43 @@ const PlayerGameChart = ({
                     </button>
                 ))}
             </div>
+
+            {/* Odds Display */}
+            {odds && odds.length > 0 && (
+                <div className="mb-6 rounded-lg bg-neutral-800 p-4 shadow">
+                    <h3 className="text-white text-lg font-semibold mb-3">Betting Odds</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {odds.map((odd, index) => (
+                            <div
+                                key={index}
+                                className="bg-neutral-700 rounded-lg p-3 border border-neutral-600"
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                        <p className="text-white font-bold">{odd.sportbook}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-white font-bold">Line: {odd.line}</p>
+                                    </div>
+                                </div>
+                                <div className="flex gap-3 mt-2">
+                                    <div className="flex-1 bg-green-600/20 rounded px-2 py-1 text-center">
+                                        <p className="text-green-400 text-xs font-semibold">Over</p>
+                                        <p className="text-white text-sm font-bold">{odd.over}</p>
+                                    </div>
+                                    <div className="flex-1 bg-red-600/20 rounded px-2 py-1 text-center">
+                                        <p className="text-red-400 text-xs font-semibold">Under</p>
+                                        <p className="text-white text-sm font-bold">{odd.under}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+            {oddsLoading && (
+                <div className="mb-6 text-neutral-400 text-center">Loading odds...</div>
+            )}
 
             {/* Controls */}
             <div className="prop-line-container flex flex-col items-center justify-center gap-4 p-4 rounded-lg shadow bg-neutral-800 mb-6">
