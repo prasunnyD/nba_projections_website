@@ -21,8 +21,6 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
     const [error, setError] = useState(null);
     const [selectedStat, setSelectedStat] = useState('points');
     const [propLine, setPropLine] = useState('');
-    const [odds, setOdds] = useState([]);
-    const [oddsLoading, setOddsLoading] = useState(false);
 
     const client = api;
 
@@ -101,55 +99,6 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         fetchData();
     }, [playerName, numberOfGames]);
 
-    // Map selected stat to market type
-    const getMarketForStat = (stat) => {
-        const marketMap = {
-            'points': 'player_points',
-            'rebounds': 'player_rebounds',
-            'assists': 'player_assists',
-        };
-        return marketMap[stat] || null;
-    };
-
-    // Fetch odds data when player changes
-    useEffect(() => {
-        if (!playerName) {
-            setOdds([]);
-            return;
-        }
-
-        const fetchOdds = async () => {
-            setOddsLoading(true);
-            try {
-                const res = await client.get(`nba/odds/${playerName}`);
-                const oddsData = res.data || [];
-                setOdds(oddsData);
-            } catch (e) {
-                console.error('Failed to fetch odds:', e);
-                setOdds([]);
-            } finally {
-                setOddsLoading(false);
-            }
-        };
-
-        fetchOdds();
-    }, [playerName]);
-
-    // Update propLine from FanDuel when selectedStat or odds change
-    useEffect(() => {
-        if (!odds || odds.length === 0) return;
-        
-        const market = getMarketForStat(selectedStat);
-        if (market) {
-            const fanDuelOdd = odds.find(
-                odd => odd.sportbook === 'FanDuel' && odd.market === market
-            );
-            if (fanDuelOdd && fanDuelOdd.line != null) {
-                setPropLine(fanDuelOdd.line.toString());
-            }
-        }
-    }, [selectedStat, odds]);
-
     // Calculate combined stats
     const getCombinedStats = (a, b) => {
         if (!series) return [];
@@ -215,8 +164,6 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
             onNumberOfGamesChange={setNumberOfGames}
             numberOfGamesOptions={[5, 10, 15, 20, 30]}
             secondaryMetric={minutesY}
-            odds={odds}
-            oddsLoading={oddsLoading}
             chartConfig={{
                 lightTheme: true,
                 height: 450
