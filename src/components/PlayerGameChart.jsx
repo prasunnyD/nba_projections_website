@@ -286,7 +286,7 @@ const PlayerGameChart = ({
                             >
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
-                                        <p className="text-white font-medium text-sm">{odd.sportbook}</p>
+                                        <p className="text-white font-bold">{odd.sportbook}</p>
                                     </div>
                                     <div className="text-right">
                                         <p className="text-white font-bold">Line: {odd.line}</p>
