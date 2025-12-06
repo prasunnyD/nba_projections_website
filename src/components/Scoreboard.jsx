@@ -8,6 +8,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedGame, setSelectedGame] = useState(null); // Track selected game
+    const [moneylineData, setMoneylineData] = useState({}); // Store moneyline data for each team
     // const client = axios.create({baseURL: "https://api.sharpr-analytics.com"});
     const client = api;
     const processTeamName = (city, team) => {
@@ -54,6 +55,36 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
     };
 
 
+    // Helper function to get highest price from moneyline response
+    const getHighestPrice = (moneylineResponse) => {
+        if (!moneylineResponse || moneylineResponse.length === 0) {
+            return null;
+        }
+        // Convert prices to numbers and find the highest
+        const highest = moneylineResponse.reduce((max, item) => {
+            const price = parseInt(item.Price, 10);
+            const maxPrice = parseInt(max.Price, 10);
+            return price > maxPrice ? item : max;
+        });
+        return {
+            price: highest.Price,
+            sportsbook: highest.sportbook
+        };
+    };
+
+    // Fetch moneyline data for a team
+    const fetchMoneyline = async (teamName) => {
+        try {
+            const encodedTeamName = encodeURIComponent(teamName);
+            const response = await client.get(`nba/odds/moneyline/${encodedTeamName}`);
+            const highestPrice = getHighestPrice(response.data);
+            return highestPrice;
+        } catch (error) {
+            console.error(`Failed to fetch moneyline for ${teamName}:`, error);
+            return null;
+        }
+    };
+
     useEffect(() => {
 
         const fetchScoreboard = async () => {
@@ -66,6 +97,37 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                 const awayCity = games.map(game => response.data[game].away_city);
                 const awayTeam = games.map(game => response.data[game].away_team);
                 setData({ games, homeCity, homeTeam, awayCity, awayTeam });
+
+                // Fetch moneyline data for all teams
+                const moneylinePromises = [];
+                const teamMoneylineMap = {};
+
+                games.forEach((game, index) => {
+                    const fullHomeTeam = processTeamName(homeCity[index], homeTeam[index]);
+                    const fullAwayTeam = processTeamName(awayCity[index], awayTeam[index]);
+                    
+                    // Fetch moneyline for home team
+                    moneylinePromises.push(
+                        fetchMoneyline(fullHomeTeam).then(result => {
+                            if (result) {
+                                teamMoneylineMap[fullHomeTeam] = result;
+                            }
+                        })
+                    );
+
+                    // Fetch moneyline for away team
+                    moneylinePromises.push(
+                        fetchMoneyline(fullAwayTeam).then(result => {
+                            if (result) {
+                                teamMoneylineMap[fullAwayTeam] = result;
+                            }
+                        })
+                    );
+                });
+
+                // Wait for all moneyline requests to complete
+                await Promise.all(moneylinePromises);
+                setMoneylineData(teamMoneylineMap);
             } catch (error) {
                 console.error('API Error:', error);
                 setError(error);
@@ -134,51 +196,71 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                               }
                           >
                               <div className="teams flex items-center gap-2">
-                                  <span
-                                      onClick={(e) => {
-                                          e.stopPropagation(); // Prevent triggering game-card click
-                                          handleTeamClick(data.awayCity[index], data.awayTeam[index]);
-                                      }}
-                                      className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
-                                  >
+                                  <div className="flex flex-col">
+                                      <span
+                                          onClick={(e) => {
+                                              e.stopPropagation(); // Prevent triggering game-card click
+                                              handleTeamClick(data.awayCity[index], data.awayTeam[index]);
+                                          }}
+                                          className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
+                                      >
+                                          {(() => {
+                                              const logoUrl = getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'L');
+                                              return logoUrl ? (
+                                                  <img 
+                                                      src={logoUrl} 
+                                                      alt={`${data.awayCity[index]} ${data.awayTeam[index]} logo`}
+                                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                                      onError={(e) => {
+                                                          e.target.style.display = 'none';
+                                                      }}
+                                                  />
+                                              ) : null;
+                                          })()}
+                                          <span className="font-semibold text-blue-300">{data.awayCity[index]}</span> <span className="text-gray-300">{data.awayTeam[index]}</span>
+                                      </span>
                                       {(() => {
-                                          const logoUrl = getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'L');
-                                          return logoUrl ? (
-                                              <img 
-                                                  src={logoUrl} 
-                                                  alt={`${data.awayCity[index]} ${data.awayTeam[index]} logo`}
-                                                  className="w-6 h-6 object-contain flex-shrink-0"
-                                                  onError={(e) => {
-                                                      e.target.style.display = 'none';
-                                                  }}
-                                              />
+                                          const teamMoneyline = moneylineData[fullAwayTeam];
+                                          return teamMoneyline ? (
+                                              <span className="text-sm text-green-400 ml-8">
+                                                  Moneyline: {teamMoneyline.price} ({teamMoneyline.sportsbook})
+                                              </span>
                                           ) : null;
                                       })()}
-                                      <span className="font-semibold text-blue-300">{data.awayCity[index]}</span> <span className="text-gray-300">{data.awayTeam[index]}</span>
-                                  </span>
+                                  </div>
                                   {' @ '}
-                                  <span
-                                      onClick={(e) => {
-                                          e.stopPropagation(); // Prevent triggering game-card click
-                                          handleTeamClick(data.homeCity[index], data.homeTeam[index]);
-                                      }}
-                                      className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
-                                  >
+                                  <div className="flex flex-col">
+                                      <span
+                                          onClick={(e) => {
+                                              e.stopPropagation(); // Prevent triggering game-card click
+                                              handleTeamClick(data.homeCity[index], data.homeTeam[index]);
+                                          }}
+                                          className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
+                                      >
+                                          {(() => {
+                                              const logoUrl = getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'L');
+                                              return logoUrl ? (
+                                                  <img 
+                                                      src={logoUrl} 
+                                                      alt={`${data.homeCity[index]} ${data.homeTeam[index]} logo`}
+                                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                                      onError={(e) => {
+                                                          e.target.style.display = 'none';
+                                                      }}
+                                                  />
+                                              ) : null;
+                                          })()}
+                                          <span className="font-semibold text-blue-300">{data.homeCity[index]}</span> <span className="text-gray-300">{data.homeTeam[index]}</span>
+                                      </span>
                                       {(() => {
-                                          const logoUrl = getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'L');
-                                          return logoUrl ? (
-                                              <img 
-                                                  src={logoUrl} 
-                                                  alt={`${data.homeCity[index]} ${data.homeTeam[index]} logo`}
-                                                  className="w-6 h-6 object-contain flex-shrink-0"
-                                                  onError={(e) => {
-                                                      e.target.style.display = 'none';
-                                                  }}
-                                              />
+                                          const teamMoneyline = moneylineData[fullHomeTeam];
+                                          return teamMoneyline ? (
+                                              <span className="text-sm text-green-400 ml-8">
+                                                  Moneyline: {teamMoneyline.price} ({teamMoneyline.sportsbook})
+                                              </span>
                                           ) : null;
                                       })()}
-                                      <span className="font-semibold text-blue-300">{data.homeCity[index]}</span> <span className="text-gray-300">{data.homeTeam[index]}</span>
-                                  </span>
+                                  </div>
                               </div>
                           </div>
                       );
