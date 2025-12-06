@@ -9,6 +9,8 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
     const [error, setError] = useState(null);
     const [selectedStat, setSelectedStat] = useState('rushingYards');
     const [propLine, setPropLine] = useState('');
+    const [odds, setOdds] = useState([]);
+    const [oddsLoading, setOddsLoading] = useState(false);
 
     const client = axios.create({ baseURL: getApiBaseUrl() });
 
@@ -110,6 +112,66 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
         fetchPlayer();
     }, [playerName, numberOfGames]);
 
+    // Map selected stat to market type
+    const getMarketForStat = (stat) => {
+        const marketMap = {
+            'completions': 'player_pass_completions',
+            'passingAttempts': 'player_pass_attempts',
+            'passingYards': 'player_pass_yds',
+            'rushingYards': 'player_rush_yds',
+            'rushingAttempts': 'player_rush_attempts',
+            'receivingYards': 'player_reception_yds',
+            'receptions': 'player_receptions',
+            'longestReception': 'player_reception_longest',
+        };
+        return marketMap[stat] || null;
+    };
+
+    // Fetch odds data when player or selected stat changes
+    useEffect(() => {
+        if (!playerName) {
+            setOdds([]);
+            return;
+        }
+
+        const market = getMarketForStat(selectedStat);
+        if (!market) {
+            setOdds([]);
+            return;
+        }
+
+        const fetchOdds = async () => {
+            setOddsLoading(true);
+            try {
+                const res = await client.get(`nfl/odds/${market}/${encodeURIComponent(playerName)}`);
+                const oddsData = res.data || [];
+                setOdds(oddsData);
+            } catch (e) {
+                console.error('Failed to fetch odds:', e);
+                setOdds([]);
+            } finally {
+                setOddsLoading(false);
+            }
+        };
+
+        fetchOdds();
+    }, [playerName, selectedStat]);
+
+    // Update propLine from FanDuel when selectedStat or odds change
+    useEffect(() => {
+        if (!odds || odds.length === 0) return;
+        
+        const market = getMarketForStat(selectedStat);
+        if (market) {
+            const fanDuelOdd = odds.find(
+                odd => odd.sportbook === 'FanDuel' && odd.market === market
+            );
+            if (fanDuelOdd && fanDuelOdd.line != null) {
+                setPropLine(fanDuelOdd.line.toString());
+            }
+        }
+    }, [selectedStat, odds]);
+
     // Build stat options based on position
     const statOptions = useMemo(() => {
         const baseOptions = [
@@ -198,6 +260,8 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             onNumberOfGamesChange={setNumberOfGames}
             numberOfGamesOptions={[17, 34]}
             secondaryMetric={secondaryMetric}
+            odds={odds}
+            oddsLoading={oddsLoading}
             chartConfig={{
                 lightTheme: true,
                 height: 400
