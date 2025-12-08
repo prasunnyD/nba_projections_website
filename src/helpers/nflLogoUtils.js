@@ -23,9 +23,11 @@ const nflTeamAbbreviations = {
     'Jacksonville': 'JAX',         // Jaguars
     'Miami': 'MIA',                // Dolphins
     'Minnesota': 'MIN',            // Vikings
+    "Philadelphia": 'PHI',          // Eagles
     'Pittsburgh': 'PIT',           // Steelers
     'Seattle': 'SEA',              // Seahawks
     'Tennessee': 'TEN',            // Titans
+    'Washington': 'WAS',           // Commanders
     
     // Special cases - multi-word cities or teams with same city
     'Green Bay': 'GB',             // Packers
