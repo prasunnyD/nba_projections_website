@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
+import { getNFLTeamLogoUrl, getCityForNFLLogo } from '../helpers/nflLogoUtils';
 
 // Colorblind-friendly gradient function
 const getRankColor = (rank, totalTeams = 32) => {
@@ -149,7 +150,25 @@ const NFLTeamStatistics = () => {
             )}
             {data && (
                 <div className="p-4">
-                    <h1 style={{ color: 'white' }} className="text-2xl font-bold mb-4">{selectedTeam} Defensive Statistics</h1>
+                    <div className="flex items-center gap-3 mb-4">
+                        {(() => {
+                            const fullTeamName = nflTeams.find(t => t.name === selectedTeam) 
+                                ? `${nflTeams.find(t => t.name === selectedTeam).city} ${selectedTeam}`
+                                : selectedTeam;
+                            const logoUrl = getNFLTeamLogoUrl(getCityForNFLLogo(fullTeamName));
+                            return logoUrl ? (
+                                <img 
+                                    src={logoUrl} 
+                                    alt={`${selectedTeam} logo`}
+                                    className="w-16 h-16 object-contain flex-shrink-0"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            ) : null;
+                        })()}
+                        <h1 style={{ color: 'white' }} className="text-2xl font-bold">{selectedTeam} Defensive Statistics</h1>
+                    </div>
                 
                 {/* Stats Table */}
                 <div className="overflow-x-auto">

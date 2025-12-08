@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
+import { getNFLTeamLogoUrl, getCityForNFLLogo } from '../helpers/nflLogoUtils';
 
 const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerPosition }) => {
     const [selectedTeam, setSelectedTeam] = useState('');
@@ -152,9 +153,27 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
             
             return (
                 <div className="mt-4">
-                    <h3 className="text-lg font-semibold text-white mb-4">
-                        {selectedTeam} Roster
-                    </h3>
+                    <div className="flex items-center gap-3 mb-4">
+                        {(() => {
+                            const fullTeamName = nflTeams.find(t => t.name === selectedTeam) 
+                                ? `${nflTeams.find(t => t.name === selectedTeam).city} ${selectedTeam}`
+                                : selectedTeam;
+                            const logoUrl = getNFLTeamLogoUrl(getCityForNFLLogo(fullTeamName));
+                            return logoUrl ? (
+                                <img 
+                                    src={logoUrl} 
+                                    alt={`${selectedTeam} logo`}
+                                    className="w-12 h-12 object-contain flex-shrink-0"
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            ) : null;
+                        })()}
+                        <h3 className="text-lg font-semibold text-white">
+                            {selectedTeam} Roster
+                        </h3>
+                    </div>
                     <div className="space-y-3">
                         {Object.keys(positionGroups).map((category) => {
                             const isCategoryOpen = openCategories.has(category);
