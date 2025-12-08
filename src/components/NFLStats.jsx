@@ -6,6 +6,7 @@ import NFLTeamDropdown from './NFLTeamDropdown';
 import NFLTeamStatistics from './NFLTeamStatistics';
 import NFLTeamOffensiveStatistics from './NFLTeamOffensiveStatistics';
 import QBPassChart from './QBPassChart';
+import { getNFLTeamLogoUrl } from '../helpers/nflLogoUtils';
 
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
@@ -56,8 +57,23 @@ export default function MainContainer({teamName, homeTeam, awayTeam}) {
             <div className="w-1/2 rounded-lg bg-neutral-900 shadow p-4">
                 {/* Player Info and Game History Form */}
                 <div className="mb-4">
-                    <h2 className="text-2xl font-bold text-white mb-4">
-                        {selectedTeam ? `${selectedTeam} - ` : ''}Player Selected: {selectedPlayer || 'None'}
+                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center justify-center gap-2">
+                        {selectedTeam && (
+                            <>
+                                {getNFLTeamLogoUrl(selectedTeam) && (
+                                    <img 
+                                        src={getNFLTeamLogoUrl(selectedTeam)} 
+                                        alt={`${selectedTeam} logo`}
+                                        className="w-24 h-24 object-contain flex-shrink-0"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                        }}
+                                    />
+                                )}
+                                <span>{selectedTeam} - </span>
+                            </>
+                        )}
+                        <span>Player Selected: {selectedPlayer || 'None'}</span>
                     </h2>
                     <NFLPlayerStatistics playerName={selectedPlayer} position={playerPosition} />
                 </div>  

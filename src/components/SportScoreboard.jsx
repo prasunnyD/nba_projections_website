@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 import { getApiBaseUrl, logApiCall } from '../utils/apiConfig';
+import { getTeamLogoUrl, getCityForLogo } from '../helpers/teamLogoUtils';
+import { getNFLTeamLogoUrl, getCityForNFLLogo } from '../helpers/nflLogoUtils';
 
 const SportScoreboard = ({ sport, onGameSelect, onTeamSelect }) => {
     const [data, setData] = useState(null);
@@ -102,8 +104,24 @@ const SportScoreboard = ({ sport, onGameSelect, onTeamSelect }) => {
                                         e.stopPropagation();
                                         handleTeamClick(data.awayTeam[index]);
                                     }}
-                                    className="cursor-pointer hover:text-blue-500 transition-colors"
+                                    className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
                                 >
+                                    {(() => {
+                                        const teamName = data.awayTeam[index];
+                                        const logoUrl = sport === 'nba' 
+                                            ? getTeamLogoUrl(getCityForLogo(teamName), 'L')
+                                            : getNFLTeamLogoUrl(getCityForNFLLogo(teamName));
+                                        return logoUrl ? (
+                                            <img 
+                                                src={logoUrl} 
+                                                alt={`${teamName} logo`}
+                                                className="w-10 h-10 object-contain flex-shrink-0"
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        ) : null;
+                                    })()}
                                     {data.awayTeam[index]}
                                 </span>
                                 {' @ '}
@@ -112,8 +130,24 @@ const SportScoreboard = ({ sport, onGameSelect, onTeamSelect }) => {
                                         e.stopPropagation();
                                         handleTeamClick(data.homeTeam[index]);
                                     }}
-                                    className="cursor-pointer hover:text-blue-500 transition-colors"
+                                    className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
                                 >
+                                    {(() => {
+                                        const teamName = data.homeTeam[index];
+                                        const logoUrl = sport === 'nba' 
+                                            ? getTeamLogoUrl(getCityForLogo(teamName), 'L')
+                                            : getNFLTeamLogoUrl(getCityForNFLLogo(teamName));
+                                        return logoUrl ? (
+                                            <img 
+                                                src={logoUrl} 
+                                                alt={`${teamName} logo`}
+                                                className="w-10 h-10 object-contain flex-shrink-0"
+                                                onError={(e) => {
+                                                    e.target.style.display = 'none';
+                                                }}
+                                            />
+                                        ) : null;
+                                    })()}
                                     {data.homeTeam[index]}
                                 </span>
                             </div>
