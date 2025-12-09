@@ -48,10 +48,9 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
         { city: 'Washington', name: 'Commanders' }
     ];
 
-    // Position groupings for offense and defense
+    // Position groupings for offense
     const positionGroups = {
-        'Offense': ['QB', 'RB', 'WR', 'TE'],
-        'Defense': ['DE', 'DT', 'S', 'CB']
+        'Offense': ['QB', 'RB', 'WR', 'TE']
     };
 
     const handleTeamChange = async (event) => {
@@ -190,7 +189,7 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
                                     >
                                         <span className="flex items-center">
                                             <span className="mr-3 text-xl">
-                                                {category === 'Offense' ? '⚡' : '🛡️'}
+                                                ⚡
                                             </span>
                                             {category}
                                         </span>
