@@ -127,7 +127,14 @@ const NFLTeamStatistics = () => {
                     id="team-stats-select"
                     value={selectedTeam}
                     onChange={handleTeamChange}
-                    className="w-full p-2 bg-neutral-600 text-white border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-3 md:p-2 bg-neutral-600 text-white border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base min-h-[44px] appearance-none cursor-pointer hover:bg-neutral-500 transition-colors"
+                    style={{
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem'
+                    }}
                 >
                     <option value="">Choose a team...</option>
                     {nflTeams.map((team, index) => (
@@ -149,8 +156,8 @@ const NFLTeamStatistics = () => {
                 </div>
             )}
             {data && (
-                <div className="p-4">
-                    <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 md:p-4">
+                    <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
                         {(() => {
                             const fullTeamName = nflTeams.find(t => t.name === selectedTeam) 
                                 ? `${nflTeams.find(t => t.name === selectedTeam).city} ${selectedTeam}`
@@ -160,244 +167,246 @@ const NFLTeamStatistics = () => {
                                 <img 
                                     src={logoUrl} 
                                     alt={`${selectedTeam} logo`}
-                                    className="w-16 h-16 object-contain flex-shrink-0"
+                                    className="w-10 h-10 md:w-16 md:h-16 object-contain flex-shrink-0"
                                     onError={(e) => {
                                         e.target.style.display = 'none';
                                     }}
                                 />
                             ) : null;
                         })()}
-                        <h1 style={{ color: 'white' }} className="text-2xl font-bold">{selectedTeam} Defensive Statistics</h1>
+                        <h1 style={{ color: 'white' }} className="text-lg md:text-xl lg:text-2xl font-bold">{selectedTeam} Defensive Statistics</h1>
                     </div>
                 
                 {/* Stats Table */}
-                <div className="overflow-x-auto">
-                    <table className="min-w-full bg-gray-800">
-                        <thead className="bg-gray-900">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Statistic
-                                </th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Rank
-                                </th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Value
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            <tr style={{ backgroundColor: getRankColor(data.epa_per_play_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
-                                    EPA per Play Allowed
-                                </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
-                                    {data.epa_per_play_allowed_rank}
-                                </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
-                                    {data.epa_per_play_allowed}
-                                </td>
-                            </tr>
-                            <tr style={{ backgroundColor: getRankColor(data.yards_per_play_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yards_per_play_allowed_rank) }}>
-                                    Yards Per Play Allowed
-                                </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.yards_per_play_allowed_rank) }}>
-                                    {data.yards_per_play_allowed_rank}
-                                </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yards_per_play_allowed_rank) }}>
-                                    {data.yards_per_play_allowed}
+                <div className="overflow-x-auto -mx-2 md:mx-0">
+                    <div className="inline-block min-w-full align-middle">
+                        <table className="min-w-full bg-gray-800">
+                            <thead className="bg-gray-900">
+                                <tr>
+                                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Statistic
+                                    </th>
+                                    <th className="px-3 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Rank
+                                    </th>
+                                    <th className="px-3 md:px-6 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Value
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                <tr style={{ backgroundColor: getRankColor(data.epa_per_play_allowed_rank) }}>
+                                    <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
+                                        EPA per Play Allowed
+                                    </td>
+                                    <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
+                                        {data.epa_per_play_allowed_rank}
+                                    </td>
+                                    <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.epa_per_play_allowed_rank) }}>
+                                        {data.epa_per_play_allowed}
+                                    </td>
+                                </tr>
+                                <tr style={{ backgroundColor: getRankColor(data.yards_per_play_allowed_rank) }}>
+                                    <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.yards_per_play_allowed_rank) }}>
+                                        Yards Per Play Allowed
+                                    </td>
+                                    <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.yards_per_play_allowed_rank) }}>
+                                        {data.yards_per_play_allowed_rank}
+                                    </td>
+                                    <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.yards_per_play_allowed_rank) }}>
+                                        {data.yards_per_play_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.down_conversion_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.down_conversion_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.down_conversion_rate_allowed_rank) }}>
                                     Down Conversion Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.down_conversion_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.down_conversion_rate_allowed_rank) }}>
                                     {data.down_conversion_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.down_conversion_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.down_conversion_rate_allowed_rank) }}>
                                     {data.down_conversion_rate_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.success_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
                                     Success Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
                                     {data.success_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.success_rate_allowed_rank) }}>
                                     {data.success_rate_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.rush_epa_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_epa_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.rush_epa_allowed_rank) }}>
                                     Rush EPA Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.rush_epa_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.rush_epa_allowed_rank) }}>
                                     {data.rush_epa_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_rush_epa_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.rush_rush_epa_allowed_rank) }}>
                                     {data.rush_epa_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.rush_success_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
                                     Rush Success Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
                                     {data.rush_success_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.rush_success_rate_allowed_rank) }}>
                                     {data.rush_success_rate_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.rush_stuff_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
                                     Rush Stuff Rate
                                 </td>
                                 <td className="px-6 py-4 text-center font-bold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
                                     {data.rush_stuff_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
                                     {data.rush_stuff_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.yards_before_contact_per_rb_rush_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yards_before_contact_per_rb_rush_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.yards_before_contact_per_rb_rush_rank) }}>
                                     Yards Before Contact Per Rush
                                 </td>
                                 <td className="px-6 py-4 text-center font-bold" style={{ color: getTextColor(data.yards_before_contact_per_rb_rush_rank) }}>
                                     {data.yards_before_contact_per_rb_rush_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yards_before_contact_per_rb_rush_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.yards_before_contact_per_rb_rush_rank) }}>
                                     {data.yards_before_contact_per_rb_rush}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.dropback_epa_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_epa_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.dropback_epa_allowed_rank) }}>
                                     Dropback EPA Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.dropback_epa_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.dropback_epa_allowed_rank) }}>
                                     {data.dropback_epa_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_epa_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.dropback_epa_allowed_rank) }}>
                                     {data.dropback_epa_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.dropback_success_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     Dropback Success Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     {data.dropback_success_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     {data.dropback_success_rate_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.pressure_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.pressure_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.pressure_rate_rank) }}>
                                     Pressure Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.pressure_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.pressure_rate_rank) }}>
                                     {data.pressure_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.pressure_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.pressure_rate_rank) }}>
                                     {data.pressure_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.scramble_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
                                     Scramble Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
                                     {data.scramble_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.scramble_rate_rank) }}>
                                     {data.scramble_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.blitz_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.blitz_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.blitz_rate_rank) }}>
                                     Blitz Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.blitz_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.blitz_rate_rank) }}>
                                     {data.blitz_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.blitz_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.blitz_rate_rank) }}>
                                     {data.blitz_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.sacks_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.sacks_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.sacks_rate_rank) }}>
                                     Sacks Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.sacks_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.sacks_rate_rank) }}>
                                     {data.sacks_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.sacks_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.sacks_rate_rank) }}>
                                     {data.sacks_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.explosive_play_rate_allowed_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.explosive_play_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.explosive_play_rate_allowed_rank) }}>
                                     Explosive Play Rate Allowed
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     {data.explosive_play_rate_allowed_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.dropback_success_rate_allowed_rank) }}>
                                     {data.explosive_play_rate_allowed}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.man_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.man_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.man_rate_rank) }}>
                                     Man Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.man_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.man_rate_rank) }}>
                                     {data.man_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.man_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.man_rate_rank) }}>
                                     {data.man_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.zone_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.zone_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.zone_rate_rank) }}>
                                     Zone Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.zone_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.zone_rate_rank) }}>
                                     {data.zone_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.zone_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.zone_rate_rank) }}>
                                     {data.zone_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.adot_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
                                     ADOT
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.adot_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.adot_rank) }}>
                                     {data.adot_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
                                     {data.adot}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.int_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.int_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.int_rate_rank) }}>
                                     Interception Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.int_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.int_rate_rank) }}>
                                     {data.int_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.int_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.int_rate_rank) }}>
                                     {data.int_rate}
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
                 </div>
             )}

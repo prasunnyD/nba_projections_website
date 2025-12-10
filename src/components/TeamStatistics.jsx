@@ -254,15 +254,22 @@ const TeamStatistics = ({ awayTeam }) => {
   return (
     <div className="bg-neutral-700 shadow-lg overflow-y-auto h-full">
       {/* Team Selection */}
-      <div className="p-4 border-b border-gray-600">
-        <label htmlFor="team-stats-select" className="block text-sm font-medium text-white mb-2">
+      <div className="p-2 md:p-4 border-b border-gray-600">
+        <label htmlFor="team-stats-select" className="block text-xs md:text-sm font-medium text-white mb-2">
           Select Team for Statistics
         </label>
         <select
           id="team-stats-select"
           value={selectedTeam}
           onChange={handleTeamChange}
-          className="w-full p-2 bg-neutral-600 text-white border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 md:p-2 bg-neutral-600 text-white border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm md:text-base min-h-[44px] appearance-none cursor-pointer hover:bg-neutral-500 transition-colors"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundPosition: 'right 0.5rem center',
+            backgroundRepeat: 'no-repeat',
+            backgroundSize: '1.5em 1.5em',
+            paddingRight: '2.5rem'
+          }}
         >
           <option value="">Choose a team...</option>
           {nbaTeams.map((team, index) => (
@@ -292,70 +299,72 @@ const TeamStatistics = ({ awayTeam }) => {
       )}
 
       {data && (
-        <div className="p-4">
-          <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 md:p-4">
+          <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
             {getTeamLogoUrl(getCityForLogo(selectedTeam)) && (
               <img 
                 src={getTeamLogoUrl(getCityForLogo(selectedTeam))} 
                 alt={`${selectedTeam} logo`}
-                className="w-14 h-14 object-contain"
+                className="w-10 h-10 md:w-14 md:h-14 object-contain"
                 onError={(e) => {
                   e.target.style.display = 'none';
                 }}
               />
             )}
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-white">
               {selectedTeam} Defensive Statistics
             </h1>
           </div>
 
           {/* Stats Table with Rank-based Row Colors */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-gray-800">
-              <thead className="bg-gray-900">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Statistic
-                  </th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Rank
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
-                    Value
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-700">
-                {[
-                  ...Object.entries(data.Defense).map(([key, stat]) => ({ name: key, ...stat })),
-                  ...Object.entries(data.Opponent).map(([key, stat]) => ({ name: key, ...stat })),
-                  ...Object.entries(data.FourFactor).map(([key, stat]) => ({ name: key, ...stat })),
-                ].map((stat) => {
-                  const bg = getRankColor(stat.rank);
-                  const fg = getTextColor(stat.rank);
-                  const displayValue =
-                    typeof stat.value === 'number'
-                      ? stat.name.includes('PCT') || stat.name.includes('RATE')
-                        ? (stat.value * 100).toFixed(2) + '%'
-                        : stat.value.toFixed(2)
-                      : stat.value;
+          <div className="overflow-x-auto -mx-2 md:mx-0">
+            <div className="inline-block min-w-full align-middle">
+              <table className="min-w-full bg-gray-800">
+                <thead className="bg-gray-900">
+                  <tr>
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Statistic
+                    </th>
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Rank
+                    </th>
+                    <th className="px-3 md:px-6 py-2 md:py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                      Value
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700">
+                  {[
+                    ...Object.entries(data.Defense).map(([key, stat]) => ({ name: key, ...stat })),
+                    ...Object.entries(data.Opponent).map(([key, stat]) => ({ name: key, ...stat })),
+                    ...Object.entries(data.FourFactor).map(([key, stat]) => ({ name: key, ...stat })),
+                  ].map((stat) => {
+                    const bg = getRankColor(stat.rank);
+                    const fg = getTextColor(stat.rank);
+                    const displayValue =
+                      typeof stat.value === 'number'
+                        ? stat.name.includes('PCT') || stat.name.includes('RATE')
+                          ? (stat.value * 100).toFixed(2) + '%'
+                          : stat.value.toFixed(2)
+                        : stat.value;
 
-                  return (
-                    <tr key={stat.name} style={{ backgroundColor: bg }}>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm font-semibold" style={{ color: fg }}>
-                        {stat.name.replaceAll('_', ' ')}
-                      </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm text-center font-bold" style={{ color: fg }}>
-                        {stat.rank ? `#${stat.rank}` : '—'}
-                      </td>
-                      <td className="px-6 py-3 whitespace-nowrap text-sm text-right font-semibold" style={{ color: fg }}>
-                        {displayValue}
-                      </td>
+                    return (
+                      <tr key={stat.name} style={{ backgroundColor: bg }}>
+                        <td className="px-3 md:px-6 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm font-semibold" style={{ color: fg }}>
+                          {stat.name.replaceAll('_', ' ')}
+                        </td>
+                        <td className="px-3 md:px-6 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-center font-bold" style={{ color: fg }}>
+                          {stat.rank ? `#${stat.rank}` : '—'}
+                        </td>
+                        <td className="px-3 md:px-6 py-2 md:py-3 whitespace-nowrap text-xs md:text-sm text-right font-semibold" style={{ color: fg }}>
+                          {displayValue}
+                        </td>
                     </tr>
                   );
                 })}
               </tbody>
             </table>
+            </div>
           </div>
 
           {/* Radar (kept) */}

@@ -86,7 +86,7 @@ export default function ShotChartContainer({ playerName, opponentTeam }) {
       setOpponentZones(null);
       return;
     }
-    const predefined = ["2024-25", "2023-24", "2022-23", "2021-22", "2020-21"];
+    const predefined = ["2025-26", "2024-25", "2023-24", "2022-23", "2021-22", "2020-21"];
     setSeasons(predefined);
     setSeason(predefined[0]);
     // If opponentTeam is provided, set it as opponent
@@ -290,17 +290,17 @@ export default function ShotChartContainer({ playerName, opponentTeam }) {
   }
 
   return (
-    <div className="rounded-xl bg-neutral-900 p-8 shadow-lg">
-      <div className="mb-4">
-        <h2 className="text-white text-3xl font-extrabold text-center">
+    <div className="rounded-xl bg-neutral-900 p-3 md:p-4 lg:p-8 shadow-lg">
+      <div className="mb-2 md:mb-3 lg:mb-4">
+        <h2 className="text-white text-lg md:text-xl lg:text-3xl font-extrabold text-center">
           {playerName} Shot Chart {season ? `(${season})` : ""}
         </h2>
-        <p className="text-gray-400 text-sm mt-1 text-center">
+        <p className="text-gray-400 text-xs md:text-sm mt-1 text-center px-2">
           Visualizing shot accuracy and volume across the court. Select the Opponent team to overlay their allowed FG% and league rank by zone.
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-center gap-2 md:gap-3 mb-3 md:mb-4 lg:mb-6">
         <OpponentDropdown data={allShots} value={opponent} onChange={setOpponent} />
         <SeasonDropdown predefinedSeasons={seasons} playerName={playerName} value={season} onChange={setSeason} />
         <div className="flex items-center gap-2">
@@ -311,7 +311,14 @@ export default function ShotChartContainer({ playerName, opponentTeam }) {
             id="numGames"
             value={numGames}
             onChange={(e) => setNumGames(e.target.value)}
-            className="bg-neutral-800 text-white text-sm rounded-md px-2 py-1"
+            className="bg-neutral-800 text-white text-sm rounded-md px-3 py-2 min-h-[44px] appearance-none cursor-pointer hover:bg-neutral-700 transition-colors border border-neutral-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+              backgroundPosition: 'right 0.5rem center',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: '1.5em 1.5em',
+              paddingRight: '2.5rem'
+            }}
           >
             <option value="All">All</option>
             <option value="5">Last 5</option>
@@ -321,22 +328,24 @@ export default function ShotChartContainer({ playerName, opponentTeam }) {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-neutral-950/80 ring-1 ring-neutral-800/80 p-6">
-        <PlayerShotHexChart
-          shots={shots}
-          xDomain={domains.x}
-          yDomain={domains.y}
-          width={900}
-          courtImgSrc="/basketball_court.png"
-          playerName={playerName}
-          seasonLabel={season}
-          baselineZones={baselineZones}
-          playerSeasonZones={playerSeasonZones}
-          opponentZones={opponentZones}
-          loading={loading}
-          error={err}
-          showHeader={false}
-        />
+      <div className="rounded-2xl bg-neutral-950/80 ring-1 ring-neutral-800/80 p-2 md:p-4 lg:p-6 overflow-x-auto">
+        <div className="min-w-full">
+          <PlayerShotHexChart
+            shots={shots}
+            xDomain={domains.x}
+            yDomain={domains.y}
+            width={typeof window !== 'undefined' && window.innerWidth < 640 ? Math.min(window.innerWidth - 40, 600) : 900}
+            courtImgSrc="/basketball_court.png"
+            playerName={playerName}
+            seasonLabel={season}
+            baselineZones={baselineZones}
+            playerSeasonZones={playerSeasonZones}
+            opponentZones={opponentZones}
+            loading={loading}
+            error={err}
+            showHeader={false}
+          />
+        </div>
       </div>
     </div>
   );

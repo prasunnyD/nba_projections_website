@@ -10,8 +10,19 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
     const [error, setError] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isRosterExpanded, setIsRosterExpanded] = useState(true);
+    const [isMobile, setIsMobile] = useState(false);
     const isManualSelection = useRef(false);
     const lastAutoSelectedHomeTeam = useRef(null);
+
+    // Detect mobile screen size
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // NBA Teams with their cities
     const nbaTeams = [
@@ -200,7 +211,7 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
                                     }}
                                 />
                             )}
-                            <h3 className="text-lg font-semibold text-white">
+                            <h3 className="text-sm md:text-base lg:text-lg font-semibold text-white">
                                 {selectedTeam} Roster
                             </h3>
                         </div>
@@ -256,14 +267,21 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
     return (
         <div className="w-full">
             <div className="mb-4">
-                <label htmlFor="team-select" className="block text-sm font-medium text-white mb-2">
+                <label htmlFor="team-select" className="block text-xs md:text-sm font-medium text-white mb-2">
                     Select NBA Team
                 </label>
                 <select
                     id="team-select"
                     value={selectedTeam}
                     onChange={handleTeamChange}
-                    className="w-full p-2 bg-neutral-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full p-3 md:p-2 bg-neutral-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px] cursor-pointer hover:bg-neutral-600 transition-colors ${!isMobile ? 'appearance-none' : ''}`}
+                    style={!isMobile ? {
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem'
+                    } : {}}
                 >
                     <option value="">Choose a team...</option>
                     {nbaTeams.map((team, index) => (

@@ -176,9 +176,9 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
 
     return (
       <div className="relative">
-          <div className="scrollmenu mb-4">
-              {loading && <p className="text-white">Loading...</p>}
-              {error && <p className="text-red-500">Error: {error.message}</p>}
+          <div className="scrollmenu mb-2 md:mb-4">
+              {loading && <p className="text-white text-sm md:text-base">Loading...</p>}
+              {error && <p className="text-red-500 text-sm md:text-base">Error: {error.message}</p>}
               {data &&
                   data.games.map((game, index) => {
                       const fullHomeTeam = processTeamName(data.homeCity[index], data.homeTeam[index]);
@@ -195,14 +195,14 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                   handleGameClick(data.homeCity[index], data.homeTeam[index], data.awayCity[index], data.awayTeam[index])
                               }
                           >
-                              <div className="teams flex items-center gap-2">
+                              <div className="teams flex items-center gap-1 md:gap-2 flex-wrap">
                                   <div className="flex flex-col">
                                       <span
                                           onClick={(e) => {
                                               e.stopPropagation(); // Prevent triggering game-card click
                                               handleTeamClick(data.awayCity[index], data.awayTeam[index]);
                                           }}
-                                          className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
+                                          className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-1 md:gap-2 text-xs md:text-sm"
                                       >
                                           {(() => {
                                               const logoUrl = getTeamLogoUrl(getCityForLogo(data.awayCity[index], data.awayTeam[index]), 'L');
@@ -210,7 +210,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                                   <img 
                                                       src={logoUrl} 
                                                       alt={`${data.awayCity[index]} ${data.awayTeam[index]} logo`}
-                                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                                      className="w-4 h-4 md:w-6 md:h-6 object-contain flex-shrink-0"
                                                       onError={(e) => {
                                                           e.target.style.display = 'none';
                                                       }}
@@ -222,20 +222,20 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                       {(() => {
                                           const teamMoneyline = moneylineData[fullAwayTeam];
                                           return teamMoneyline ? (
-                                              <span className="text-sm text-green-400 ml-8">
+                                              <span className="text-xs md:text-sm text-green-400 ml-4 md:ml-8">
                                                   Moneyline: {teamMoneyline.price} ({teamMoneyline.sportsbook})
                                               </span>
                                           ) : null;
                                       })()}
                                   </div>
-                                  {' @ '}
+                                  <span className="text-xs md:text-sm">@</span>
                                   <div className="flex flex-col">
                                       <span
                                           onClick={(e) => {
                                               e.stopPropagation(); // Prevent triggering game-card click
                                               handleTeamClick(data.homeCity[index], data.homeTeam[index]);
                                           }}
-                                          className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-2"
+                                          className="cursor-pointer hover:text-blue-500 transition-colors flex items-center gap-1 md:gap-2 text-xs md:text-sm"
                                       >
                                           {(() => {
                                               const logoUrl = getTeamLogoUrl(getCityForLogo(data.homeCity[index], data.homeTeam[index]), 'L');
@@ -243,7 +243,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                                   <img 
                                                       src={logoUrl} 
                                                       alt={`${data.homeCity[index]} ${data.homeTeam[index]} logo`}
-                                                      className="w-6 h-6 object-contain flex-shrink-0"
+                                                      className="w-4 h-4 md:w-6 md:h-6 object-contain flex-shrink-0"
                                                       onError={(e) => {
                                                           e.target.style.display = 'none';
                                                       }}
@@ -255,7 +255,7 @@ const Scoreboard = ({ onGameSelect, onTeamSelect}) => {
                                       {(() => {
                                           const teamMoneyline = moneylineData[fullHomeTeam];
                                           return teamMoneyline ? (
-                                              <span className="text-sm text-green-400 ml-8">
+                                              <span className="text-xs md:text-sm text-green-400 ml-4 md:ml-8">
                                                   Moneyline: {teamMoneyline.price} ({teamMoneyline.sportsbook})
                                               </span>
                                           ) : null;

@@ -188,130 +188,132 @@ const NBATeamOffensiveStatistics = ({ selectedTeam }) => {
                 </div>
             )}
             {data && (
-                <div className="p-4">
-                    <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 md:p-4">
+                    <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-4">
                         {getTeamLogoUrl(getCityForLogo(data.team_name || selectedTeam)) && (
                             <img 
                                 src={getTeamLogoUrl(getCityForLogo(data.team_name || selectedTeam))} 
                                 alt={`${data.team_name || selectedTeam} logo`}
-                                className="w-16 h-16 object-contain"
+                                className="w-10 h-10 md:w-16 md:h-16 object-contain"
                                 onError={(e) => {
                                     e.target.style.display = 'none';
                                 }}
                             />
                         )}
-                        <h1 style={{ color: 'white' }} className="text-2xl font-bold">
+                        <h1 style={{ color: 'white' }} className="text-lg md:text-xl lg:text-2xl font-bold">
                             {data.team_name || selectedTeam} Offensive Statistics
                         </h1>
                     </div>
                 
                 {/* Stats Table */}
-                <div className="overflow-x-auto">
-                    <table className="min-w-full bg-gray-800">
-                        <thead className="bg-gray-900">
-                            <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Statistic
-                                </th>
-                                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Rank
-                                </th>
-                                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                    Value
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200">
-                            <tr style={{ backgroundColor: getRankColor(data.off_rating_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.off_rating_rank) }}>
-                                    Offensive Rating
-                                </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.off_rating_rank) }}>
-                                    {data.off_rating_rank}
-                                </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.off_rating_rank) }}>
-                                    {data.off_rating}
-                                </td>
-                            </tr>
+                <div className="overflow-x-auto -mx-2 md:mx-0">
+                    <div className="inline-block min-w-full align-middle">
+                        <table className="min-w-full bg-gray-800">
+                            <thead className="bg-gray-900">
+                                <tr>
+                                    <th className="px-3 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Statistic
+                                    </th>
+                                    <th className="px-3 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Rank
+                                    </th>
+                                    <th className="px-3 md:px-6 py-2 md:py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Value
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                <tr style={{ backgroundColor: getRankColor(data.off_rating_rank) }}>
+                                    <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.off_rating_rank) }}>
+                                        Offensive Rating
+                                    </td>
+                                    <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.off_rating_rank) }}>
+                                        {data.off_rating_rank}
+                                    </td>
+                                    <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.off_rating_rank) }}>
+                                        {data.off_rating}
+                                    </td>
+                                </tr>
                             <tr style={{ backgroundColor: getRankColor(data.reb_pct_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.reb_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.reb_pct_rank) }}>
                                     Rebound Percentage
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.reb_pct_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.reb_pct_rank) }}>
                                     {data.reb_pct_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.reb_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.reb_pct_rank) }}>
                                     {(data.reb_pct * 100).toFixed(1)}%
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.ast_pct_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.ast_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.ast_pct_rank) }}>
                                     Assist Percentage
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.ast_pct_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.ast_pct_rank) }}>
                                     {data.ast_pct_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.ast_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.ast_pct_rank) }}>
                                     {(data.ast_pct * 100).toFixed(1)}%
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.pace_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.pace_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.pace_rank) }}>
                                     Pace
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.pace_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.pace_rank) }}>
                                     {data.pace_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.pace_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.pace_rank) }}>
                                     {data.pace}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.efg_pct_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.efg_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.efg_pct_rank) }}>
                                     Effective Field Goal Percentage
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.efg_pct_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.efg_pct_rank) }}>
                                     {data.efg_pct_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.efg_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.efg_pct_rank) }}>
                                     {(data.efg_pct * 100).toFixed(1)}%
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.fta_rate_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.fta_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.fta_rate_rank) }}>
                                     Free Throw Attempt Rate
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.fta_rate_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.fta_rate_rank) }}>
                                     {data.fta_rate_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.fta_rate_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.fta_rate_rank) }}>
                                     {(data.fta_rate * 100).toFixed(1)}%
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.tm_tov_pct_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.tm_tov_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.tm_tov_pct_rank) }}>
                                     Team Turnover Percentage
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.tm_tov_pct_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.tm_tov_pct_rank) }}>
                                     {data.tm_tov_pct_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.tm_tov_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.tm_tov_pct_rank) }}>
                                     {(data.tm_tov_pct * 100).toFixed(1)}%
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.oreb_pct_rank) }}>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.oreb_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.oreb_pct_rank) }}>
                                     Offensive Rebound Percentage
                                 </td>
-                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.oreb_pct_rank) }}>
+                                <td className="px-3 md:px-6 py-2 md:py-4 text-xs md:text-sm text-center font-bold" style={{ color: getTextColor(data.oreb_pct_rank) }}>
                                     {data.oreb_pct_rank}
                                 </td>
-                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.oreb_pct_rank) }}>
+                                <td className="px-3 md:px-4 py-2 text-left text-xs md:text-sm font-semibold" style={{ color: getTextColor(data.oreb_pct_rank) }}>
                                     {(data.oreb_pct * 100).toFixed(1)}%
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
                 </div>
             )}

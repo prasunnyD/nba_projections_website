@@ -264,7 +264,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             oddsLoading={oddsLoading}
             chartConfig={{
                 lightTheme: true,
-                height: 400
+                height: typeof window !== 'undefined' && window.innerWidth < 640 ? 300 : 400
             }}
         />
     );

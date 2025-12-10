@@ -229,7 +229,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
             oddsLoading={oddsLoading}
             chartConfig={{
                 lightTheme: true,
-                height: 450
+                height: typeof window !== 'undefined' && window.innerWidth < 640 ? 300 : 450
             }}
         />
     );

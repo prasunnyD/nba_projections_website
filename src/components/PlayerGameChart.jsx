@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import Plot from 'react-plotly.js';
 
 /**
@@ -171,24 +171,38 @@ const PlayerGameChart = ({
         return traces;
     }, [dates, currentStatValues, statDisplayName, propLine, secondaryMetric, chartConfig.lightTheme]);
 
+    // Detect mobile screen size
+    const [isMobile, setIsMobile] = useState(false);
+    
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
     // Chart layout configuration
     const layout = useMemo(() => ({
         autosize: true,
-        margin: { t: 40, r: 50, b: 80, l: 60 },
+        margin: isMobile 
+            ? { t: 20, r: 20, b: 60, l: 40 }
+            : { t: 40, r: 50, b: 80, l: 60 },
         font: {
             family: 'Inter, system-ui, sans-serif',
             color: chartConfig.lightTheme ? '#1f2937' : '#e5e7eb',
-            size: 12
+            size: isMobile ? 10 : 12
         },
         xaxis: {
             title: {
                 text: 'Game Date',
                 font: { 
-                    size: 14, 
+                    size: isMobile ? 12 : 14, 
                     color: chartConfig.lightTheme ? '#374151' : '#e5e7eb' 
                 }
             },
-            tickangle: -45,
+            tickangle: isMobile ? -60 : -45,
             automargin: true,
             type: 'category',
             tickmode: 'array',
@@ -202,14 +216,14 @@ const PlayerGameChart = ({
             linecolor: chartConfig.lightTheme ? '#d1d5db' : '#4b5563',
             tickfont: { 
                 color: chartConfig.lightTheme ? '#6b7280' : '#9ca3af', 
-                size: 11 
+                size: isMobile ? 9 : 11 
             },
         },
         yaxis: {
             title: {
                 text: statDisplayName,
                 font: { 
-                    size: 14, 
+                    size: isMobile ? 12 : 14, 
                     color: chartConfig.lightTheme ? '#374151' : '#e5e7eb' 
                 }
             },
@@ -221,7 +235,7 @@ const PlayerGameChart = ({
             linecolor: chartConfig.lightTheme ? '#d1d5db' : '#4b5563',
             tickfont: { 
                 color: chartConfig.lightTheme ? '#6b7280' : '#9ca3af', 
-                size: 11 
+                size: isMobile ? 9 : 11 
             },
         },
         yaxis2: {
@@ -252,17 +266,17 @@ const PlayerGameChart = ({
         },
         paper_bgcolor: chartConfig.lightTheme ? 'white' : 'rgba(0,0,0,0)',
         plot_bgcolor: chartConfig.lightTheme ? 'white' : 'rgba(0,0,0,0)',
-        height: chartConfig.height || 450,
-    }), [dates, statDisplayName, secondaryMetric, chartConfig]);
+        height: isMobile ? 300 : (chartConfig.height || 450),
+    }), [dates, statDisplayName, secondaryMetric, chartConfig, isMobile]);
 
     return (
-        <div className="rounded-xl bg-neutral-900 p-6 shadow-lg">
-            <h2 className="text-white text-2xl font-bold mb-6">
+        <div className="rounded-xl bg-neutral-900 p-3 md:p-4 lg:p-6 shadow-lg">
+            <h2 className="text-white text-lg md:text-xl lg:text-2xl font-bold mb-3 md:mb-4 lg:mb-6">
                 {title || `Last ${numberOfGames} Games ${statDisplayName} History`}
             </h2>
 
             {/* Stat Selector Buttons */}
-            <div className="mb-6 flex flex-wrap gap-2">
+            <div className="mb-3 md:mb-4 lg:mb-6 flex flex-wrap gap-1.5 md:gap-2">
                 {statOptions.map(option => (
                     <button
                         key={option.key}
@@ -276,9 +290,9 @@ const PlayerGameChart = ({
 
             {/* Odds Display */}
             {odds && odds.length > 0 && (
-                <div className="mb-6 rounded-lg bg-neutral-800 p-4 shadow">
-                    <h3 className="text-white text-lg font-semibold mb-3">Betting Odds</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div className="mb-3 md:mb-4 lg:mb-6 rounded-lg bg-neutral-800 p-2 md:p-3 lg:p-4 shadow">
+                    <h3 className="text-white text-sm md:text-base lg:text-lg font-semibold mb-2 md:mb-3">Betting Odds</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-3">
                         {odds.map((odd, index) => (
                             <div
                                 key={index}
@@ -312,26 +326,33 @@ const PlayerGameChart = ({
             )}
 
             {/* Controls */}
-            <div className="prop-line-container flex flex-col items-center justify-center gap-4 p-4 rounded-lg shadow bg-neutral-800 mb-6">
-                <div className="prop-line-and-games flex items-center gap-8">
+            <div className="prop-line-container flex flex-col items-center justify-center gap-2 md:gap-3 lg:gap-4 p-2 md:p-3 lg:p-4 rounded-lg shadow bg-neutral-800 mb-3 md:mb-4 lg:mb-6">
+                <div className="prop-line-and-games flex flex-col sm:flex-row items-center gap-3 md:gap-4 lg:gap-8 w-full">
                     <div className="prop-line-input flex items-center gap-2">
-                        <label htmlFor="propLine" className="text-white font-medium">Prop Line:</label>
+                        <label htmlFor="propLine" className="text-white text-sm md:text-base font-medium">Prop Line:</label>
                         <input
                             id="propLine"
                             type="number"
                             value={propLine}
                             onChange={(e) => onPropLineChange(e.target.value)}
-                            className="w-20 px-2 py-1 border rounded text-center bg-neutral-700 text-white border-neutral-600"
+                            className="w-16 md:w-20 px-2 py-1 border rounded text-center bg-neutral-700 text-white border-neutral-600 text-sm md:text-base"
                             placeholder="0.5"
                         />
                     </div>
                     <div className="number-of-games-container flex items-center gap-2">
-                        <label htmlFor="gameCount" className="text-white font-medium">Number of Games:</label>
+                        <label htmlFor="gameCount" className="text-white text-sm md:text-base font-medium">Games:</label>
                         <select
                             id="gameCount"
                             value={numberOfGames}
                             onChange={(e) => onNumberOfGamesChange(Number(e.target.value))}
-                            className="px-3 py-2 border rounded-md bg-neutral-700 text-white border-neutral-600"
+                            className="px-3 md:px-3 py-2 md:py-2 border rounded-md bg-neutral-700 text-white border-neutral-600 text-sm md:text-base min-h-[44px] appearance-none cursor-pointer hover:bg-neutral-600 transition-colors"
+                            style={{
+                                backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                                backgroundPosition: 'right 0.5rem center',
+                                backgroundRepeat: 'no-repeat',
+                                backgroundSize: '1.5em 1.5em',
+                                paddingRight: '2.5rem'
+                            }}
                         >
                             {numberOfGamesOptions.map(num => (
                                 <option key={num} value={num}>
@@ -343,7 +364,7 @@ const PlayerGameChart = ({
                 </div>
 
                 {propLineStats && (
-                    <div className="prop-line-stats flex items-center gap-4 text-sm">
+                    <div className="prop-line-stats flex flex-col sm:flex-row items-center gap-2 md:gap-4 text-xs md:text-sm">
                         <span className="font-bold text-green-500">
                             Above: {propLineStats.above} ({propLineStats.abovePct}%)
                         </span>
@@ -356,16 +377,19 @@ const PlayerGameChart = ({
 
             {/* Chart */}
             {dates && dates.length > 0 && currentStatValues.length > 0 && (
-                <div className={`rounded-xl ${chartConfig.lightTheme ? 'bg-white ring-1 ring-gray-200' : 'bg-neutral-950/80 ring-1 ring-neutral-800/80'} p-6 shadow-sm`}>
-                    <Plot
-                        data={traces}
-                        layout={layout}
-                        config={{
-                            responsive: true,
-                            displayModeBar: false,
-                        }}
-                        className="w-full"
-                    />
+                <div className={`rounded-xl ${chartConfig.lightTheme ? 'bg-white ring-1 ring-gray-200' : 'bg-neutral-950/80 ring-1 ring-neutral-800/80'} p-2 md:p-4 lg:p-6 shadow-sm overflow-x-auto`}>
+                    <div className="min-w-full">
+                        <Plot
+                            data={traces}
+                            layout={layout}
+                            config={{
+                                responsive: true,
+                                displayModeBar: false,
+                            }}
+                            className="w-full"
+                            style={{ width: '100%', minHeight: isMobile ? '300px' : '450px' }}
+                        />
+                    </div>
                 </div>
             )}
         </div>

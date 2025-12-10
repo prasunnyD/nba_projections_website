@@ -11,6 +11,17 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [openPositions, setOpenPositions] = useState(new Set());
     const [openCategories, setOpenCategories] = useState(new Set());
+    const [isMobile, setIsMobile] = useState(false);
+
+    // Detect mobile screen size
+    useEffect(() => {
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
 
     // NFL Teams with their cities
     const nflTeams = [
@@ -169,7 +180,7 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
                                 />
                             ) : null;
                         })()}
-                        <h3 className="text-lg font-semibold text-white">
+                        <h3 className="text-sm md:text-base lg:text-lg font-semibold text-white">
                             {selectedTeam} Roster
                         </h3>
                     </div>
@@ -185,10 +196,10 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
                                 <div key={category} className="border-2 border-gray-500 rounded-xl overflow-hidden shadow-lg">
                                     <button
                                         onClick={() => toggleCategory(category)}
-                                        className="w-full px-6 py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-blue-700 hover:to-blue-800 text-left text-white font-bold text-lg flex justify-between items-center transition-all duration-200 shadow-md"
+                                        className="w-full px-4 md:px-6 py-3 md:py-4 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-blue-700 hover:to-blue-800 text-left text-white font-bold text-sm md:text-base lg:text-lg flex justify-between items-center transition-all duration-200 shadow-md"
                                     >
                                         <span className="flex items-center">
-                                            <span className="mr-3 text-xl">
+                                            <span className="mr-3 text-base md:text-lg lg:text-xl">
                                                 ⚡
                                             </span>
                                             {category}
@@ -255,14 +266,21 @@ const NFLTeamDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, onPlayerP
     return (
         <div className="w-full">
             <div className="mb-4">
-                <label htmlFor="team-select" className="block text-sm font-medium text-white mb-2">
+                <label htmlFor="team-select" className="block text-xs md:text-sm font-medium text-white mb-2">
                     Select NFL Team
                 </label>
                 <select
                     id="team-select"
                     value={selectedTeam}
                     onChange={handleTeamChange}
-                    className="w-full p-2 bg-neutral-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className={`w-full p-3 md:p-2 bg-neutral-700 text-white border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-base min-h-[44px] cursor-pointer hover:bg-neutral-600 transition-colors ${!isMobile ? 'appearance-none' : ''}`}
+                    style={!isMobile ? {
+                        backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                        backgroundPosition: 'right 0.5rem center',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundSize: '1.5em 1.5em',
+                        paddingRight: '2.5rem'
+                    } : {}}
                 >
                     <option value="">Choose a team...</option>
                     {nflTeams.map((team, index) => (

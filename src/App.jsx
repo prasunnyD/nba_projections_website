@@ -10,16 +10,16 @@ function Navigation() {
   const navigate = useNavigate();
   
   return (
-    <div className="mb-4 flex gap-4 p-4 justify-center">
+    <div className="mb-2 md:mb-4 flex flex-col sm:flex-row gap-2 md:gap-4 p-2 md:p-4 justify-center">
       <button 
         onClick={() => navigate('/')}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 md:px-4 rounded transition-colors duration-200 text-sm md:text-base"
       >
         Go to NBA Page
       </button>
       <button 
         onClick={() => navigate('/nfl')}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 md:px-4 rounded transition-colors duration-200 text-sm md:text-base"
       >
         Go to NFL Page
       </button>
