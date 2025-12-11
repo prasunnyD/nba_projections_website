@@ -10,14 +10,14 @@ import { getNFLTeamLogoUrl } from '../helpers/nflLogoUtils';
 
 export default function MainContainer({teamName, homeTeam, awayTeam}) {
     const [selectedPlayer, setSelectedPlayer] = useState('');
-    const [numberOfGames, setNumberOfGames] = useState(10);
+    const [numberOfGames, setNumberOfGames] = useState(17);
     const [selectedTeam, setSelectedTeam] = useState('');
     const [rosterData, setRosterData] = useState([]);
     const [playerPosition, setPlayerPosition] = useState('');
 
     const handlePlayerSelect = (playerName) => {
         setSelectedPlayer(playerName);
-        setNumberOfGames(10);
+        setNumberOfGames(17);
     };
 
     const handleTeamSelect = (teamName) => {

@@ -210,6 +210,17 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                     {data.success_rate}
                                 </td>
                             </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.rush_epa_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_epa_rank) }}>
+                                    Rush EPA
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.rush_epa_rank) }}>
+                                    {data.rush_epa_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_epa_rank) }}>
+                                    {data.rush_epa}
+                                </td>
+                            </tr>
                             <tr style={{ backgroundColor: getRankColor(data.rush_success_rate_rank) }}>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_rank) }}>
                                     Rush Success Rate
@@ -219,6 +230,17 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                 </td>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_success_rate_rank) }}>
                                     {data.rush_success_rate}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.dropback_epa_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_epa_rank) }}>
+                                    Dropback EPA
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.dropback_epa_rank) }}>
+                                    {data.dropback_epa_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.dropback_epa_rank) }}>
+                                    {data.dropback_epa}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.dropback_success_rate_rank) }}>
