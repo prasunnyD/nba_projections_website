@@ -1,30 +1,42 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+
+// All NBA teams - using city names to match shot data format
+const ALL_NBA_TEAMS = [
+  'Atlanta',
+  'Boston',
+  'Brooklyn',
+  'Charlotte',
+  'Chicago',
+  'Cleveland',
+  'Dallas',
+  'Denver',
+  'Detroit',
+  'Golden State',
+  'Houston',
+  'Indiana',
+  'Los Angeles Clippers',
+  'Los Angeles Lakers',
+  'Memphis',
+  'Miami',
+  'Milwaukee',
+  'Minnesota',
+  'New Orleans',
+  'New York',
+  'Oklahoma City',
+  'Orlando',
+  'Philadelphia',
+  'Phoenix',
+  'Portland',
+  'Sacramento',
+  'San Antonio',
+  'Toronto',
+  'Utah',
+  'Washington'
+].sort();
 
 export default function OpponentDropdown({ data, value, onChange }) {
-  const [opponents, setOpponents] = useState([]);
-
-  useEffect(() => {
-    if (data && data.length > 0) {
-      // Extract unique opponents from data (could be shots or passes)
-      // Check for different possible field names
-      const opponentField = data[0].opponent || data[0].defteam || data[0].opponent_team || data[0].defense;
-      
-      if (opponentField) {
-        const uniqueOpponents = [...new Set(data.map(item => 
-          item.opponent || item.defteam || item.opponent_team || item.defense
-        ))].filter(Boolean).sort();
-        setOpponents(uniqueOpponents);
-      } else {
-        setOpponents([]);
-      }
-    } else {
-      setOpponents([]);
-    }
-  }, [data]);
-
-  if (opponents.length === 0) {
-    return null;
-  }
+  // Always show all NBA teams, regardless of data
+  const opponents = ALL_NBA_TEAMS;
 
   return (
     <div className="flex items-center">
