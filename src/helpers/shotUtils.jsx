@@ -26,13 +26,60 @@ export const normalizePct = (v) => {
 export const filterShots = (allShots, opponent, numGames) => {
   if (!allShots) return [];
   let filtered = [...allShots];
-  if (opponent) filtered = filtered.filter((s) => s.opponent === opponent);
+  // Only filter by opponent if opponent is a non-empty string
+  if (opponent && opponent.trim() !== "" && opponent !== "All Opponents") {
+    // Try exact match first
+    let matched = filtered.filter((s) => s.opponent === opponent);
+    
+    // If no exact match, try case-insensitive and partial matching
+    if (matched.length === 0) {
+      const oppLower = opponent.toLowerCase();
+      matched = filtered.filter((s) => {
+        if (!s.opponent) return false;
+        const shotOppLower = s.opponent.toLowerCase();
+        // Exact case-insensitive match
+        if (shotOppLower === oppLower) return true;
+        // Check if opponent name contains the shot opponent (e.g., "Phoenix Suns" contains "Phoenix")
+        if (oppLower.includes(shotOppLower) || shotOppLower.includes(oppLower)) return true;
+        // Check last word match (e.g., "Phoenix Suns" matches "Suns")
+        const oppWords = oppLower.split(/\s+/);
+        const shotWords = shotOppLower.split(/\s+/);
+        if (oppWords.some(w => shotWords.includes(w)) || shotWords.some(w => oppWords.includes(w))) return true;
+        return false;
+      });
+    }
+    
+    // Use matched shots (even if empty - this shows "no data" when opponent doesn't match)
+    filtered = matched;
+  }
+  // If opponent is empty or "All Opponents", filtered remains as all shots
+  
   if (numGames !== "All") {
     const n = parseInt(numGames, 10);
     const hasDates = filtered.every((s) => !!s.gameDate);
-    filtered = hasDates
-      ? [...filtered].sort((a, b) => new Date(a.gameDate) - new Date(b.gameDate)).slice(-n)
-      : filtered.slice(-n);
+    
+    if (hasDates) {
+      // Group shots by game date to get unique games
+      const gamesMap = new Map();
+      filtered.forEach((shot) => {
+        const dateKey = shot.gameDate;
+        if (!gamesMap.has(dateKey)) {
+          gamesMap.set(dateKey, []);
+        }
+        gamesMap.get(dateKey).push(shot);
+      });
+      
+      // Sort games by date and get last N games
+      const sortedGames = Array.from(gamesMap.entries())
+        .sort((a, b) => new Date(a[0]) - new Date(b[0]))
+        .slice(-n);
+      
+      // Flatten shots from the last N games
+      filtered = sortedGames.flatMap(([_, shots]) => shots);
+    } else {
+      // Fallback: if no dates, just take last N shots
+      filtered = filtered.slice(-n);
+    }
   }
   return filtered;
 };

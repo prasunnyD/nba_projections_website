@@ -152,23 +152,21 @@ export default function PlayerShotHexChart({
     if (seasonPct == null) seasonPct = playerSeasonZones?.[hover.regionId]?.fg_pct ?? playerPct;
 
     const opp = opponentZones?.[hover.regionId] || null;
-    const opponentPct = normalizePct(opp?.fg_pct);
-    const opponentRank = Number.isFinite(+opp?.fg_rank) ? +opp.fg_rank : null;
-    const outOf = Number.isFinite(+opp?.out_of) ? +opp.out_of : null;
-
     const fmt = d3.format(".1%");
-    const pctText = playerPct == null ? "—" : fmt(playerPct);
-    const seasonText = seasonPct == null ? "—" : fmt(normalizePct(seasonPct) ?? seasonPct);
-    const oppText = opponentPct == null ? "—" : fmt(opponentPct);
-
+    const fmtNum = d3.format(",");
+    
     return {
       regionLabel: REGION_LABELS[hover.regionId],
-      pctText,
+      pctText: playerPct == null ? "—" : fmt(playerPct),
       made: z.made,
       atts: z.atts,
-      seasonText,
-      oppText,
-      oppRankText: opponentRank && outOf ? `Rk ${opponentRank}/${outOf}` : null,
+      seasonText: seasonPct == null ? "—" : fmt(normalizePct(seasonPct) ?? seasonPct),
+      oppText: normalizePct(opp?.fg_pct) == null ? "—" : fmt(normalizePct(opp?.fg_pct)),
+      oppRankText: (Number.isFinite(+opp?.fg_rank) && Number.isFinite(+opp?.out_of)) 
+        ? `Rk ${opp.fg_rank}/${opp.out_of}` 
+        : (Number.isFinite(+opp?.fg_rank) ? `Rk ${opp.fg_rank}` : null),
+      oppFgaText: Number.isFinite(+opp?.fga) ? fmtNum(opp.fga) : "—",
+      oppFgaRankText: Number.isFinite(+opp?.fga_rank) ? `Rk ${opp.fga_rank}` : null,
     };
   }, [hover, zoneStats, baselineZones, playerSeasonZones, opponentZones]);
 
@@ -307,76 +305,29 @@ export default function PlayerShotHexChart({
               </g>
             )}
 
-            {/* Opponent overlay badges — simplified rank text */}
+            {/* Opponent overlay badges */}
             {opponentZones && (
-            <g>
-              {Object.entries(REGION_LABEL_FEET).map(([rid, [fx, fy]]) => {
-                const z = opponentZones[rid];
-                const pct = normalizePct(z?.fg_pct);
-                if (pct == null) return null;
+              <g>
+                {Object.entries(REGION_LABEL_FEET).map(([rid, [fx, fy]]) => {
+                  const zoneData = opponentZones[rid];
+                  const pct = normalizePct(zoneData?.fg_pct);
+                  if (pct == null) return null;
 
-                const px = x(fx);
-                const py = y(fy);
-                const rank = Number.isFinite(+z?.fg_rank) ? +z.fg_rank : null;
-
-                return (
-                  <g key={rid} transform={`translate(${px},${py})`} filter="url(#oppBadgeShadow)">
-                    {/* Badge background */}
-                    <rect
-                      x={-48}
-                      y={-28}
-                      width={96}
-                      height={48}
-                      rx={10}
-                      fill="#0b1220"
-                      opacity="0.97"
-                      stroke="#3b4758"
-                      strokeWidth="1.2"
+                  return (
+                    <OpponentBadge
+                      key={rid}
+                      x={x(fx)}
+                      y={y(fy)}
+                      zoneName={zoneData?.zone_name}
+                      fgPct={pct}
+                      fgRank={Number.isFinite(+zoneData?.fg_rank) ? +zoneData.fg_rank : null}
+                      fga={Number.isFinite(+zoneData?.fga) ? +zoneData.fga : null}
+                      fgaRank={Number.isFinite(+zoneData?.fga_rank) ? +zoneData.fga_rank : null}
                     />
-
-                    {/* Label "OPP" */}
-                    <text
-                      x={0}
-                      y={-10}
-                      textAnchor="middle"
-                      fontSize="11"
-                      fontWeight="800"
-                      fill="#a9c0e3"
-                      letterSpacing="0.04em"
-                    >
-                      OPP
-                    </text>
-
-                    {/* FG% value */}
-                    <text
-                      x={0}
-                      y={9}
-                      textAnchor="middle"
-                      fontSize="18"
-                      fontWeight="900"
-                      fill="#e7eef9"
-                    >
-                      {d3.format(".1%")(pct)}
-                    </text>
-
-                    {/* Rank line */}
-                    {rank ? (
-                      <text
-                        x={0}
-                        y={25}
-                        textAnchor="middle"
-                        fontSize="11"
-                        fontWeight="800"
-                        fill="#b3c8e6"
-                      >
-                        Rank: {rank}
-                      </text>
-                    ) : null}
-                  </g>
-                );
-              })}
-            </g>
-          )}
+                  );
+                })}
+              </g>
+            )}
 
           </g>
         </svg>
@@ -400,6 +351,55 @@ export default function PlayerShotHexChart({
 }
 
 // ---------------- Subcomponents ----------------
+function OpponentBadge({ x, y, zoneName, fgPct, fgRank, fga, fgaRank }) {
+  const BADGE_WIDTH = 110;
+  const LINE_HEIGHT = 16;
+  const PADDING = 10;
+  
+  const lines = [
+    zoneName && { text: zoneName, fontSize: 11, fontWeight: 900, fill: "#e7eef9", letterSpacing: "0.01em" },
+    { text: `OPP FG% : ${d3.format(".1%")(fgPct)}`, fontSize: 12, fontWeight: 800, fill: "#a9c0e3", letterSpacing: "0.02em" },
+    fgRank != null && { text: `FG% Rk:${fgRank}`, fontSize: 12, fontWeight: 700, fill: "#b3c8e6" },
+    fga != null && { text: `FGA: ${d3.format(",")(fga)}`, fontSize: 12, fontWeight: 800, fill: "#a9c0e3" },
+    fgaRank != null && { text: `FGA Rk:${fgaRank}`, fontSize: 12, fontWeight: 700, fill: "#b3c8e6" },
+  ].filter(Boolean);
+  
+  const badgeHeight = PADDING * 2 + (lines.length * LINE_HEIGHT);
+  const badgeTop = -(badgeHeight / 2);
+  const baseY = badgeTop + PADDING + 12;
+  
+  return (
+    <g transform={`translate(${x},${y})`} filter="url(#oppBadgeShadow)">
+      <rect
+        x={-BADGE_WIDTH / 2}
+        y={badgeTop}
+        width={BADGE_WIDTH}
+        height={badgeHeight}
+        rx={10}
+        fill="#0b1220"
+        opacity="0.3"
+        stroke="#3b4758"
+        strokeWidth="1.2"
+        strokeOpacity="0.6"
+      />
+      {lines.map((line, i) => (
+        <text
+          key={i}
+          x={0}
+          y={baseY + i * LINE_HEIGHT}
+          textAnchor="middle"
+          fontSize={line.fontSize}
+          fontWeight={line.fontWeight}
+          fill={line.fill}
+          letterSpacing={line.letterSpacing}
+        >
+          {line.text}
+        </text>
+      ))}
+    </g>
+  );
+}
+
 function SummaryTile({ label, value }) {
   return (
     <div className="bg-neutral-800 rounded-lg p-3 text-center">
@@ -439,10 +439,21 @@ function Tooltip({ containerRef, hover, tip }) {
           <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT OVERALL FG%</div>
           <div className="flex items-baseline gap-2">
             <div className="text-slate-900 text-base font-extrabold">{tip.oppText}</div>
-            {tip.oppRankText ? <div className="text-slate-500 text-xs font-semibold">{tip.oppRankText}</div> : null}
+            {tip.oppRankText && <div className="text-slate-500 text-xs font-semibold">{tip.oppRankText}</div>}
           </div>
         </div>
       </div>
+
+      {/* Opponent FGA section */}
+      {tip.oppFgaText !== "—" && (
+        <div className="mt-6">
+          <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT FGA</div>
+          <div className="flex items-baseline gap-2">
+            <div className="text-slate-900 text-base font-extrabold">{tip.oppFgaText}</div>
+            {tip.oppFgaRankText && <div className="text-slate-500 text-xs font-semibold">{tip.oppFgaRankText}</div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
