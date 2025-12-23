@@ -396,6 +396,39 @@ const NFLTeamStatistics = () => {
                                     {data.int_rate}
                                 </td>
                             </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.yds_allowed_wr_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yds_allowed_wr_rank) }}>
+                                    Yards Allowed to Wide Receivers
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.yds_allowed_wr_rank) }}>
+                                    {data.yds_allowed_wr_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yds_allowed_wr_rank) }}>
+                                    {data.yds_allowed_wr}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.yds_allowed_rb_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yds_allowed_rb_rank) }}>
+                                    Yards Allowed to Running Backs
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.yds_allowed_rb_rank) }}>
+                                    {data.yds_allowed_rb_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yds_allowed_rb_rank) }}>
+                                    {data.yds_allowed_rb}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.yds_allowed_te_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yds_allowed_te_rank) }}>
+                                    Yards Allowed to Tight Ends
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.yds_allowed_te_rank) }}>
+                                    {data.yds_allowed_te_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.yds_allowed_te_rank) }}>
+                                    {data.yds_allowed_te}
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
