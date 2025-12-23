@@ -298,6 +298,17 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                     {data.scramble_rate}
                                 </td>
                             </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.pressure_rate_allowed_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.pressure_rate_allowed_rank) }}>
+                                    Pressure Rate Allowed
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.pressure_rate_allowed_rank) }}>
+                                    {data.pressure_rate_allowed_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.pressure_rate_allowed_rank) }}>
+                                    {data.pressure_rate_allowed}
+                                </td>
+                            </tr>
                             <tr style={{ backgroundColor: getRankColor(data.rushingAttempts_rank) }}>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rushingAttempts_rank) }}>
                                     Rushing Attempts
@@ -320,6 +331,17 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                     {data.yardsPerRushAttempt}
                                 </td>
                             </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.rush_stuff_rate_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
+                                    Rush Stuff Rate
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
+                                    {data.rush_stuff_rate_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.rush_stuff_rate_rank) }}>
+                                    {data.rush_stuff_rate}
+                                </td>
+                            </tr>
                             <tr style={{ backgroundColor: getRankColor(data.passingAttempts_rank) }}>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.passingAttempts_rank) }}>
                                     Passing Attempts
@@ -331,6 +353,17 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                     {data.passingAttempts}
                                 </td>
                             </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.time_to_throw_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.time_to_throw_rank) }}>
+                                    Time to Throw
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.time_to_throw_rank) }}>
+                                    {data.time_to_throw_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.time_to_throw_rank) }}>
+                                    {data.time_to_throw}
+                                </td>
+                            </tr>
                             <tr style={{ backgroundColor: getRankColor(data.adot_rank) }}>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
                                     ADOT
@@ -340,6 +373,17 @@ const NFLTeamOffensiveStatistics = ({ selectedTeam }) => {
                                 </td>
                                 <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.adot_rank) }}>
                                     {data.adot}
+                                </td>
+                            </tr>
+                            <tr style={{ backgroundColor: getRankColor(data.explosive_play_rate_rank) }}>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.explosive_play_rate_rank) }}>
+                                    Explosive Play Rate
+                                </td>
+                                <td className="px-6 py-4 text-md text-center font-bold" style={{ color: getTextColor(data.explosive_play_rate_rank) }}>
+                                    {data.explosive_play_rate_rank}
+                                </td>
+                                <td className="px-4 py-2 text-left font-semibold" style={{ color: getTextColor(data.explosive_play_rate_rank) }}>
+                                    {data.explosive_play_rate}
                                 </td>
                             </tr>
                             <tr style={{ backgroundColor: getRankColor(data.int_rate_rank) }}>
