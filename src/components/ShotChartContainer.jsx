@@ -40,7 +40,7 @@ function computeZonesFromShots(shots) {
 
   const out = {};
   for (const [id, v] of Object.entries(zones)) {
-    if (v.att > 0) out[id] = { fg_pct: v.made / v.att };
+    if (v.att > 0) out[id] = { fg_pct: v.made / v.att , zone_pct: v.att/shots.length, zone_made : v.made, zone_attempts: v.att, total_attempts : shots.length};
   }
   return Object.keys(out).length ? out : null;
 }

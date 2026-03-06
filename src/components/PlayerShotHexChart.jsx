@@ -148,9 +148,12 @@ export default function PlayerShotHexChart({
 
     const playerPct = z.fg ?? null;
     // Prefer baseline → fallback to player season → fallback to current
-    let seasonPct = baselineZones?.[hover.regionId]?.fg_pct ?? null;
-    if (seasonPct == null) seasonPct = playerSeasonZones?.[hover.regionId]?.fg_pct ?? playerPct;
 
+    let seasonZone = playerSeasonZones?.[hover.regionId]?.zone_pct
+    let seasonZoneMade = playerSeasonZones?.[hover.regionId]?.zone_made
+    let seasonZoneAtt = playerSeasonZones?.[hover.regionId]?.zone_attempts
+    let seasonPct = seasonZoneMade/seasonZoneAtt
+    let seasonAtt = playerSeasonZones?.[hover.regionId]?.total_attempts
     const opp = opponentZones?.[hover.regionId] || null;
     const fmt = d3.format(".1%");
     const fmtNum = d3.format(",");
@@ -159,14 +162,14 @@ export default function PlayerShotHexChart({
       regionLabel: REGION_LABELS[hover.regionId],
       pctText: playerPct == null ? "—" : fmt(playerPct),
       made: z.made,
-      atts: z.atts,
-      seasonText: seasonPct == null ? "—" : fmt(normalizePct(seasonPct) ?? seasonPct),
-      oppText: normalizePct(opp?.fg_pct) == null ? "—" : fmt(normalizePct(opp?.fg_pct)),
-      oppRankText: (Number.isFinite(+opp?.fg_rank) && Number.isFinite(+opp?.out_of)) 
-        ? `Rk ${opp.fg_rank}/${opp.out_of}` 
-        : (Number.isFinite(+opp?.fg_rank) ? `Rk ${opp.fg_rank}` : null),
-      oppFgaText: Number.isFinite(+opp?.fga) ? fmtNum(opp.fga) : "—",
-      oppFgaRankText: Number.isFinite(+opp?.fga_rank) ? `Rk ${opp.fga_rank}` : null,
+      zoneAttempts: z.atts,
+      totalAttempts: quickTiles.attempts,
+      zonePct : fmt(z.atts/quickTiles.attempts),
+      seasonText: fmt(seasonPct),
+      seasonZonePct: fmt(seasonZone),
+      seasonZoneAttempts : seasonZoneAtt,
+      seasonZoneMade : seasonZoneMade,
+      seasonAttempts : seasonAtt
     };
   }, [hover, zoneStats, baselineZones, playerSeasonZones, opponentZones]);
 
@@ -359,12 +362,12 @@ function OpponentBadge({ x, y, zoneName, fgPct, fgRank, fga, fgaRank }) {
   const lines = [
     zoneName && { text: zoneName, fontSize: 11, fontWeight: 900, fill: "#e7eef9", letterSpacing: "0.01em" },
     { text: `OPP FG% : ${d3.format(".1%")(fgPct)}`, fontSize: 12, fontWeight: 800, fill: "#a9c0e3", letterSpacing: "0.02em" },
-    fgRank != null && { text: `FG% Rk:${fgRank}`, fontSize: 12, fontWeight: 700, fill: "#b3c8e6" },
-    fga != null && { text: `FGA: ${d3.format(",")(fga)}`, fontSize: 12, fontWeight: 800, fill: "#a9c0e3" },
-    fgaRank != null && { text: `FGA Rk:${fgaRank}`, fontSize: 12, fontWeight: 700, fill: "#b3c8e6" },
+    fgRank != null && { text: `OPP FG% RANK:${fgRank}`, fontSize: 12, fontWeight: 700, fill: "#b3c8e6" },
+    fgaRank != null && { text: `OPP FGA RANK:${fgaRank}`, fontSize: 12, fontWeight: 700, fill: "#b3c8e6" },
   ].filter(Boolean);
   
   const badgeHeight = PADDING * 2 + (lines.length * LINE_HEIGHT);
+  const badgeWidth = PADDING * 2 + BADGE_WIDTH
   const badgeTop = -(badgeHeight / 2);
   const baseY = badgeTop + PADDING + 12;
   
@@ -373,7 +376,7 @@ function OpponentBadge({ x, y, zoneName, fgPct, fgRank, fga, fgaRank }) {
       <rect
         x={-BADGE_WIDTH / 2}
         y={badgeTop}
-        width={BADGE_WIDTH}
+        width={badgeWidth}
         height={badgeHeight}
         rx={10}
         fill="#0b1220"
@@ -423,37 +426,43 @@ function Tooltip({ containerRef, hover, tip }) {
       <div className="text-slate-800 text-sm font-semibold">{tip.regionLabel}</div>
 
       {/* Player section */}
-      <div className="mt-1">
-        <div className="text-[11px] font-semibold tracking-wide text-slate-600">PLAYER SHOT VOLUME %</div>
-        <div className="text-sky-700 text-2xl font-extrabold leading-6">{tip.pctText}</div>
-        <div className="text-slate-600 text-xs">{`${tip.made} of ${tip.atts}`}</div>
+    <div className="grid grid-cols-2 gap-5 mt-2">
+      <div>
+        <div className="text-[11px] font-semibold tracking-wide text-slate-600">SEASON ZONE FG %</div>
+        <div className="text-slate-800 text-base font-bold">{tip.seasonText}</div>
+        <div className="text-slate-600 text-xs">{`${tip.seasonZoneMade} of ${tip.seasonZoneAttempts}`}</div>
       </div>
+      <div>
+        <div className="text-[11px] font-semibold tracking-wide text-slate-600">SEASON ZONE VOLUME %</div>
+        <div className="text-slate-800 text-base font-bold">{tip.seasonZonePct}</div>
+        <div className="text-slate-600 text-xs">{`${tip.seasonZoneAttempts} of ${tip.seasonAttempts}`}</div>
+      </div>
+    </div>
 
       {/* Baseline + Opponent section */}
-      <div className="grid grid-cols-2 gap-8 mt-10">
+      <div className="grid grid-cols-2 gap-5 mt-2">
         <div>
-          <div className="text-[11px] font-semibold tracking-wide text-slate-600">PLAYER SEASON AVG</div>
-          <div className="text-slate-800 text-base font-bold">{tip.seasonText}</div>
+          <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT ZONE FG %</div>
+          <div className="text-slate-800 text-base font-bold">{tip.pctText}</div>
+          <div className="text-slate-600 text-xs">{`${tip.made} of ${tip.zoneAttempts}`}</div>
         </div>
         <div>
-          <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT OVERALL FG%</div>
-          <div className="flex items-baseline gap-2">
-            <div className="text-slate-900 text-base font-extrabold">{tip.oppText}</div>
-            {tip.oppRankText && <div className="text-slate-500 text-xs font-semibold">{tip.oppRankText}</div>}
-          </div>
+          <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT ZONE VOLUME %</div>
+          <div className="text-slate-800 text-base font-bold">{tip.zonePct}</div>
+          <div className="text-slate-600 text-xs">{`${tip.zoneAttempts} of ${tip.totalAttempts}`}</div>
         </div>
       </div>
 
       {/* Opponent FGA section */}
-      {tip.oppFgaText !== "—" && (
+      {/* {tip.oppFgaText !== "—" && (
         <div className="mt-6">
           <div className="text-[11px] font-semibold tracking-wide text-slate-600">OPPONENT FGA</div>
           <div className="flex items-baseline gap-2">
             <div className="text-slate-900 text-base font-extrabold">{tip.oppFgaText}</div>
-            {tip.oppFgaRankText && <div className="text-slate-500 text-xs font-semibold">{tip.oppFgaRankText}</div>}
+            {tip.oppFgaRankText && <div className="text-slate-900 text-base font-extrabold">{tip.oppFgaRankText}</div>}
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }
