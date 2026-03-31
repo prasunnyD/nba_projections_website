@@ -14,6 +14,11 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
 
     const client = axios.create({ baseURL: getApiBaseUrl() });
 
+    // Helper function to encode player name, ensuring apostrophes are encoded as %27
+    const encodePlayerName = (name) => {
+        return encodeURIComponent(name).replace(/'/g, '%27');
+    };
+
     useEffect(() => {
         if (!playerName) return;
 
@@ -24,9 +29,9 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             try {
                 let response = null;
                 if (position === 'RB' || position === 'WR' || position === 'TE') {
-                    response = await client.get(`nfl/players/${playerName}/rushing-receiving-game-stats`);
+                    response = await client.get(`nfl/players/${encodePlayerName(playerName)}/rushing-receiving-game-stats`);
                 } else if (position === 'QB') {
-                    response = await client.get(`nfl/players/${playerName}/passing-game-stats`);
+                    response = await client.get(`nfl/players/${encodePlayerName(playerName)}/passing-game-stats`);
                 }
 
                 if (!response.data || Object.keys(response.data).length === 0) {
@@ -143,7 +148,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
         const fetchOdds = async () => {
             setOddsLoading(true);
             try {
-                const res = await client.get(`nfl/odds/${market}/${encodeURIComponent(playerName)}`);
+                const res = await client.get(`nfl/odds/${market}/${encodePlayerName(playerName)}`);
                 const oddsData = res.data || [];
                 setOdds(oddsData);
             } catch (e) {

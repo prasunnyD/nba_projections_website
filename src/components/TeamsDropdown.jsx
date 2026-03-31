@@ -62,11 +62,21 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
             return 'Los Angeles Clippers';
         }
         
-        // Find matching team in nbaTeams array
+        // Find matching team in nbaTeams array by city
         const team = nbaTeams.find(t => t.city === teamValue);
         if (team) {
             // For most teams, return the city name (which is what the API expects)
             return team.city;
+        }
+        
+        // Try to match full team name format "City Team" against nbaTeams array
+        // This handles cases like "Portland Trail Blazers" -> "Portland"
+        const fullTeamMatch = nbaTeams.find(t => {
+            const fullName = `${t.city} ${t.name}`;
+            return teamValue === fullName || teamValue.startsWith(t.city + ' ');
+        });
+        if (fullTeamMatch) {
+            return fullTeamMatch.city;
         }
         
         // Fallback: if it's in "City Team" format, try to match or return city
@@ -78,9 +88,17 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
             if (parts[0] === 'Oklahoma' && parts[1] === 'City') return 'Oklahoma City';
             if (parts[0] === 'San' && parts[1] === 'Antonio') return 'San Antonio';
             if (parts[0] === 'Golden' && parts[1] === 'State') return 'Golden State';
-            // For others, assume first word(s) before team name is the city
-            // Most team names are single words, so take everything except last word
-            return parts.slice(0, -1).join(' ');
+            
+            // Try to find city by checking if input starts with any known city name
+            for (const nbaTeam of nbaTeams) {
+                if (teamValue.startsWith(nbaTeam.city + ' ')) {
+                    return nbaTeam.city;
+                }
+            }
+            
+            // Last resort: assume first word is the city (for single-word cities)
+            // This is less reliable but handles edge cases
+            return parts[0];
         }
         // Single word - return as is
         return teamValue;
