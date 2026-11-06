@@ -4,6 +4,7 @@ import './App.css';
 import Scoreboard from './components/Scoreboard';
 import MainContainer from './components/MainContainer';
 import NFLStats from './components/NFLStats';
+import ATPLive from './components/ATPLive'
 
 // Navigation component that uses useNavigate inside Router context
 function Navigation() {
@@ -22,6 +23,12 @@ function Navigation() {
         className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
       >
         Go to NFL Page
+      </button>
+      <button 
+        onClick={() => navigate('/atp')}
+        className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
+      >
+        Go to ATP Page
       </button>
     </div>
   );
@@ -62,6 +69,7 @@ function AppContent() {
           } 
         />
         <Route path="/nfl" element={<NFLStats/>} />
+        <Route path="/atp" element={<ATPLive/>} />
       </Routes>
     </>
   );
