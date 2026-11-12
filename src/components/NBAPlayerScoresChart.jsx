@@ -14,15 +14,30 @@ const toMinutes = (val) => {
     return Number.isFinite(n) ? n : null;
 };
 
+const usageRateFromGame = (game) => {
+    if (!game) return null;
+    const raw =
+        game.usage_rate ??
+        game.usageRate ??
+        game.USG ??
+        game.usg ??
+        game.usg_pct;
+    if (raw == null) return null;
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+};
+
 const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) => {
     const [series, setSeries] = useState(null);
     const [minutesByDate, setMinutesByDate] = useState({});
+    const [usageRateByDate, setUsageRateByDate] = useState({});
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [selectedStat, setSelectedStat] = useState('points');
     const [propLine, setPropLine] = useState('');
     const [odds, setOdds] = useState([]);
     const [oddsLoading, setOddsLoading] = useState(false);
+    const [oddsRefreshKey, setOddsRefreshKey] = useState(0);
 
     const client = api;
 
@@ -34,6 +49,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
             setError(null);
             setSeries(null);
             setMinutesByDate({});
+            setUsageRateByDate({});
             try {
                 let res = await client.get(`nba/player/${playerName}/last/${numberOfGames}/games`);
 
@@ -79,17 +95,28 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
                     }
                 }
 
+                const usageRateMap = {};
+                datesAsc.forEach(d => {
+                    const parsed = usageRateFromGame(payload[d]);
+                    if (parsed != null) usageRateMap[d] = parsed;
+                });
+
                 // Update minutesMap to use formatted dates as keys
                 const formattedMinutesMap = {};
+                const formattedUsageRateMap = {};
                 formattedDates.forEach((formatted, idx) => {
                     const orig = datesAsc[idx];
                     if (minutesMap[orig] != null) {
                         formattedMinutesMap[formatted] = minutesMap[orig];
                     }
+                    if (usageRateMap[orig] != null) {
+                        formattedUsageRateMap[formatted] = usageRateMap[orig];
+                    }
                 });
 
                 setSeries({ dates: formattedDates, points, rebounds, assists });
                 setMinutesByDate(formattedMinutesMap);
+                setUsageRateByDate(formattedUsageRateMap);
             } catch (e) {
                 console.error(e);
                 setError('Failed to fetch player data.');
@@ -131,7 +158,9 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         const fetchOdds = async () => {
             setOddsLoading(true);
             try {
-                const res = await client.get(`nba/odds/${market}/${playerName}`);
+                const res = await client.get(`nba/odds/${market}/${playerName}`, {
+                    params: { _: oddsRefreshKey || Date.now() },
+                });
                 const oddsData = res.data || [];
                 setOdds(oddsData);
             } catch (e) {
@@ -143,7 +172,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         };
 
         fetchOdds();
-    }, [playerName, selectedStat]);
+    }, [playerName, selectedStat, oddsRefreshKey]);
 
     // Update propLine from FanDuel when selectedStat or odds change
     useEffect(() => {
@@ -196,17 +225,26 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         { key: 'points+rebounds+assists', label: 'Points + Rebounds + Assists' },
     ];
 
-    // Secondary metric (minutes)
-    const minutesY = useMemo(() => {
-        if (!series) return null;
-        return {
-            values: series.dates.map(d => minutesByDate[d] ?? null),
-            name: 'Minutes',
-            yaxisTitle: 'Minutes',
-            color: '#f59e0b',
-            unit: ' min'
-        };
-    }, [series, minutesByDate]);
+    const secondaryMetrics = useMemo(() => {
+        if (!series) return [];
+        const metrics = [
+            {
+                values: series.dates.map(d => minutesByDate[d] ?? null),
+                name: 'Minutes',
+                yaxisTitle: 'Minutes',
+                color: '#f59e0b',
+                unit: ' min'
+            },
+            {
+                values: series.dates.map(d => usageRateByDate[d] ?? null),
+                name: 'Usage Rate',
+                yaxisTitle: 'Usage Rate',
+                color: '#a855f7',
+                yHoverFormat: '%{y}',
+            }
+        ];
+        return metrics.filter(m => m.values.some(v => v != null));
+    }, [series, minutesByDate, usageRateByDate]);
 
     if (!playerName) return <div>Please select a player.</div>;
     if (loading) return <div>Loading…</div>;
@@ -224,9 +262,10 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
             numberOfGames={numberOfGames}
             onNumberOfGamesChange={setNumberOfGames}
             numberOfGamesOptions={[5, 10, 15, 20, 30]}
-            secondaryMetric={minutesY}
+            secondaryMetrics={secondaryMetrics}
             odds={odds}
             oddsLoading={oddsLoading}
+            onRefreshOdds={() => setOddsRefreshKey((k) => k + 1)}
             chartConfig={{
                 lightTheme: true,
                 height: 450

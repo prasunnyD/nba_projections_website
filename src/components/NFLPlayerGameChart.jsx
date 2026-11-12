@@ -11,6 +11,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
     const [propLine, setPropLine] = useState('');
     const [odds, setOdds] = useState([]);
     const [oddsLoading, setOddsLoading] = useState(false);
+    const [oddsRefreshKey, setOddsRefreshKey] = useState(0);
 
     const client = axios.create({ baseURL: getApiBaseUrl() });
 
@@ -143,7 +144,9 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
         const fetchOdds = async () => {
             setOddsLoading(true);
             try {
-                const res = await client.get(`nfl/odds/${market}/${encodeURIComponent(playerName)}`);
+                const res = await client.get(`nfl/odds/${market}/${encodeURIComponent(playerName)}`, {
+                    params: { _: oddsRefreshKey || Date.now() },
+                });
                 const oddsData = res.data || [];
                 setOdds(oddsData);
             } catch (e) {
@@ -155,7 +158,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
         };
 
         fetchOdds();
-    }, [playerName, selectedStat]);
+    }, [playerName, selectedStat, oddsRefreshKey]);
 
     // Update propLine from FanDuel when selectedStat or odds change
     useEffect(() => {
@@ -262,6 +265,7 @@ const NFLPlayerGameChart = ({ playerName, position, numberOfGames, setNumberOfGa
             secondaryMetric={secondaryMetric}
             odds={odds}
             oddsLoading={oddsLoading}
+            onRefreshOdds={() => setOddsRefreshKey((k) => k + 1)}
             chartConfig={{
                 lightTheme: true,
                 height: 400

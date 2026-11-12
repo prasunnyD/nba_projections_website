@@ -1,6 +1,32 @@
 import React, { useMemo } from 'react';
 import Plot from 'react-plotly.js';
 
+/** API ingested_time is US Eastern wall clock; trailing Z is not UTC. */
+function formatIngestedTimeEastern(raw) {
+    const match = String(raw).trim().match(
+        /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/
+    );
+    if (!match) return null;
+    const [, year, month, day, hour, minute] = match;
+    const stamp = new Date(Date.UTC(
+        Number(year),
+        Number(month) - 1,
+        Number(day),
+        Number(hour),
+        Number(minute),
+    ));
+    const label = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'UTC',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true,
+    }).format(stamp);
+    return `${label} ET`;
+}
+
 /**
  * Shared component for displaying player game statistics charts
  * Used by both NBA and NFL player charts
@@ -17,13 +43,15 @@ import Plot from 'react-plotly.js';
  * @param {number} props.numberOfGames - Number of games displayed
  * @param {Function} props.onNumberOfGamesChange - Callback when number of games changes
  * @param {Array<number>} props.numberOfGamesOptions - Available number of games options
- * @param {Object} props.secondaryMetric - Optional secondary metric config
+ * @param {Object} props.secondaryMetric - Optional secondary metric config (single)
+ * @param {Array<Object>} props.secondaryMetrics - Optional list of line metrics (overrides secondaryMetric when set)
  * @param {Array<number|null>} props.secondaryMetric.values - Secondary metric values
  * @param {string} props.secondaryMetric.name - Secondary metric name
  * @param {string} props.secondaryMetric.yaxisTitle - Secondary metric y-axis title
  * @param {string} props.secondaryMetric.color - Secondary metric line color
  * @param {Array} props.odds - Optional array of odds data
  * @param {boolean} props.oddsLoading - Whether odds are loading
+ * @param {Function} props.onRefreshOdds - Re-fetch latest odds from the API
  * @param {Object} props.chartConfig - Chart styling configuration
  * @param {boolean} props.chartConfig.lightTheme - Use light theme for chart
  * @param {number} props.chartConfig.height - Chart height
@@ -41,8 +69,10 @@ const PlayerGameChart = ({
     onNumberOfGamesChange,
     numberOfGamesOptions = [5, 10, 15, 20, 30],
     secondaryMetric,
+    secondaryMetrics,
     odds = [],
     oddsLoading = false,
+    onRefreshOdds,
     chartConfig = {
         lightTheme: true,
         height: 450
@@ -61,6 +91,50 @@ const PlayerGameChart = ({
     };
 
     const statDisplayName = getStatDisplayName(selectedStat);
+
+    const lineMetrics = useMemo(() => {
+        if (secondaryMetrics?.length) return secondaryMetrics;
+        if (secondaryMetric) return [secondaryMetric];
+        return [];
+    }, [secondaryMetric, secondaryMetrics]);
+
+    const buildLineMetricTrace = (metric, yaxisId) => {
+        const yHover = metric.yHoverFormat ?? '%{y:.1f}';
+        return {
+        x: dates,
+        y: metric.values,
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: metric.name,
+        yaxis: yaxisId,
+        line: {
+            color: metric.color || '#f59e0b',
+            width: 2.5
+        },
+        marker: {
+            color: metric.color || '#f59e0b',
+            size: 7,
+            line: {
+                color: metric.color || '#d97706',
+                width: 1
+            }
+        },
+        hovertemplate: metric.customdata
+            ? `<b>%{x}</b><br>${yHover}${metric.unit || ''}<br>Snaps: %{customdata}<extra>${metric.name}</extra>`
+            : `<b>%{x}</b><br>${metric.name}: ${yHover}${metric.unit || ''}<extra></extra>`,
+        hoverlabel: {
+            bgcolor: chartConfig.lightTheme ? 'white' : '#1f2937',
+            bordercolor: chartConfig.lightTheme ? '#d1d5db' : '#4b5563',
+            font: {
+                color: chartConfig.lightTheme ? '#1f2937' : '#e5e7eb',
+                size: 12
+            }
+        },
+        ...(metric.customdata ? { customdata: metric.customdata } : {})
+        };
+    };
+
+    const overlayYAxisKey = (index) => (index === 0 ? 'y2' : 'y3');
 
     // Calculate prop line stats
     const propLineStats = useMemo(() => {
@@ -107,41 +181,10 @@ const PlayerGameChart = ({
             },
         });
 
-        // Secondary metric (if provided)
-        if (secondaryMetric && secondaryMetric.values && secondaryMetric.values.some(v => v != null)) {
-            traces.push({
-                x: dates,
-                y: secondaryMetric.values,
-                type: 'scatter',
-                mode: 'lines+markers',
-                name: secondaryMetric.name,
-                yaxis: 'y2',
-                line: { 
-                    color: secondaryMetric.color || '#f59e0b', 
-                    width: 2.5 
-                },
-                marker: { 
-                    color: secondaryMetric.color || '#f59e0b', 
-                    size: 7, 
-                    line: { 
-                        color: secondaryMetric.color || '#d97706', 
-                        width: 1 
-                    } 
-                },
-                hovertemplate: secondaryMetric.customdata 
-                    ? `<b>%{x}</b><br>%{y:.1f}${secondaryMetric.unit || ''}<br>Snaps: %{customdata}<extra>${secondaryMetric.name}</extra>`
-                    : `<b>%{x}</b><br>${secondaryMetric.name}: %{y:.1f}${secondaryMetric.unit || ''}<extra></extra>`,
-                hoverlabel: {
-                    bgcolor: chartConfig.lightTheme ? 'white' : '#1f2937',
-                    bordercolor: chartConfig.lightTheme ? '#d1d5db' : '#4b5563',
-                    font: { 
-                        color: chartConfig.lightTheme ? '#1f2937' : '#e5e7eb', 
-                        size: 12 
-                    }
-                },
-                ...(secondaryMetric.customdata ? { customdata: secondaryMetric.customdata } : {})
-            });
-        }
+        lineMetrics.forEach((metric, index) => {
+            if (!metric?.values?.some(v => v != null)) return;
+            traces.push(buildLineMetricTrace(metric, overlayYAxisKey(index)));
+        });
 
         // Prop line (if set)
         if (propLine) {
@@ -169,7 +212,7 @@ const PlayerGameChart = ({
         }
 
         return traces;
-    }, [dates, currentStatValues, statDisplayName, propLine, secondaryMetric, chartConfig.lightTheme]);
+    }, [dates, currentStatValues, statDisplayName, propLine, lineMetrics, chartConfig.lightTheme]);
 
     // Chart layout configuration
     const layout = useMemo(() => ({
@@ -225,7 +268,7 @@ const PlayerGameChart = ({
             },
         },
         yaxis2: {
-            title: secondaryMetric?.yaxisTitle || '',
+            title: lineMetrics[0]?.yaxisTitle || '',
             overlaying: 'y',
             side: 'right',
             rangemode: 'tozero',
@@ -234,6 +277,20 @@ const PlayerGameChart = ({
             showticklabels: false,
             showline: false,
         },
+        ...(lineMetrics.length > 1
+            ? {
+                yaxis3: {
+                    title: lineMetrics[1]?.yaxisTitle || '',
+                    overlaying: 'y',
+                    side: 'right',
+                    rangemode: 'tozero',
+                    zeroline: false,
+                    showgrid: false,
+                    showticklabels: false,
+                    showline: false,
+                },
+            }
+            : {}),
         showlegend: true,
         legend: {
             x: 0.5,
@@ -253,7 +310,32 @@ const PlayerGameChart = ({
         paper_bgcolor: chartConfig.lightTheme ? 'white' : 'rgba(0,0,0,0)',
         plot_bgcolor: chartConfig.lightTheme ? 'white' : 'rgba(0,0,0,0)',
         height: chartConfig.height || 450,
-    }), [dates, statDisplayName, secondaryMetric, chartConfig]);
+    }), [dates, statDisplayName, lineMetrics, chartConfig]);
+
+    const oddsByBook = useMemo(() => {
+        if (!odds?.length) return [];
+        return [...odds].sort((a, b) => {
+            if (a.sportbook === 'FanDuel') return -1;
+            if (b.sportbook === 'FanDuel') return 1;
+            return String(a.sportbook || '').localeCompare(String(b.sportbook || ''));
+        });
+    }, [odds]);
+
+    const formatOddsPrice = (value) => {
+        if (value == null || value === '') return '—';
+        const n = Number(value);
+        if (!Number.isFinite(n)) return String(value);
+        return n > 0 ? `+${n}` : String(n);
+    };
+
+    const oddsAsOfLabel = useMemo(() => {
+        const entry = odds?.find(
+            (o) => o?.ingested_time != null || o?.ingestedTime != null
+        );
+        const raw = entry?.ingested_time ?? entry?.ingestedTime;
+        if (raw == null || raw === '') return null;
+        return formatIngestedTimeEastern(raw) ?? String(raw);
+    }, [odds]);
 
     return (
         <div className="rounded-xl bg-neutral-900 p-6 shadow-lg">
@@ -275,40 +357,99 @@ const PlayerGameChart = ({
             </div>
 
             {/* Odds Display */}
-            {odds && odds.length > 0 && (
-                <div className="mb-6 rounded-lg bg-neutral-800 p-4 shadow">
-                    <h3 className="text-white text-lg font-semibold mb-3">Betting Odds</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {odds.map((odd, index) => (
-                            <div
-                                key={index}
-                                className="bg-neutral-700 rounded-lg p-3 border border-neutral-600"
-                            >
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <p className="text-white font-bold">{odd.sportbook}</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <p className="text-white font-bold">Line: {odd.line}</p>
-                                    </div>
-                                </div>
-                                <div className="flex gap-3 mt-2">
-                                    <div className="flex-1 bg-green-600/20 rounded px-2 py-1 text-center">
-                                        <p className="text-green-400 text-xs font-semibold">Over</p>
-                                        <p className="text-white text-sm font-bold">{odd.over}</p>
-                                    </div>
-                                    <div className="flex-1 bg-red-600/20 rounded px-2 py-1 text-center">
-                                        <p className="text-red-400 text-xs font-semibold">Under</p>
-                                        <p className="text-white text-sm font-bold">{odd.under}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+            {onRefreshOdds && (
+                <div className="mb-6 overflow-hidden rounded-xl border border-neutral-700/80 bg-neutral-800/60">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-700/80 px-4 py-3">
+                        <h3 className="text-white text-sm font-semibold tracking-wide">
+                            Betting Odds
+                            {oddsAsOfLabel && !oddsLoading && (
+                                <span className="ml-2 font-normal text-neutral-400">
+                                    · As of {oddsAsOfLabel}
+                                </span>
+                            )}
+                            {oddsLoading && (
+                                <span className="ml-2 font-normal text-neutral-500">· Updating…</span>
+                            )}
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={onRefreshOdds}
+                            disabled={oddsLoading}
+                            className="rounded-md border border-neutral-600 bg-neutral-700/80 px-3 py-1 text-xs font-medium text-neutral-200 transition hover:bg-neutral-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            Refresh odds
+                        </button>
                     </div>
+                    {oddsByBook.length > 0 && (
+                    <div className="overflow-x-auto">
+                        <table className="w-full min-w-[280px] border-collapse text-sm">
+                            <thead>
+                                <tr className="border-b border-neutral-700/60">
+                                    <th
+                                        scope="col"
+                                        className="sticky left-0 z-10 bg-neutral-800/95 px-4 py-2.5 text-left text-xs font-medium uppercase tracking-wider text-neutral-500"
+                                    />
+                                    {oddsByBook.map((odd) => (
+                                        <th
+                                            key={odd.sportbook}
+                                            scope="col"
+                                            className="px-3 py-2.5 text-center font-normal"
+                                        >
+                                            <span className="block text-neutral-100 font-semibold">
+                                                {odd.sportbook}
+                                            </span>
+                                            {odd.line != null && (
+                                                <span className="mt-0.5 block text-xs font-medium text-neutral-400 tabular-nums">
+                                                    {odd.line}
+                                                </span>
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr className="border-b border-neutral-700/40">
+                                    <th
+                                        scope="row"
+                                        className="sticky left-0 z-10 bg-neutral-800/95 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-emerald-400/90"
+                                    >
+                                        Over
+                                    </th>
+                                    {oddsByBook.map((odd) => (
+                                        <td
+                                            key={`${odd.sportbook}-over`}
+                                            className="px-3 py-3 text-center font-semibold tabular-nums text-white"
+                                        >
+                                            {formatOddsPrice(odd.over)}
+                                        </td>
+                                    ))}
+                                </tr>
+                                <tr>
+                                    <th
+                                        scope="row"
+                                        className="sticky left-0 z-10 bg-neutral-800/95 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-rose-400/90"
+                                    >
+                                        Under
+                                    </th>
+                                    {oddsByBook.map((odd) => (
+                                        <td
+                                            key={`${odd.sportbook}-under`}
+                                            className="px-3 py-3 text-center font-semibold tabular-nums text-white"
+                                        >
+                                            {formatOddsPrice(odd.under)}
+                                        </td>
+                                    ))}
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    )}
+                    {oddsByBook.length === 0 && (
+                        <p className="px-4 py-6 text-center text-sm text-neutral-400">
+                            {oddsLoading ? 'Loading odds…' : 'No odds available. Try refresh.'}
+                        </p>
+                    )}
                 </div>
-            )}
-            {oddsLoading && (
-                <div className="mb-6 text-neutral-400 text-center">Loading odds...</div>
             )}
 
             {/* Controls */}
