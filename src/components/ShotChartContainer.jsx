@@ -79,7 +79,7 @@ export default function ShotChartContainer({ playerName }) {
       setOpponentZones(null);
       return;
     }
-    const predefined = ["2025-26"];
+    const predefined = ["2026-27", "2025-26"];
     setSeasons(predefined);
     setSeason(predefined[0]);
     // Always start with "All Opponents" (empty string) to show all shots
