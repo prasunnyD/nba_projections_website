@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { api,logApiCall } from '../utils/apiConfig';
 import { getTeamLogoUrl } from '../helpers/teamLogoUtils';
+import { formatUtcAsEastern } from '../utils/easternApiTime';
 
 const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam }) => {
     const [selectedTeam, setSelectedTeam] = useState('');
@@ -10,6 +11,7 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
     const [error, setError] = useState(null);
     const [selectedPlayer, setSelectedPlayer] = useState(null);
     const [isRosterExpanded, setIsRosterExpanded] = useState(true);
+    const [injuryHover, setInjuryHover] = useState(null);
     const isManualSelection = useRef(false);
     const lastAutoSelectedHomeTeam = useRef(null);
 
@@ -166,6 +168,31 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
         // Only depend on homeTeam, not selectedTeam, so manual selections aren't overridden
     }, [homeTeam, fetchRosterForTeam]);
 
+    const onRosterDataRef = useRef(onRosterData);
+    onRosterDataRef.current = onRosterData;
+
+    // Refresh injury status without replacing the open roster or selected player.
+    useEffect(() => {
+        if (!selectedTeam) return;
+
+        const team = selectedTeam;
+        const refreshInjuries = async () => {
+            try {
+                const response = await api.get(`nba/team-roster/${extractCityForAPI(team)}`, {
+                    params: { _: Date.now() },
+                });
+                const rosterArray = Object.values(response.data || {})[0] || [];
+                setRoster(rosterArray);
+                onRosterDataRef.current?.(rosterArray);
+            } catch (err) {
+                console.error('Error refreshing injury status:', err);
+            }
+        };
+
+        const intervalId = setInterval(refreshInjuries, 10 * 60 * 1000);
+        return () => clearInterval(intervalId);
+    }, [selectedTeam]);
+
     const handlePlayerClick = (player) => {
         setSelectedPlayer(player);
         if (onPlayerSelect) {
@@ -227,6 +254,18 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
                                 };
                                 
                                 const status = player.STATUS && player.STATUS.trim() !== '' ? player.STATUS : null;
+                                const ingestedAt = player.INGESTED_AT ?? player.ingested_at;
+                                const ingestedLabel = ingestedAt ? formatUtcAsEastern(ingestedAt) : null;
+
+                                const showIngestedTip = (event) => {
+                                    if (!status || !ingestedLabel) return;
+                                    const rect = event.currentTarget.getBoundingClientRect();
+                                    setInjuryHover({
+                                        label: ingestedLabel,
+                                        left: rect.left,
+                                        top: rect.bottom + 6,
+                                    });
+                                };
                                 
                                 return (
                                     <li
@@ -236,7 +275,16 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
                                         }`}
                                         onClick={() => handlePlayerClick(player.PLAYER)}
                                     >
-                                        <strong>{player.NUM || 'N/A'}</strong> - {player.PLAYER || 'Unknown'} ({player.POSITION || 'N/A'})
+                                        <strong>{player.NUM || 'N/A'}</strong>
+                                        {' - '}
+                                        <span
+                                            className={status && ingestedLabel ? 'underline decoration-dotted decoration-neutral-500 underline-offset-2' : undefined}
+                                            onMouseEnter={showIngestedTip}
+                                            onMouseLeave={() => setInjuryHover(null)}
+                                        >
+                                            {player.PLAYER || 'Unknown'}
+                                        </span>
+                                        {' '}({player.POSITION || 'N/A'})
                                         {status && (
                                             <span className={`ml-2 font-semibold ${getStatusColor(status)}`}>
                                                 {status}
@@ -246,6 +294,14 @@ const TeamsDropdown = ({ onTeamSelect, onRosterData, onPlayerSelect, homeTeam })
                                 );
                             })}
                         </ul>
+                    )}
+                    {injuryHover && (
+                        <div
+                            className="pointer-events-none fixed z-50 rounded-md border border-neutral-600 bg-neutral-950 px-2 py-1 text-xs font-medium text-neutral-100 shadow-lg"
+                            style={{ left: injuryHover.left, top: injuryHover.top }}
+                        >
+                            As of {injuryHover.label}
+                        </div>
                     )}
                 </div>
             );
