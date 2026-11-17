@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { api } from '../utils/apiConfig';
 import PlayerGameChart from './PlayerGameChart';
+import { getCityForLogo, getTeamLogoUrl } from '../helpers/teamLogoUtils';
 
 // convert "mm:ss" or number to decimal minutes
 const toMinutes = (val) => {
@@ -67,6 +68,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
                 const points = datesAsc.map(d => payload[d]?.points ?? payload[d]?.PTS ?? 0);
                 const rebounds = datesAsc.map(d => payload[d]?.rebounds ?? payload[d]?.REB ?? 0);
                 const assists = datesAsc.map(d => payload[d]?.assists ?? payload[d]?.AST ?? 0);
+                const opponents = datesAsc.map(d => payload[d]?.opponent ?? payload[d]?.OPPONENT ?? '');
 
                 // Try minutes from the same payload first
                 const minutesMap = {};
@@ -114,7 +116,7 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
                     }
                 });
 
-                setSeries({ dates: formattedDates, points, rebounds, assists });
+                setSeries({ dates: formattedDates, points, rebounds, assists, opponents });
                 setMinutesByDate(formattedMinutesMap);
                 setUsageRateByDate(formattedUsageRateMap);
             } catch (e) {
@@ -225,6 +227,13 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         { key: 'points+rebounds+assists', label: 'Points + Rebounds + Assists' },
     ];
 
+    const opponentLogos = useMemo(() => {
+        if (!series?.opponents) return [];
+        return series.opponents.map((name) => (
+            name ? getTeamLogoUrl(getCityForLogo(name), 'L') : null
+        ));
+    }, [series]);
+
     const secondaryMetrics = useMemo(() => {
         if (!series) return [];
         const metrics = [
@@ -246,6 +255,14 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
         return metrics.filter(m => m.values.some(v => v != null));
     }, [series, minutesByDate, usageRateByDate]);
 
+    const minutesShare = useMemo(() => {
+        if (!series?.dates) return [];
+        return series.dates.map((date) => {
+            const minutes = minutesByDate[date];
+            return minutes == null ? null : minutes / 240;
+        });
+    }, [series, minutesByDate]);
+
     if (!playerName) return <div>Please select a player.</div>;
     if (loading) return <div>Loading…</div>;
     if (error) return <div className="text-red-500">{error}</div>;
@@ -263,6 +280,9 @@ const NBAPlayerScoresChart = ({ playerName, numberOfGames, setNumberOfGames }) =
             onNumberOfGamesChange={setNumberOfGames}
             numberOfGamesOptions={[5, 10, 15, 20, 30]}
             secondaryMetrics={secondaryMetrics}
+            opponents={series?.opponents || []}
+            opponentLogos={opponentLogos}
+            minutesShare={minutesShare}
             odds={odds}
             oddsLoading={oddsLoading}
             onRefreshOdds={() => setOddsRefreshKey((k) => k + 1)}

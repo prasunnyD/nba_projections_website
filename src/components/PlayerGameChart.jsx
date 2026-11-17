@@ -1,31 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import Plot from 'react-plotly.js';
-
-/** API ingested_time is US Eastern wall clock; trailing Z is not UTC. */
-function formatIngestedTimeEastern(raw) {
-    const match = String(raw).trim().match(
-        /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/
-    );
-    if (!match) return null;
-    const [, year, month, day, hour, minute] = match;
-    const stamp = new Date(Date.UTC(
-        Number(year),
-        Number(month) - 1,
-        Number(day),
-        Number(hour),
-        Number(minute),
-    ));
-    const label = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'UTC',
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-    }).format(stamp);
-    return `${label} ET`;
-}
+import { formatIngestedTimeEastern } from '../utils/easternApiTime';
 
 /**
  * Shared component for displaying player game statistics charts
@@ -52,6 +27,8 @@ function formatIngestedTimeEastern(raw) {
  * @param {Array} props.odds - Optional array of odds data
  * @param {boolean} props.oddsLoading - Whether odds are loading
  * @param {Function} props.onRefreshOdds - Re-fetch latest odds from the API
+ * @param {Array<string>} props.opponents - Opponent name aligned with each game date
+ * @param {Array<number|null>} props.minutesShare - Minutes / 240 aligned with each game date
  * @param {Object} props.chartConfig - Chart styling configuration
  * @param {boolean} props.chartConfig.lightTheme - Use light theme for chart
  * @param {number} props.chartConfig.height - Chart height
@@ -73,6 +50,9 @@ const PlayerGameChart = ({
     odds = [],
     oddsLoading = false,
     onRefreshOdds,
+    opponents = [],
+    opponentLogos = [],
+    minutesShare = [],
     chartConfig = {
         lightTheme: true,
         height: 450
@@ -153,24 +133,43 @@ const PlayerGameChart = ({
         const traces = [];
 
         // Main stat bar chart
+        const numericValues = currentStatValues.map(v => Number(v) || 0);
+        const tallestBar = Math.max(
+            1,
+            ...numericValues.filter(v => v > 0),
+            Number(propLine) || 0
+        );
+        // Zero bars have no height, so Plotly never opens their tooltip.
+        // Draw them at full height with no opacity so the column can still be hovered.
+        const barValues = numericValues.map(v => (v === 0 ? tallestBar : v));
+
         traces.push({
             x: dates,
-            y: currentStatValues,
+            y: barValues,
             type: 'bar',
             name: statDisplayName,
             marker: {
                 color: propLine
-                    ? currentStatValues.map(v => Number(v) >= Number(propLine) ? '#22c55e' : '#ef4444')
+                    ? numericValues.map(v => v >= Number(propLine) ? '#22c55e' : '#ef4444')
                     : '#3b82f6',
                 line: {
                     color: propLine
-                        ? currentStatValues.map(v => Number(v) >= Number(propLine) ? '#16a34a' : '#dc2626')
+                        ? numericValues.map(v => v >= Number(propLine) ? '#16a34a' : '#dc2626')
                         : '#2563eb',
-                    width: 0.5
+                    width: numericValues.map(v => (v === 0 ? 0 : 0.5))
                 },
-                opacity: 0.9,
+                opacity: numericValues.map(v => (v === 0 ? 0 : 0.9)),
             },
-            hovertemplate: `<b>%{x}</b><br>${statDisplayName}: %{y}<extra></extra>`,
+            customdata: dates.map((_, index) => [
+                opponents[index] || '',
+                minutesShare[index] == null ? '' : `${(Number(minutesShare[index]) * 100).toFixed(1)}%`,
+                numericValues[index],
+            ]),
+            hovertemplate: [
+                `<b>%{x}</b><br>${statDisplayName}: %{customdata[2]}`,
+                opponents?.length ? 'Opponent: %{customdata[0]}' : '',
+                minutesShare?.some((value) => value != null) ? 'Minutes share: %{customdata[1]}' : '',
+            ].filter(Boolean).join('<br>') + '<extra></extra>',
             hoverlabel: {
                 bgcolor: chartConfig.lightTheme ? 'white' : '#1f2937',
                 bordercolor: chartConfig.lightTheme ? '#d1d5db' : '#4b5563',
@@ -212,7 +211,7 @@ const PlayerGameChart = ({
         }
 
         return traces;
-    }, [dates, currentStatValues, statDisplayName, propLine, lineMetrics, chartConfig.lightTheme]);
+    }, [dates, currentStatValues, statDisplayName, propLine, lineMetrics, chartConfig.lightTheme, opponents, minutesShare]);
 
     // Chart layout configuration
     const layout = useMemo(() => ({
@@ -311,6 +310,53 @@ const PlayerGameChart = ({
         plot_bgcolor: chartConfig.lightTheme ? 'white' : 'rgba(0,0,0,0)',
         height: chartConfig.height || 450,
     }), [dates, statDisplayName, lineMetrics, chartConfig]);
+
+    const [logoBoxes, setLogoBoxes] = useState([]);
+    const logoSyncKey = useRef('');
+
+    const syncOpponentLogos = useCallback((graphDiv) => {
+        const hasLogos = opponentLogos?.some(Boolean);
+        if (!graphDiv?._fullLayout || !hasLogos || !dates?.length) {
+            if (logoSyncKey.current) {
+                logoSyncKey.current = '';
+                setLogoBoxes([]);
+            }
+            return;
+        }
+
+        const xaxis = graphDiv._fullLayout.xaxis;
+        const yaxis = graphDiv._fullLayout.yaxis;
+        const size = graphDiv._fullLayout._size;
+        if (!xaxis?.d2p || !yaxis?.d2p || !size) return;
+
+        const gap = dates.length > 1
+            ? Math.abs(xaxis.d2p(dates[1]) - xaxis.d2p(dates[0]))
+            : 48;
+        const logoSize = Math.max(18, Math.min(32, (Number.isFinite(gap) ? gap : 48) * 0.62));
+
+        const boxes = dates.map((date, index) => {
+            const src = opponentLogos[index];
+            if (!src) return null;
+            const xPx = xaxis.d2p(date);
+            const yBase = yaxis.d2p(0);
+            if (![xPx, yBase].every(Number.isFinite)) return null;
+            return {
+                key: `${date}-${index}`,
+                src,
+                alt: opponents[index] || 'Opponent',
+                left: size.l + xPx - logoSize / 2,
+                top: size.t + yBase - logoSize - 4,
+                size: logoSize,
+            };
+        }).filter(Boolean);
+
+        const key = boxes.map((box) => (
+            `${box.key}:${box.left.toFixed(1)}:${box.top.toFixed(1)}:${box.size}:${box.src}`
+        )).join('|');
+        if (key === logoSyncKey.current) return;
+        logoSyncKey.current = key;
+        setLogoBoxes(boxes);
+    }, [dates, opponentLogos, opponents]);
 
     const oddsByBook = useMemo(() => {
         if (!odds?.length) return [];
@@ -498,15 +544,34 @@ const PlayerGameChart = ({
             {/* Chart */}
             {dates && dates.length > 0 && currentStatValues.length > 0 && (
                 <div className={`rounded-xl ${chartConfig.lightTheme ? 'bg-white ring-1 ring-gray-200' : 'bg-neutral-950/80 ring-1 ring-neutral-800/80'} p-6 shadow-sm`}>
-                    <Plot
-                        data={traces}
-                        layout={layout}
-                        config={{
-                            responsive: true,
-                            displayModeBar: false,
-                        }}
-                        className="w-full"
-                    />
+                    <div className="relative">
+                        <Plot
+                            data={traces}
+                            layout={layout}
+                            config={{
+                                responsive: true,
+                                displayModeBar: false,
+                            }}
+                            className="w-full"
+                            onInitialized={(_figure, graphDiv) => syncOpponentLogos(graphDiv)}
+                            onUpdate={(_figure, graphDiv) => syncOpponentLogos(graphDiv)}
+                        />
+                        {logoBoxes.map((box) => (
+                            <img
+                                key={box.key}
+                                src={box.src}
+                                alt={box.alt}
+                                title={box.alt}
+                                className="pointer-events-none absolute object-contain drop-shadow-sm"
+                                style={{
+                                    left: box.left,
+                                    top: box.top,
+                                    width: box.size,
+                                    height: box.size,
+                                }}
+                            />
+                        ))}
+                    </div>
                 </div>
             )}
         </div>

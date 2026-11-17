@@ -99,6 +99,12 @@ export const getAllTeamIds = () => {
 export const getCityForLogo = (teamName) => {
     if (!teamName) return '';
     
+    const normalized = teamName.trim();
+
+    // Opponent abbreviations from the player game API
+    if (/^la$/i.test(normalized)) return 'Los Angeles Clippers';
+    if (/^los ang(?:e|a)les$/i.test(normalized)) return 'Los Angeles Lakers';
+
     // Handle LA teams
     if (teamName.includes('Los Angeles Lakers') || teamName.includes('Lakers')) {
         return 'Los Angeles Lakers';
